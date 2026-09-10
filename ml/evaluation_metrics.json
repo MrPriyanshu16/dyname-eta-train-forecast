@@ -1,0 +1,56 @@
+{
+  "baseline": {
+    "name": "Static Timetable Heuristic (Current NTES)",
+    "mae_minutes": 50.57,
+    "rmse_minutes": 68.26,
+    "r2_score": -0.819,
+    "histogram": [
+      0,
+      9,
+      84,
+      137,
+      189,
+      252,
+      279,
+      434
+    ]
+  },
+  "ml_model": {
+    "name": "Dynamic Spatio-Temporal ML Regressor (Our Model)",
+    "mae_minutes": 4.65,
+    "rmse_minutes": 6.16,
+    "r2_score": 0.985,
+    "accuracy_gain_pct": 90.8,
+    "histogram": [
+      0,
+      8,
+      294,
+      1031,
+      242,
+      22,
+      3,
+      0
+    ]
+  },
+  "bin_labels": [
+    "<-30m",
+    "-30 to -15m",
+    "-15 to -5m",
+    "-5 to +5m (Accurate)",
+    "+5 to +15m",
+    "+15 to +30m",
+    "+30 to +50m",
+    ">+50m"
+  ],
+  "feature_importance": {
+    "current_delay_min": 13.94,
+    "distance_remaining_km": 20.97,
+    "section_occupancy_ratio": 25.78,
+    "priority_tier": 11.68,
+    "weather_fog_index": 20.57,
+    "headway_km": 2.97,
+    "is_junction_ahead": 4.09
+  },
+  "sample_count": 8000,
+  "test_count": 1600
+}
