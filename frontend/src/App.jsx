@@ -142,13 +142,16 @@ export default function App() {
 
   const currentTrains = telemetry?.trains || [];
   const currentSections = telemetry?.sections || [];
+  const currentSignals = telemetry?.signals || [];
+  const currentNationwideRoutes = telemetry?.nationwide_routes || [];
+  const currentNationwideStations = telemetry?.nationwide_stations || [];
   const currentDisruptions = telemetry?.disruptions || {};
   const currentPlatformConflicts = telemetry?.platform_conflicts || [];
 
   return (
-    <div className="min-h-screen bg-rail-bg text-slate-100 flex flex-col font-sans">
+    <div className="relative w-screen h-screen overflow-hidden bg-[#09090b] text-zinc-100 flex flex-col font-sans selection:bg-sky-500/20 selection:text-sky-200">
       
-      {/* App Header */}
+      {/* Floating App Header */}
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -159,79 +162,84 @@ export default function App() {
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        
-        {/* Map Toggle & Canvas (Shown on Passenger and Controller views) */}
-        {(activeTab === 'passenger' || activeTab === 'controller') && (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <Map className="w-4 h-4 text-rail-accent" />
-                <h3 className="font-bold text-sm text-slate-200 uppercase tracking-wider">
-                  Live Geospatial Corridor Track (NDLS ➔ CNB 440 km)
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowMap(!showMap)}
-                className="text-xs text-rail-muted hover:text-white px-2.5 py-1 rounded bg-rail-card border border-rail-border transition"
-              >
-                {showMap ? 'Hide Map' : 'Show Map'}
-              </button>
-            </div>
-
-            {showMap && (
-              <div className="h-[380px] w-full">
-                <CorridorMap
-                  stations={stations}
-                  sections={currentSections}
-                  trains={currentTrains}
-                  selectedTrainId={selectedTrainId}
-                  onSelectTrain={setSelectedTrainId}
-                  disruptions={currentDisruptions}
-                />
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Tab Views */}
-        {activeTab === 'passenger' && (
+      {activeTab === 'passenger' ? (
+        <main className="relative w-full h-full flex-1 overflow-hidden">
           <PassengerView
             trains={currentTrains}
             selectedTrainId={selectedTrainId}
             onSelectTrain={setSelectedTrainId}
             stations={stations}
-          />
-        )}
-
-        {activeTab === 'controller' && (
-          <ControllerView
             sections={currentSections}
+            signals={currentSignals}
+            nationwideRoutes={currentNationwideRoutes}
+            nationwideStations={currentNationwideStations}
             disruptions={currentDisruptions}
-            onInjectDisruption={handleInjectDisruption}
-            onResetDisruptions={handleResetDisruptions}
-            platformConflicts={currentPlatformConflicts}
-            trains={currentTrains}
           />
-        )}
+        </main>
+      ) : (
+        <main className="relative w-full h-full flex-1 overflow-y-auto pt-24 pb-8 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto space-y-6">
+          
+          {/* Map View for Controller Tab */}
+          {activeTab === 'controller' && (
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <Map className="w-4 h-4 text-sky-400" />
+                  <h3 className="font-bold text-xs uppercase tracking-wider text-zinc-300 font-mono">
+                    Live Geospatial Corridor Track (NDLS ➔ CNB 440 km)
+                  </h3>
+                </div>
+                <button
+                  onClick={() => setShowMap(!showMap)}
+                  className="text-xs text-zinc-400 hover:text-white px-3 py-1 rounded-xl bg-zinc-900 border border-zinc-800 transition"
+                >
+                  {showMap ? 'Hide Map' : 'Show Map'}
+                </button>
+              </div>
 
-        {activeTab === 'analytics' && (
-          <AnalyticsView metrics={metrics} />
-        )}
+              {showMap && (
+                <div className="h-[380px] w-full rounded-2xl overflow-hidden border border-white/10 shadow-2xl">
+                  <CorridorMap
+                    stations={stations}
+                    sections={currentSections}
+                    trains={currentTrains}
+                    selectedTrainId={selectedTrainId}
+                    onSelectTrain={setSelectedTrainId}
+                    disruptions={currentDisruptions}
+                  />
+                </div>
+              )}
+            </div>
+          )}
 
-        {activeTab === 'about' && (
-          <AboutView />
-        )}
+          {activeTab === 'controller' && (
+            <ControllerView
+              sections={currentSections}
+              disruptions={currentDisruptions}
+              onInjectDisruption={handleInjectDisruption}
+              onResetDisruptions={handleResetDisruptions}
+              platformConflicts={currentPlatformConflicts}
+              trains={currentTrains}
+            />
+          )}
 
-      </main>
+          {activeTab === 'analytics' && (
+            <AnalyticsView metrics={metrics} />
+          )}
 
-      {/* Footer */}
-      <footer className="border-t border-rail-border bg-rail-card/60 py-4 mt-auto text-center text-xs text-rail-muted">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Smart India Hackathon (SIH 26028) • Dynamic Train ETA System</span>
-          <span>Developed by Priyanshu Prajapat & Keshav Solanki</span>
-        </div>
-      </footer>
+          {activeTab === 'about' && (
+            <AboutView />
+          )}
+
+          {/* Footer for Scrollable Tabs */}
+          <footer className="border-t border-white/10 bg-[#121318]/80 backdrop-blur-md py-4 mt-8 text-center text-xs text-zinc-500 rounded-2xl">
+            <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+              <span className="font-medium text-zinc-400">Smart India Hackathon (SIH 26028) • Dynamic Train ETA System</span>
+              <span className="text-zinc-500">Developed by Priyanshu Prajapat & Keshav Solanki</span>
+            </div>
+          </footer>
+        </main>
+      )}
 
     </div>
   );

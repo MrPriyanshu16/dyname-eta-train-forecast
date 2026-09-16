@@ -18,14 +18,14 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0b1329;
+  background: #0B0C10;
 }
 ::-webkit-scrollbar-thumb {
-  background: #233554;
+  background: #262833;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #0284c7;
+  background: #38BDF8;
 }
 
 /* Pulse indicator animation */
@@ -38,25 +38,85 @@
   animation: pulse-fast 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Leaflet map custom styling for dark mode */
+/* Leaflet map custom styling for clean matte dark mode */
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background-color: #0b1329 !important;
-  border-radius: 0.75rem;
+  background-color: #0E0E12 !important;
 }
 
-.leaflet-tile {
-  filter: brightness(0.65) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+/* Crisp Leaflet Zoom Controls matching glassmorphic dark theme */
+.leaflet-top.leaflet-right {
+  top: 178px !important;
+  right: 16px !important;
 }
 
-.leaflet-popup-content-wrapper {
-  background: #152238 !important;
-  color: #f1f5f9 !important;
-  border: 1px solid #233554 !important;
+.leaflet-bar {
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  border-radius: 1rem !important;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+}
+
+.leaflet-bar a {
+  background-color: rgba(18, 19, 24, 0.85) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  color: #94A3B8 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  transition: all 0.2s ease;
+  width: 34px !important;
+  height: 34px !important;
+  line-height: 34px !important;
+  font-size: 16px !important;
+}
+
+.leaflet-bar a:hover {
+  background-color: rgba(38, 40, 51, 0.95) !important;
+  color: #38BDF8 !important;
+}
+
+/* Clean Dark Tooltip */
+.leaflet-tooltip {
+  background: #181920 !important;
+  color: #F8FAFC !important;
+  border: 1px solid #262833 !important;
   border-radius: 0.5rem !important;
+  padding: 4px 8px !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
+}
+.leaflet-tooltip-top:before {
+  border-top-color: #181920 !important;
+}
+.leaflet-tooltip-bottom:before {
+  border-bottom-color: #181920 !important;
+}
+
+/* Clean Dark Popup */
+.leaflet-popup-content-wrapper {
+  background: #181920 !important;
+  color: #F8FAFC !important;
+  border: 1px solid #262833 !important;
+  border-radius: 0.75rem !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
 }
 
 .leaflet-popup-tip {
-  background: #152238 !important;
+  background: #181920 !important;
+}
+
+/* Reset Leaflet div icon default white box */
+.leaflet-div-icon {
+  background: transparent !important;
+  border: none !important;
+}
+
+/* Radar spin animation for signature hubs */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
 }

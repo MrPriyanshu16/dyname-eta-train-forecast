@@ -6,7 +6,7 @@ Models authentic train movements, section occupancies, signal aspects, and disru
 import math
 import time
 from typing import Dict, List, Optional
-from ml.corridor_data import STATIONS, SECTIONS, TRAINS_SCHEDULE
+from ml.corridor_data import STATIONS, SECTIONS, TRAINS_SCHEDULE, SIGNALS, NATIONWIDE_ROUTES, NATIONWIDE_STATIONS
 from backend.ml_predictor import predictor
 
 def interpolate_coordinates(km: float) -> tuple[float, float, str]:
@@ -70,6 +70,8 @@ class CorridorSimulator:
                 "current_delay_min": initial_delays[idx % len(initial_delays)],
                 "current_status": "RUNNING",
                 "current_section_id": sec_id,
+                "loco": sched.get("loco", "WAP-7"),
+                "heading": sched.get("heading", "118° SE"),
                 "stops": sched["stops"],
                 "dynamic_etas": []
             }
@@ -275,6 +277,39 @@ class CorridorSimulator:
         
         return self.get_full_state()
 
+    def get_signal_states(self) -> List[dict]:
+        """
+        Dynamically computes Automatic Block Signal aspects (GREEN, YELLOW, RED)
+        based on live train proximity along the corridor.
+        """
+        result = []
+        for sig in SIGNALS:
+            sig_km = sig["km"]
+            aspect = "GREEN"
+            
+            # Check if any train is currently in the block immediately ahead
+            for t in self.trains.values():
+                t_km = t.get("current_km", 0.0)
+                if sig_km <= t_km <= sig_km + 6.0:
+                    dist = t_km - sig_km
+                    if dist <= 2.5:
+                        aspect = "RED"
+                        break
+                    elif dist <= 6.0 and aspect != "RED":
+                        aspect = "YELLOW"
+            
+            # Injected disruptions
+            if self.disruptions.get("maintenance_section") == sig.get("section_id"):
+                aspect = "YELLOW"
+            if self.disruptions.get("signal_halt_section") == sig.get("section_id"):
+                aspect = "RED"
+
+            result.append({
+                **sig,
+                "aspect": aspect
+            })
+        return result
+
     def get_full_state(self) -> dict:
         """Returns the full corridor telemetry state."""
         return {
@@ -292,6 +327,9 @@ class CorridorSimulator:
                 }
                 for sec in SECTIONS
             ],
+            "signals": self.get_signal_states(),
+            "nationwide_routes": NATIONWIDE_ROUTES,
+            "nationwide_stations": NATIONWIDE_STATIONS,
             "trains": list(self.trains.values()),
             "platform_conflicts": self.detect_platform_conflicts("CNB")
         }
