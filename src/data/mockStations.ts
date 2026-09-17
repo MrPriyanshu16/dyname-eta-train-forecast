@@ -270,6 +270,42 @@ export const MOCK_STATIONS: Station[] = [
     zone: 'NCR',
     platforms: 7,
     facilities: ['Wi-Fi', 'Waiting Rooms', 'Food Plaza']
+  },
+  {
+    code: 'ANVT',
+    name: 'Anand Vihar Terminal',
+    city: 'Delhi',
+    state: 'Delhi',
+    zone: 'NR',
+    platforms: 7,
+    facilities: ['Wi-Fi', 'Executive Lounge', 'Metro Connectivity', 'Prepaid Taxi']
+  },
+  {
+    code: 'MB',
+    name: 'Moradabad Junction',
+    city: 'Moradabad',
+    state: 'Uttar Pradesh',
+    zone: 'NR',
+    platforms: 5,
+    facilities: ['Wi-Fi', 'Waiting Rooms', 'Food Plaza']
+  },
+  {
+    code: 'BE',
+    name: 'Bareilly Junction',
+    city: 'Bareilly',
+    state: 'Uttar Pradesh',
+    zone: 'NR',
+    platforms: 6,
+    facilities: ['Wi-Fi', 'Waiting Hall', 'Canteen']
+  },
+  {
+    code: 'MFP',
+    name: 'Muzaffarpur Junction',
+    city: 'Muzaffarpur',
+    state: 'Bihar',
+    zone: 'ECR',
+    platforms: 6,
+    facilities: ['Wi-Fi', 'Executive Lounge', 'Retiring Rooms', 'Food Court']
   }
 ];
 

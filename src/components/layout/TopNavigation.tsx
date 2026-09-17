@@ -96,7 +96,7 @@ export const TopNavigation: React.FC = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
               </span>
-              <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Simulated Clock</span>
+              <span className="text-slate-500 dark:text-slate-400 text-[11px] font-medium">Live Transit Time</span>
               <span className="font-mono font-semibold text-slate-800 dark:text-slate-200 text-xs">{simulatedTime}</span>
             </div>
 

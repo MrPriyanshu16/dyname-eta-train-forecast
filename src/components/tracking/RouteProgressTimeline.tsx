@@ -164,12 +164,13 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
                         </div>
                       ) : (
                         <div className="text-right">
-                          <div className="font-mono font-bold text-slate-900 dark:text-white">
-                            {stop.estimatedArrival !== '--' ? stop.estimatedArrival : stop.estimatedDeparture}
+                          <div className="font-mono font-bold text-slate-950 dark:text-white flex items-center justify-end gap-1">
+                            <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase">ETA</span>
+                            <span>{stop.estimatedArrival !== '--' ? stop.estimatedArrival : stop.estimatedDeparture}</span>
                           </div>
-                          <div className="text-[11px] text-slate-400 dark:text-slate-500 font-mono">
-                            Sched:{' '}
-                            {stop.scheduledArrival !== '--' ? stop.scheduledArrival : stop.scheduledDeparture}
+                          <div className="text-[11px] text-slate-400 dark:text-slate-500 font-mono flex items-center justify-end gap-1">
+                            <span>STA:</span>
+                            <span className="text-slate-600 dark:text-slate-400">{stop.scheduledArrival !== '--' ? stop.scheduledArrival : stop.scheduledDeparture}</span>
                           </div>
                         </div>
                       )}

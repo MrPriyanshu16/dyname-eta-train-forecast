@@ -1,8 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Train, StationStop } from '../../types/train';
 import { getDelayBadgeText, getRemainingTimeText } from '../../utils/time';
-import { Clock, MapPin, ChevronDown, CheckCircle2, AlertTriangle, ArrowRight } from 'lucide-react';
+import {
+  Clock,
+  MapPin,
+  ChevronDown,
+  CheckCircle2,
+  AlertTriangle,
+  ArrowRight,
+  Sparkles,
+  ShieldCheck,
+  Cpu,
+  TrendingDown,
+  Info
+} from 'lucide-react';
 import { TrainStatusBadge } from '../train/TrainStatusBadge';
+import { predictETAWithML, MLPredictionResponse } from '../../utils/mlApi';
 
 interface ArrivalEstimateCardProps {
   train: Train;
@@ -17,13 +30,66 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
   upcomingStops,
   onSelectStation
 }) => {
+  const [mlData, setMlData] = useState<MLPredictionResponse | null>(null);
+  const [isMlLoading, setIsMlLoading] = useState(false);
+
   const isCompleted = train.currentStatus.state === 'COMPLETED';
   const isDelayed = targetStation.delayArrivalMinutes > 0;
-  const isTargetDestination =
-    targetStation.stationCode === train.destination.code;
+  const isTargetDestination = targetStation.stationCode === train.destination.code;
+
+  // Poll / Query ML Model when train or target station changes
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchML() {
+      setIsMlLoading(true);
+      const res = await predictETAWithML({
+        train_number: train.number,
+        timestamp: new Date().toISOString(),
+        latitude: 27.2081, // TDL Corridor coordinates
+        longitude: 78.2393,
+        speed: train.currentStatus.currentSpeedKmph || 115.0,
+        current_delay_minutes: train.currentStatus.delayMinutes || 0.0,
+        weather_fog_index: 0.0
+      });
+      if (isMounted && res) {
+        setMlData(res);
+      }
+      if (isMounted) setIsMlLoading(false);
+    }
+
+    fetchML();
+    return () => {
+      isMounted = false;
+    };
+  }, [train.number, train.currentStatus.delayMinutes, targetStation.stationCode]);
+
+  // Find target station in ML predictions
+  const mlStationPred = mlData?.predictions.upcoming_stations.find(
+    s => s.station_code === targetStation.stationCode
+  );
+  const mlDestPred = mlData?.predictions.destination;
+
+  // Active ETA string: Use ML predicted ETA if available, otherwise local timetable estimate
+  const activeETA = isTargetDestination
+    ? mlDestPred?.predicted_eta || (targetStation.estimatedArrival !== '--' ? targetStation.estimatedArrival : targetStation.estimatedDeparture)
+    : mlStationPred?.predicted_eta || (targetStation.estimatedArrival !== '--' ? targetStation.estimatedArrival : targetStation.estimatedDeparture);
+
+  const scheduledTime = targetStation.scheduledArrival !== '--'
+    ? targetStation.scheduledArrival
+    : targetStation.scheduledDeparture;
+
+  const ntesBaselineETA = isTargetDestination
+    ? mlDestPred?.ntes_baseline_eta
+    : mlStationPred?.ntes_baseline_eta;
+
+  const remainingMinutes = isTargetDestination
+    ? mlDestPred?.predicted_remaining_minutes
+    : mlStationPred?.predicted_remaining_minutes;
 
   const remainingText = isCompleted
     ? 'Journey Completed'
+    : remainingMinutes !== undefined
+    ? `${Math.floor(remainingMinutes / 60)}h ${Math.round(remainingMinutes % 60)}m remaining`
     : getRemainingTimeText(
         targetStation.estimatedArrival !== '--'
           ? targetStation.estimatedArrival
@@ -46,9 +112,9 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
 
       {/* Station Selector & Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-5 border-b border-slate-100 dark:border-slate-800">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-xs font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-            {isTargetDestination ? 'Final Destination' : 'Next Target Station'}
+            {isTargetDestination ? 'Final Destination' : 'Target Station'}
           </span>
           <span className="text-slate-300 dark:text-slate-700">·</span>
           <div className="relative inline-block">
@@ -66,6 +132,19 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
             </select>
             <ChevronDown className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
+
+          {/* Machine Learning Model Indicator Badge */}
+          {mlData ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800">
+              <Sparkles className="w-3 h-3 text-indigo-500 animate-pulse" />
+              <span>XGBoost ML Active</span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+              <Cpu className="w-3 h-3 text-slate-400" />
+              <span>{isMlLoading ? 'Connecting to ML...' : 'Local Engine'}</span>
+            </span>
+          )}
         </div>
 
         <div className="flex items-center gap-2">
@@ -85,7 +164,7 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
       {/* Main ETA Display Section */}
       <div className="py-6 sm:py-7 grid grid-cols-1 md:grid-cols-12 gap-6 items-baseline">
         {/* Left dominant block: Station and Estimated Time */}
-        <div className="md:col-span-8">
+        <div className="md:col-span-8 space-y-4">
           <div className="flex items-baseline gap-3 flex-wrap">
             <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
               {targetStation.stationName}
@@ -96,28 +175,36 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
           </div>
 
           {/* Large tabular numerals for arrival estimate */}
-          <div className="mt-4 flex items-baseline gap-4 flex-wrap">
+          <div className="flex items-baseline gap-5 flex-wrap">
             <div>
-              <div className="text-xs uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 mb-1">
-                Estimated Arrival
+              <div className="text-xs uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 mb-1 flex items-center gap-1.5">
+                <span>Dynamic Estimated Arrival (ETA)</span>
+                {mlData && <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold">● AI PREDICTION</span>}
               </div>
               <div className="font-mono text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 dark:text-white tabular-nums">
-                {targetStation.estimatedArrival !== '--'
-                  ? targetStation.estimatedArrival
-                  : targetStation.estimatedDeparture}
+                {activeETA}
               </div>
             </div>
 
-            {/* Scheduled comparison and delta */}
-            <div className="border-l border-slate-200 dark:border-slate-800 pl-4 sm:pl-5 space-y-1">
+            {/* Scheduled Timetable Comparison */}
+            <div className="border-l border-slate-200 dark:border-slate-800 pl-4 sm:pl-5 space-y-1.5">
               <div className="text-xs text-slate-500 dark:text-slate-400">
-                Scheduled:{' '}
-                <span className="font-mono font-semibold text-slate-700 dark:text-slate-300 tabular-nums">
-                  {targetStation.scheduledArrival !== '--'
-                    ? targetStation.scheduledArrival
-                    : targetStation.scheduledDeparture}
+                Scheduled Timetable (STA):{' '}
+                <span className="font-mono font-bold text-slate-800 dark:text-slate-200 tabular-nums">
+                  {scheduledTime}
                 </span>
               </div>
+
+              {/* NTES Baseline comparison if ML is connected */}
+              {ntesBaselineETA && (
+                <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
+                  <span>Static NTES Baseline:</span>
+                  <span className="font-mono text-slate-600 dark:text-slate-300 font-semibold line-through">
+                    {ntesBaselineETA}
+                  </span>
+                </div>
+              )}
+
               <div className="text-xs font-medium">
                 {isDelayed ? (
                   <span className="text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-1">
@@ -133,19 +220,44 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Statistical Uncertainty / Prediction Interval (from ML) */}
+          {mlDestPred && isTargetDestination && (
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 text-xs text-indigo-900 dark:text-indigo-200">
+              <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
+              <span>
+                <strong>80% Prediction Interval:</strong>{' '}
+                <span className="font-mono font-bold">
+                  {mlDestPred.prediction_interval_80pct.lower_eta} – {mlDestPred.prediction_interval_80pct.upper_eta}
+                </span>{' '}
+                <span className="text-[11px] text-indigo-600 dark:text-indigo-400">(Quantile regression bounds)</span>
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Right side: Countdown & proximity badge */}
-        <div className="md:col-span-4 bg-slate-50 dark:bg-slate-850 rounded-xl p-4 border border-slate-100 dark:border-slate-800 flex flex-col justify-center">
-          <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 mb-1">
+        <div className="md:col-span-4 bg-slate-50 dark:bg-slate-850 rounded-xl p-4 border border-slate-100 dark:border-slate-800 flex flex-col justify-center space-y-2">
+          <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 mb-0.5">
             Status Countdown
           </div>
           <div className="text-lg font-bold text-indigo-900 dark:text-indigo-300">
             {remainingText}
           </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
             {train.currentStatus.statusExplanation}
           </p>
+
+          {/* Route Consistency Tag */}
+          {mlData && (
+            <div className="pt-2 border-t border-slate-200/60 dark:border-slate-750 flex items-center justify-between text-[11px]">
+              <span className="text-slate-400">Route Geometry:</span>
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+                <CheckCircle2 className="w-3 h-3" />
+                {mlData.current_location.route_status}
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -161,6 +273,11 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
                   ? `Approaching ${train.currentStatus.nextStationName}`
                   : 'In Transit')}
             </strong>
+            {mlData?.current_location.current_section && (
+              <span className="text-slate-400 ml-1.5">
+                (Section: <span className="font-mono font-medium">{mlData.current_location.current_section}</span>)
+              </span>
+            )}
           </span>
         </div>
 

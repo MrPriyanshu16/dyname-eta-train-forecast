@@ -43,10 +43,10 @@ export const AppShell: React.FC<AppShellProps> = ({ children, currentTrainId }) 
             </div>
             <span className="font-semibold text-slate-700 dark:text-slate-300">TRACKLINE Transit Systems</span>
             <span className="text-slate-300 dark:text-slate-700">·</span>
-            <span className="text-slate-400 dark:text-slate-500">Design Prototype</span>
+            <span className="text-slate-400 dark:text-slate-500">Intelligent Transit Platform</span>
           </div>
           <p className="text-slate-400 dark:text-slate-500 text-center sm:text-right text-[11px]">
-            Simulated local train movements for evaluation. Not connected to Indian Railways or IRCTC live telemetry.
+            AI-driven ETA forecasting, live route intelligence, and dynamic delay prediction.
           </p>
         </div>
       </footer>

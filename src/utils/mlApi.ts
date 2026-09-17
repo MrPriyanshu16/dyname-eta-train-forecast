@@ -78,6 +78,26 @@ export interface ModelMetricsResponse {
   }>;
 }
 
+export interface SimulatorStepResponse {
+  simulator_state: {
+    active_disruption: string | null;
+    current_speed_kmh: number;
+    km_position: number;
+    current_delay_minutes: number;
+    weather_fog_index: number;
+    is_signal_halt: boolean;
+    progress_percentage: number;
+  };
+  telemetry_ping: {
+    timestamp: string;
+    train_number: string;
+    latitude: number;
+    longitude: number;
+    speed_kmh: number;
+  };
+  eta_forecast: MLPredictionResponse;
+}
+
 export async function checkMLBackendHealth(): Promise<boolean> {
   try {
     const res = await fetch(`${ML_API_BASE_URL}/`, { method: 'GET', signal: AbortSignal.timeout(1500) });
@@ -101,6 +121,36 @@ export async function predictETAWithML(params: {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(params),
+      signal: AbortSignal.timeout(3000)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function stepRTISSimulator(delta_minutes: number = 5.0): Promise<SimulatorStepResponse | null> {
+  try {
+    const res = await fetch(`${ML_API_BASE_URL}/api/simulator/step`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ delta_minutes }),
+      signal: AbortSignal.timeout(3000)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function injectSimulatorDisruption(disruption_type: string, severity?: number): Promise<{ status: string; active_disruption: string | null } | null> {
+  try {
+    const res = await fetch(`${ML_API_BASE_URL}/api/simulator/disruption`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ disruption_type, severity }),
       signal: AbortSignal.timeout(3000)
     });
     if (!res.ok) return null;

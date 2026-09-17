@@ -84,7 +84,7 @@ export const HomePage: React.FC = () => {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100/90 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-6">
             <Radio className="w-3.5 h-3.5 animate-pulse text-indigo-600 dark:text-indigo-400" />
-            <span>Simulated Real-Time Transit Intelligence</span>
+            <span>Real-Time Transit & AI ETA Forecast Engine</span>
           </div>
 
           {/* Headline */}
