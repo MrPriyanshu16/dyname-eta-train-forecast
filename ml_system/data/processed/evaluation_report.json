@@ -1,0 +1,133 @@
+{
+  "overall_model_comparison": {
+    "Baseline_1_Timetable": {
+      "mae_minutes": 64.66,
+      "rmse_minutes": 90.58,
+      "median_ae_minutes": 50.24,
+      "r2_score": 0.6932,
+      "within_5_min_pct": 24.55,
+      "within_10_min_pct": 27.25,
+      "within_15_min_pct": 29.78,
+      "within_30_min_pct": 38.91,
+      "sample_count": 5850
+    },
+    "Baseline_2_Delay_Propagation_NTES": {
+      "mae_minutes": 76.62,
+      "rmse_minutes": 97.11,
+      "median_ae_minutes": 64.17,
+      "r2_score": 0.6474,
+      "within_5_min_pct": 4.43,
+      "within_10_min_pct": 9.13,
+      "within_15_min_pct": 14.02,
+      "within_30_min_pct": 26.32,
+      "sample_count": 5850
+    },
+    "Model_1_Random_Forest": {
+      "mae_minutes": 17.85,
+      "rmse_minutes": 25.71,
+      "median_ae_minutes": 12.91,
+      "r2_score": 0.9753,
+      "within_5_min_pct": 31.76,
+      "within_10_min_pct": 42.97,
+      "within_15_min_pct": 54.22,
+      "within_30_min_pct": 77.76,
+      "sample_count": 5850
+    },
+    "Model_2_Gradient_Boosting": {
+      "mae_minutes": 17.89,
+      "rmse_minutes": 25.59,
+      "median_ae_minutes": 12.86,
+      "r2_score": 0.9755,
+      "within_5_min_pct": 31.28,
+      "within_10_min_pct": 42.97,
+      "within_15_min_pct": 54.94,
+      "within_30_min_pct": 77.98,
+      "sample_count": 5850
+    },
+    "Model_3_XGBoost": {
+      "mae_minutes": 17.9,
+      "rmse_minutes": 25.61,
+      "median_ae_minutes": 12.94,
+      "r2_score": 0.9755,
+      "within_5_min_pct": 31.16,
+      "within_10_min_pct": 43.08,
+      "within_15_min_pct": 54.89,
+      "within_30_min_pct": 78.09,
+      "sample_count": 5850
+    }
+  },
+  "error_analysis_by_priority_tier": {
+    "Tier 1: Vande Bharat / Rajdhani": {
+      "sample_count": 600,
+      "mae_ntes": 20.45,
+      "mae_ml": 6.83,
+      "improvement_pct": 66.6
+    },
+    "Tier 2: Shatabdi": {
+      "sample_count": 1050,
+      "mae_ntes": 52.91,
+      "mae_ml": 14.02,
+      "improvement_pct": 73.5
+    },
+    "Tier 3: Superfast": {
+      "sample_count": 2700,
+      "mae_ntes": 76.1,
+      "mae_ml": 19.08,
+      "improvement_pct": 74.9
+    },
+    "Tier 4: Express": {
+      "sample_count": 1500,
+      "mae_ntes": 116.63,
+      "mae_ml": 22.93,
+      "improvement_pct": 80.3
+    }
+  },
+  "error_analysis_by_prediction_horizon": {
+    "< 100 km (Short horizon)": {
+      "sample_count": 1650,
+      "mae_ntes": 96.55,
+      "mae_ml": 4.05,
+      "improvement_pct": 95.8
+    },
+    "100-250 km (Mid horizon)": {
+      "sample_count": 1200,
+      "mae_ntes": 49.45,
+      "mae_ml": 18.63,
+      "improvement_pct": 62.3
+    },
+    "> 250 km (Long horizon)": {
+      "sample_count": 3000,
+      "mae_ntes": 76.53,
+      "mae_ml": 25.23,
+      "improvement_pct": 67.0
+    }
+  },
+  "error_analysis_by_current_delay": {
+    "On-time to Small (<= 15m)": {
+      "sample_count": 1308,
+      "mae_ntes": 88.55,
+      "mae_ml": 21.6,
+      "improvement_pct": 75.6
+    },
+    "Moderate delay (15-45m)": {
+      "sample_count": 1440,
+      "mae_ntes": 60.37,
+      "mae_ml": 21.61,
+      "improvement_pct": 64.2
+    },
+    "Severe delay (> 45m)": {
+      "sample_count": 3096,
+      "mae_ntes": 78.7,
+      "mae_ml": 14.63,
+      "improvement_pct": 81.4
+    }
+  },
+  "error_analysis_by_weather": {
+    "Clear Weather": {
+      "sample_count": 5850,
+      "mae_ntes": 76.62,
+      "mae_ml": 17.9,
+      "improvement_pct": 76.6
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "model_version": "1.0.0",
+  "primary_model": "XGBoostRegressor",
+  "feature_columns": [
+    "current_delay_min",
+    "distance_from_origin",
+    "distance_remaining",
+    "journey_progress_ratio",
+    "priority_tier",
+    "section_occupancy_ratio",
+    "headway_km",
+    "weather_fog_index",
+    "is_junction_ahead",
+    "hour_sin",
+    "hour_cos",
+    "day_of_week",
+    "is_weekend",
+    "hist_train_avg_delay",
+    "hist_station_avg_delay"
+  ],
+  "target_column": "target_remaining_time_to_destination",
+  "train_samples": 27082,
+  "val_samples": 6068,
+  "test_samples": 5850,
+  "feature_importances": {
+    "distance_from_origin": 0.4945,
+    "distance_remaining": 0.33,
+    "journey_progress_ratio": 0.0718,
+    "priority_tier": 0.0482,
+    "weather_fog_index": 0.0169,
+    "hour_sin": 0.0161,
+    "hist_station_avg_delay": 0.0158,
+    "hour_cos": 0.0043,
+    "current_delay_min": 0.0007,
+    "is_junction_ahead": 0.0004,
+    "section_occupancy_ratio": 0.0004,
+    "headway_km": 0.0003,
+    "day_of_week": 0.0003,
+    "is_weekend": 0.0003,
+    "hist_train_avg_delay": 0.0
+  }
+}

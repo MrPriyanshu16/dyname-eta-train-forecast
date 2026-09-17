@@ -1,0 +1,40 @@
+train_number,station_code,station_name,station_sequence,distance_from_origin,scheduled_arrival,scheduled_departure,halt_duration_min
+22436,NDLS,New Delhi,1,0.0,--:--,06:00,0
+22436,CNB,Kanpur Central,2,440.3,10:24,--:--,0
+12302,NDLS,New Delhi,1,0.0,--:--,16:50,0
+12302,CNB,Kanpur Central,2,440.3,21:14,--:--,0
+12004,NDLS,New Delhi,1,0.0,--:--,06:10,0
+12004,GZB,Ghaziabad Jn,2,25.6,06:25,06:30,5
+12004,ALJN,Aligarh Jn,3,126.0,07:30,07:35,5
+12004,TDL,Tundla Jn,4,204.2,08:22,08:27,5
+12004,ETW,Etawah Jn,5,297.0,09:23,09:28,5
+12004,PHD,Phaphund,6,355.0,10:03,10:05,2
+12004,CNB,Kanpur Central,7,440.3,10:56,--:--,0
+12566,NDLS,New Delhi,1,0.0,--:--,13:00,0
+12566,GZB,Ghaziabad Jn,2,25.6,13:18,13:28,10
+12566,ALJN,Aligarh Jn,3,126.0,14:39,14:49,10
+12566,TDL,Tundla Jn,4,204.2,15:44,15:54,10
+12566,CNB,Kanpur Central,5,440.3,18:41,--:--,0
+12418,NDLS,New Delhi,1,0.0,--:--,22:10,0
+12418,GZB,Ghaziabad Jn,2,25.6,22:28,22:38,10
+12418,ALJN,Aligarh Jn,3,126.0,23:49,23:59,10
+12418,CNB,Kanpur Central,4,440.3,03:41,--:--,0
+14218,NDLS,New Delhi,1,0.0,--:--,21:30,0
+14218,GZB,Ghaziabad Jn,2,25.6,21:48,21:58,10
+14218,ALJN,Aligarh Jn,3,126.0,23:09,23:19,10
+14218,HRS,Hathras Jn,4,157.0,23:41,23:43,2
+14218,TDL,Tundla Jn,5,204.2,00:16,00:26,10
+14218,SKB,Shikohabad Jn,6,244.0,00:54,00:56,2
+14218,ETW,Etawah Jn,7,297.0,01:33,01:43,10
+14218,PHD,Phaphund,8,355.0,02:24,02:26,2
+14218,RURA,Rura,9,396.0,02:55,02:57,2
+14218,CNB,Kanpur Central,10,440.3,03:28,--:--,0
+12876,NDLS,New Delhi,1,0.0,--:--,07:30,0
+12876,GZB,Ghaziabad Jn,2,25.6,07:48,07:58,10
+12876,ALJN,Aligarh Jn,3,126.0,09:09,09:19,10
+12876,TDL,Tundla Jn,4,204.2,10:14,10:24,10
+12876,ETW,Etawah Jn,5,297.0,11:30,11:40,10
+12876,CNB,Kanpur Central,6,440.3,13:21,--:--,0
+12398,NDLS,New Delhi,1,0.0,--:--,12:50,0
+12398,ALJN,Aligarh Jn,2,126.0,14:19,14:29,10
+12398,CNB,Kanpur Central,3,440.3,18:11,--:--,0
