@@ -1,31 +1,90 @@
-@import 'leaflet/dist/leaflet.css';
+﻿@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-rail-bg: #f8fafc;
+  --color-rail-surface: #ffffff;
+  --color-rail-card: #ffffff;
+  --color-rail-cardHover: #f1f5f9;
+  --color-rail-border: #e2e8f0;
+  --color-rail-borderSubtle: #f1f5f9;
+  --color-rail-muted: #64748b;
+  --color-rail-accent: #0284c7;
+  --color-rail-accentHover: #0369a1;
+  --color-rail-green: #10b981;
+  --color-rail-yellow: #f59e0b;
+  --color-rail-red: #ef4444;
+  --color-rail-purple: #8b5cf6;
+}
+
+.dark {
+  --color-rail-bg: #0f172a;
+  --color-rail-surface: #1e293b;
+  --color-rail-card: #1e293b;
+  --color-rail-cardHover: #334155;
+  --color-rail-border: #334155;
+  --color-rail-borderSubtle: #1e293b;
+  --color-rail-muted: #94a3b8;
+  --color-rail-accent: #38bdf8;
+  --color-rail-accentHover: #0284c7;
+}
 
 @layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
   body {
-    @apply bg-rail-bg text-slate-100 font-sans antialiased overflow-x-hidden;
-    margin: 0;
-    padding: 0;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .font-mono, [data-tabular] {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* Custom scrollbar */
+/* Custom subtle scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0B0C10;
+  background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #262833;
-  border-radius: 4px;
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+.dark ::-webkit-scrollbar-thumb {
+  background: #334155;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #38BDF8;
+  background: #94a3b8;
+}
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
 /* Pulse indicator animation */
@@ -38,77 +97,102 @@
   animation: pulse-fast 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
 
-/* Leaflet map custom styling for clean matte dark mode */
+/* Leaflet map custom styling */
 .leaflet-container {
   width: 100%;
   height: 100%;
-  background-color: #0E0E12 !important;
+  background-color: #F8FAFC !important;
 }
 
-/* Crisp Leaflet Zoom Controls matching glassmorphic dark theme */
-.leaflet-top.leaflet-right {
-  top: 178px !important;
-  right: 16px !important;
+.dark .leaflet-container {
+  background-color: #0f172a !important;
 }
 
+/* Crisp Leaflet Zoom Controls */
 .leaflet-bar {
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  border-radius: 1rem !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 0.75rem !important;
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08) !important;
 }
 
 .leaflet-bar a {
-  background-color: rgba(18, 19, 24, 0.85) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
-  color: #94A3B8 !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+  background-color: #FFFFFF !important;
+  color: #475569 !important;
+  border-bottom: 1px solid #F1F5F9 !important;
   transition: all 0.2s ease;
   width: 34px !important;
   height: 34px !important;
   line-height: 34px !important;
-  font-size: 16px !important;
+  font-size: 15px !important;
+}
+
+.dark .leaflet-bar a {
+  background-color: #1e293b !important;
+  color: #cbd5e1 !important;
+  border-bottom: 1px solid #334155 !important;
 }
 
 .leaflet-bar a:hover {
-  background-color: rgba(38, 40, 51, 0.95) !important;
-  color: #38BDF8 !important;
+  background-color: #F8FAFC !important;
+  color: #4f46e5 !important;
 }
 
-/* Clean Dark Tooltip */
+.dark .leaflet-bar a:hover {
+  background-color: #334155 !important;
+  color: #818cf8 !important;
+}
+
+/* Clean Tooltip */
 .leaflet-tooltip {
-  background: #181920 !important;
-  color: #F8FAFC !important;
-  border: 1px solid #262833 !important;
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1px solid #E2E8F0 !important;
   border-radius: 0.5rem !important;
   padding: 4px 8px !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5) !important;
-}
-.leaflet-tooltip-top:before {
-  border-top-color: #181920 !important;
-}
-.leaflet-tooltip-bottom:before {
-  border-bottom-color: #181920 !important;
+  font-weight: 600 !important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08) !important;
 }
 
-/* Clean Dark Popup */
+.dark .leaflet-tooltip {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
+}
+
+/* Clean Popup */
 .leaflet-popup-content-wrapper {
-  background: #181920 !important;
-  color: #F8FAFC !important;
-  border: 1px solid #262833 !important;
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border: 1px solid #E2E8F0 !important;
   border-radius: 0.75rem !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+}
+
+.dark .leaflet-popup-content-wrapper {
+  background: #1e293b !important;
+  color: #f8fafc !important;
+  border: 1px solid #334155 !important;
 }
 
 .leaflet-popup-tip {
-  background: #181920 !important;
+  background: #FFFFFF !important;
+}
+
+.dark .leaflet-popup-tip {
+  background: #1e293b !important;
 }
 
 /* Reset Leaflet div icon default white box */
 .leaflet-div-icon {
   background: transparent !important;
   border: none !important;
+}
+
+/* Headlight projection cone for Uber-style train */
+.headlight-cone {
+  clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+  background: linear-gradient(to top, rgba(79, 70, 229, 0.35), rgba(99, 102, 241, 0.02));
 }
 
 /* Radar spin animation for signature hubs */
