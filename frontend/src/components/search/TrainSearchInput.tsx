@@ -14,7 +14,7 @@ interface TrainSearchInputProps {
 }
 
 export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
-  placeholder = 'Search train number, train name, or station (e.g., 12951, Rajdhani, NDLS)',
+  placeholder = 'Search by train number, name, or station (e.g., 12951, NDLS)...',
   autoFocus = false,
   initialValue = '',
   size = 'default',
@@ -134,7 +134,7 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
   const isLarge = size === 'large';
 
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div ref={containerRef} className={`relative w-full ${isFocused ? 'z-50' : 'z-20'}`}>
       <form onSubmit={handleSubmit} className="relative">
         <div
           className={`flex items-center w-full bg-white dark:bg-slate-900 rounded-xl border transition-all duration-200 shadow-xs ${
@@ -162,7 +162,7 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
             onKeyDown={handleKeyDown}
             placeholder={placeholder}
             autoFocus={autoFocus}
-            className="w-full h-full bg-transparent border-none outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium"
+            className="flex-1 min-w-0 h-full bg-transparent border-none outline-none text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 font-medium pr-3 truncate text-sm sm:text-base"
           />
 
           {query && (
@@ -173,7 +173,7 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
                 setSelectedIndex(-1);
                 inputRef.current?.focus();
               }}
-              className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors mr-1 cursor-pointer"
+              className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors mr-1 shrink-0 cursor-pointer"
             >
               <X className="w-4 h-4" />
             </button>
@@ -181,7 +181,7 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
 
           <button
             type="submit"
-            className={`shrink-0 flex items-center gap-1.5 rounded-lg font-medium transition-all cursor-pointer ${
+            className={`shrink-0 flex items-center gap-1.5 rounded-lg font-medium transition-all cursor-pointer ml-2 ${
               isLarge
                 ? 'px-4 py-2 text-xs bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
                 : 'px-2.5 py-1 text-xs bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'

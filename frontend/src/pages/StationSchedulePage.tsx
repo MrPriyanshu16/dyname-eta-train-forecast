@@ -190,7 +190,7 @@ export const StationSchedulePage: React.FC = () => {
           >
             <ArrowUpRight className="w-3.5 h-3.5 text-blue-400 dark:text-blue-500" />
             <span>Departures</span>
-            <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-slate-800 dark:bg-slate-200 text-slate-300 dark:text-slate-800">
+            <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-800 dark:bg-slate-200 text-slate-300 dark:text-slate-800">
               {stationServices.filter(s => s.type === 'DEPARTURE').length}
             </span>
           </button>
@@ -205,7 +205,7 @@ export const StationSchedulePage: React.FC = () => {
           >
             <ArrowDownLeft className="w-3.5 h-3.5 text-emerald-400 dark:text-emerald-500" />
             <span>Arrivals</span>
-            <span className="text-[11px] font-mono px-1.5 py-0.2 rounded bg-slate-800 dark:bg-slate-200 text-slate-300 dark:text-slate-800">
+            <span className="text-[11px] font-mono px-1.5 py-0.5 rounded bg-slate-800 dark:bg-slate-200 text-slate-300 dark:text-slate-800">
               {stationServices.filter(s => s.type === 'ARRIVAL').length}
             </span>
           </button>
@@ -272,7 +272,7 @@ export const StationSchedulePage: React.FC = () => {
                         {service.destination}
                       </span>
                       {service.isOriginOrTerminus && (
-                        <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.2 rounded ml-1">
+                        <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded ml-1">
                           {service.type === 'DEPARTURE' ? 'Originating Train' : 'Terminating Train'}
                         </span>
                       )}

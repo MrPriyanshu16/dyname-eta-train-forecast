@@ -73,14 +73,14 @@ export const HomePage: React.FC = () => {
   return (
     <div className="space-y-12 sm:space-y-16 pb-12 transition-colors">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900/80 dark:to-slate-950 pt-12 pb-16 sm:pt-16 sm:pb-20 border-b border-slate-200/70 dark:border-slate-800 transition-colors">
+      <section className="relative z-20 bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900/80 dark:to-slate-950 pt-12 pb-16 sm:pt-16 sm:pb-20 border-b border-slate-200/70 dark:border-slate-800 transition-colors">
         {/* Subtle geometric line representing track movement */}
-        <div className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-30">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20 dark:opacity-30">
           <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-600 dark:via-indigo-400 to-transparent" />
           <div className="absolute top-1/2 left-1/3 w-32 h-1 bg-indigo-500 rounded-full blur-xs" />
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-20">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100/90 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-6">
             <Radio className="w-3.5 h-3.5 animate-pulse text-indigo-600 dark:text-indigo-400" />
@@ -110,25 +110,25 @@ export const HomePage: React.FC = () => {
             <span className="text-slate-400 dark:text-slate-500">Popular:</span>
             <button
               onClick={() => navigate('/train/12951')}
-              className="px-2 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs"
             >
               12951 Rajdhani
             </button>
             <button
               onClick={() => navigate('/train/22436')}
-              className="px-2 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs"
             >
               22436 Vande Bharat
             </button>
             <button
               onClick={() => navigate('/station/NDLS')}
-              className="px-2 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs"
             >
               NDLS Station Board
             </button>
             <button
               onClick={() => navigate('/journey-planner')}
-              className="px-2 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs"
             >
               Plan Journey
             </button>

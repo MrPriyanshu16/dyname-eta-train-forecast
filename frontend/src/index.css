@@ -1,4 +1,4 @@
-﻿@import "tailwindcss";
+@import "tailwindcss";
 @import "leaflet/dist/leaflet.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
@@ -17,18 +17,27 @@
   --color-rail-yellow: #f59e0b;
   --color-rail-red: #ef4444;
   --color-rail-purple: #8b5cf6;
+  --color-slate-850: #121215;
 }
 
 .dark {
-  --color-rail-bg: #0f172a;
-  --color-rail-surface: #1e293b;
-  --color-rail-card: #1e293b;
-  --color-rail-cardHover: #334155;
-  --color-rail-border: #334155;
-  --color-rail-borderSubtle: #1e293b;
-  --color-rail-muted: #94a3b8;
+  --color-rail-bg: #000000;
+  --color-rail-surface: #09090b;
+  --color-rail-card: #09090b;
+  --color-rail-cardHover: #18181b;
+  --color-rail-border: #27272a;
+  --color-rail-borderSubtle: #18181b;
+  --color-rail-muted: #a1a1aa;
   --color-rail-accent: #38bdf8;
   --color-rail-accentHover: #0284c7;
+
+  /* Proper True Black / Obsidian Neutral Palette */
+  --color-slate-950: #000000;
+  --color-slate-900: #09090b;
+  --color-slate-850: #121215;
+  --color-slate-800: #18181b;
+  --color-slate-700: #27272a;
+  --color-slate-600: #3f3f46;
 }
 
 @layer base {
@@ -42,6 +51,11 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     transition: background-color 0.2s ease, color 0.2s ease;
+  }
+
+  .dark body {
+    background-color: #000000;
+    color: #f4f4f5;
   }
 
   .font-mono, [data-tabular] {
@@ -63,13 +77,13 @@
   border-radius: 9999px;
 }
 .dark ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #27272a;
 }
 ::-webkit-scrollbar-thumb:hover {
   background: #94a3b8;
 }
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+  background: #3f3f46;
 }
 
 @keyframes pulse-subtle {
@@ -203,4 +217,41 @@
 
 .animate-spin-slow {
   animation: spin-slow 12s linear infinite;
+}
+
+/* Cyber-tactical GPS radar wave animations */
+@keyframes gps-ping {
+  0% {
+    transform: scale(0.5);
+    opacity: 0.95;
+  }
+  100% {
+    transform: scale(2.8);
+    opacity: 0;
+  }
+}
+
+.gps-radar-wave {
+  animation: gps-ping 2.2s cubic-bezier(0, 0.2, 0.8, 1) infinite;
+}
+
+.gps-radar-wave-delayed {
+  animation: gps-ping 2.2s cubic-bezier(0, 0.2, 0.8, 1) 0.9s infinite;
+}
+
+/* Animated Route Flow along railway corridor */
+@keyframes route-march {
+  to {
+    stroke-dashoffset: -40;
+  }
+}
+
+.animated-route-flow {
+  stroke-dasharray: 8 8 !important;
+  animation: route-march 1.5s linear infinite !important;
+}
+
+/* Railway tie sleeper crossbar styling */
+.sleeper-track {
+  stroke-linecap: butt !important;
 }

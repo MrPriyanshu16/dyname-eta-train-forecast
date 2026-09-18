@@ -1,6 +1,7 @@
 import React from 'react';
 import { TopNavigation } from './TopNavigation';
 import { SimulationDrawer } from '../ui/SimulationDrawer';
+import { TracklineLogo } from '../ui/TracklineLogo';
 import { Link, useLocation } from 'react-router-dom';
 import { Compass, Building2, Search, Bookmark } from 'lucide-react';
 import { useSimulation } from '../../context/SimulationContext';
@@ -38,9 +39,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children, currentTrainId }) 
       <footer className="border-t border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900/80 py-8 px-4 text-xs text-slate-500 dark:text-slate-400 mt-auto transition-colors">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded bg-slate-900 dark:bg-indigo-600 text-white flex items-center justify-center font-bold text-[10px]">
-              T
-            </div>
+            <TracklineLogo size="sm" className="!w-5 !h-5 !rounded-md" />
             <span className="font-semibold text-slate-700 dark:text-slate-300">TRACKLINE Transit Systems</span>
             <span className="text-slate-300 dark:text-slate-700">·</span>
             <span className="text-slate-400 dark:text-slate-500">Design Prototype</span>
@@ -70,7 +69,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children, currentTrainId }) 
               <div className="relative">
                 <Icon className={`w-4 h-4 mb-0.5 ${isActive ? 'stroke-[2.5]' : 'stroke-2'}`} />
                 {item.badge !== undefined && (
-                  <span className="absolute -top-1 -right-2.5 px-1 py-0.2 text-[9px] font-mono font-bold bg-indigo-600 text-white rounded-full leading-tight">
+                  <span className="absolute -top-1 -right-2.5 px-1 py-0.5 text-[9px] font-mono font-bold bg-indigo-600 text-white rounded-full leading-tight">
                     {item.badge}
                   </span>
                 )}

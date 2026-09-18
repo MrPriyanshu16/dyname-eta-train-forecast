@@ -78,7 +78,7 @@ export const ScheduleTable: React.FC<ScheduleTableProps> = ({ train }) => {
                   <td className="py-3.5 px-4">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-slate-900 dark:text-white">{stop.stationName}</span>
-                      <span className="font-mono text-[11px] px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+                      <span className="font-mono text-[11px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                         {stop.stationCode}
                       </span>
                     </div>
@@ -154,7 +154,7 @@ export const ScheduleTable: React.FC<ScheduleTableProps> = ({ train }) => {
                   <span className="font-bold text-sm text-slate-900 dark:text-white">
                     {stop.stationName}
                   </span>
-                  <span className="font-mono text-xs px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                  <span className="font-mono text-xs px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                     {stop.stationCode}
                   </span>
                 </div>

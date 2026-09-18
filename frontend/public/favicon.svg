@@ -1,6 +1,36 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <rect width="32" height="32" rx="8" fill="#1E3A8A"/>
-  <path d="M7 10H25M7 16H25M7 22H25" stroke="#93C5FD" stroke-width="2" stroke-linecap="round"/>
-  <path d="M12 6V26M20 6V26" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
-  <circle cx="20" cy="16" r="3" fill="#38BDF8"/>
+  <defs>
+    <linearGradient id="favBadge" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#4F46E5"/>
+      <stop offset="100%" stop-color="#312E81"/>
+    </linearGradient>
+    <linearGradient id="favGlass" x1="16" y1="7" x2="16" y2="13" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#38BDF8"/>
+      <stop offset="100%" stop-color="#0284C7"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Container Badge -->
+  <rect width="32" height="32" rx="8" fill="url(#favBadge)"/>
+  <rect x="0.5" y="0.5" width="31" height="31" rx="7.5" stroke="white" stroke-opacity="0.2"/>
+
+  <!-- Rails -->
+  <path d="M7.5 28L11 23.5M24.5 28L21 23.5" stroke="#A5B4FC" stroke-width="1.4" stroke-linecap="round"/>
+  <path d="M9.5 26.5H22.5" stroke="#A5B4FC" stroke-width="1" stroke-linecap="round" stroke-opacity="0.8"/>
+
+  <!-- Train Locomotive Body -->
+  <path d="M10.5 6C10.5 4 21.5 4 21.5 6L23 15C23 20.5 21 23 16 23C11 23 9 20.5 9 15L10.5 6Z" fill="#FFFFFF"/>
+
+  <!-- Windshield -->
+  <path d="M11.5 7.5C11.5 6.5 20.5 6.5 20.5 7.5L21.2 11.5C21.2 12.8 19 13.2 16 13.2C13 13.2 10.8 12.8 10.8 11.5L11.5 7.5Z" fill="url(#favGlass)"/>
+
+  <!-- Headlights -->
+  <circle cx="12.2" cy="18.2" r="1.3" fill="#FACC15"/>
+  <circle cx="19.8" cy="18.2" r="1.3" fill="#FACC15"/>
+
+  <!-- Nose Ribbon -->
+  <rect x="15" y="16.5" width="2" height="3.5" rx="1" fill="#4F46E5"/>
+
+  <!-- Front Pilot Skirt -->
+  <path d="M10.5 22.2L16 24L21.5 22.2" stroke="#4F46E5" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

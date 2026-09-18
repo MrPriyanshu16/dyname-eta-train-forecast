@@ -62,11 +62,8 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
       </div>
 
       {/* Vertical Station Timeline */}
-      <div className="p-5 sm:p-7 relative">
-        {/* Continuous Track Spine Line */}
-        <div className="absolute left-[33px] sm:left-[41px] top-10 bottom-10 w-0.5 bg-slate-200 dark:bg-slate-700 -z-0" />
-
-        <div className="space-y-6 relative z-10">
+      <div className="p-5 sm:p-6 relative">
+        <div className="flex flex-col relative">
           {train.stops.map((stop, idx) => {
             const isCompleted = stop.status === 'COMPLETED';
             const isCurrent = stop.status === 'CURRENT';
@@ -77,62 +74,96 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
             const isOrigin = idx === 0;
             const isDestination = idx === train.stops.length - 1;
 
+            // Segment color determination:
+            const prevStop = idx > 0 ? train.stops[idx - 1] : null;
+            const isTopSegmentActive = prevStop ? prevStop.status === 'COMPLETED' : false;
+            const isBottomSegmentActive = isCompleted;
+
             return (
               <div
                 key={stop.stationCode}
                 ref={isCurrent ? currentStationRef : null}
-                onClick={() => onSelectStation(stop.stationCode)}
-                className={`group flex items-start gap-4 p-3.5 -mx-3.5 rounded-xl transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-indigo-50/80 dark:bg-indigo-950/60 ring-1 ring-indigo-300 dark:ring-indigo-700'
-                    : isCurrent
-                    ? 'bg-blue-50/50 dark:bg-blue-950/40'
-                    : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
-                }`}
+                className="group flex items-stretch gap-3 sm:gap-4 relative"
               >
-                {/* Node Icon */}
-                <div className="shrink-0 flex items-center justify-center w-8 sm:w-10">
-                  {isCompleted ? (
-                    <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                    </div>
-                  ) : isCurrent ? (
-                    <div className="relative flex items-center justify-center">
-                      <span className="animate-ping absolute inline-flex h-7 w-7 rounded-full bg-blue-400 opacity-75" />
-                      <div className="w-6 h-6 rounded-full bg-blue-600 border-2 border-white dark:border-slate-900 text-white flex items-center justify-center shadow-xs">
-                        <MapPin className="w-3 h-3" />
-                      </div>
-                    </div>
-                  ) : isNext ? (
-                    <div className="w-6 h-6 rounded-full bg-indigo-600 border-2 border-white dark:border-slate-900 text-white flex items-center justify-center shadow-xs">
-                      <div className="w-2 h-2 rounded-full bg-white" />
-                    </div>
+                {/* Left Track Column: Continuous Spine Connector Line & Node Icon */}
+                <div className="relative flex flex-col items-center shrink-0 w-8 sm:w-10">
+                  {/* Top connector line (from top of row to node) */}
+                  {!isOrigin ? (
+                    <div
+                      className={`w-0.5 h-[18px] shrink-0 transition-colors ${
+                        isTopSegmentActive
+                          ? 'bg-emerald-500 dark:bg-emerald-400'
+                          : 'bg-slate-200 dark:bg-slate-700'
+                      }`}
+                    />
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 group-hover:border-slate-400 flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
-                    </div>
+                    <div className="h-[18px] shrink-0" />
+                  )}
+
+                  {/* Node Icon */}
+                  <div className="relative z-10 flex items-center justify-center shrink-0">
+                    {isCompleted ? (
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shadow-xs">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      </div>
+                    ) : isCurrent ? (
+                      <div className="relative flex items-center justify-center w-6 h-6">
+                        <span className="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-blue-400 opacity-75" />
+                        <div className="relative w-6 h-6 rounded-full bg-blue-600 border-2 border-white dark:border-slate-900 text-white flex items-center justify-center shadow-xs">
+                          <MapPin className="w-3 h-3" />
+                        </div>
+                      </div>
+                    ) : isNext ? (
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 border-2 border-white dark:border-slate-900 text-white flex items-center justify-center shadow-xs">
+                        <div className="w-2 h-2 rounded-full bg-white" />
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 rounded-full bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 group-hover:border-slate-400 flex items-center justify-center shadow-2xs">
+                        <div className="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600" />
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bottom connector line (from bottom of node to bottom of row) */}
+                  {!isDestination && (
+                    <div
+                      className={`w-0.5 flex-1 transition-colors ${
+                        isBottomSegmentActive
+                          ? 'bg-emerald-500 dark:bg-emerald-400'
+                          : 'bg-slate-200 dark:bg-slate-700'
+                      }`}
+                    />
                   )}
                 </div>
 
-                {/* Station Info Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+                {/* Station Info Card */}
+                <div
+                  onClick={() => onSelectStation(stop.stationCode)}
+                  className={`flex-1 min-w-0 p-3.5 sm:p-4 my-1.5 rounded-xl border transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-300 dark:border-indigo-700 ring-1 ring-indigo-300 dark:ring-indigo-700'
+                      : isCurrent
+                      ? 'bg-blue-50/50 dark:bg-blue-950/40 border-blue-200 dark:border-blue-900/60 hover:bg-blue-50/80 dark:hover:bg-blue-950/60'
+                      : 'bg-slate-50/40 dark:bg-slate-900/40 hover:bg-slate-100/70 dark:hover:bg-slate-800/70 border-slate-200/70 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1.5">
                     {/* Station Name, Code & Badges */}
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-bold text-sm text-slate-900 dark:text-white">
                         {stop.stationName}
                       </span>
-                      <span className="font-mono text-xs font-semibold px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700">
+                      <span className="font-mono text-xs font-semibold px-1.5 py-0.5 rounded bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
                         {stop.stationCode}
                       </span>
 
                       {isOrigin && (
-                        <span className="text-[10px] font-semibold uppercase px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                        <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
                           Origin
                         </span>
                       )}
                       {isDestination && (
-                        <span className="text-[10px] font-semibold uppercase px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300">
+                        <span className="text-[10px] font-semibold uppercase px-1.5 py-0.5 rounded bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300">
                           Destination
                         </span>
                       )}
@@ -147,7 +178,7 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
                         </span>
                       )}
                       {isSelected && (
-                        <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-indigo-600 text-white">
+                        <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-600 text-white">
                           Selected for ETA
                         </span>
                       )}
@@ -204,7 +235,7 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
 
                   {/* Expanded Station Card */}
                   {isExpanded && (
-                    <div className="mt-3 p-3.5 rounded-lg bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700 text-xs space-y-2 animate-in fade-in-50 duration-150">
+                    <div className="mt-3 p-3.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs space-y-2 animate-in fade-in-50 duration-150">
                       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                         <div>
                           <span className="text-slate-400 dark:text-slate-500 block text-[10px] uppercase">

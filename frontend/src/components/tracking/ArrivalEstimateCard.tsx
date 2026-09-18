@@ -150,7 +150,7 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
       </div>
 
       {/* Location Context Bar */}
-      <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-800/40 -mx-6 -mb-6 p-4 px-6 sm:px-7 rounded-b-2xl">
+      <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-slate-600 dark:text-slate-400 bg-slate-50/50 dark:bg-slate-800/40 -mx-6 -mb-6 sm:-mx-7 sm:-mb-7 p-4 px-6 sm:px-7 rounded-b-2xl">
         <div className="flex items-center gap-2">
           <MapPin className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
           <span>

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSimulation } from '../../context/SimulationContext';
 import { ThemeToggle } from '../ui/ThemeToggle';
+import { TracklineLogo } from '../ui/TracklineLogo';
 import {
   Compass,
   Calendar,
@@ -44,18 +45,12 @@ export const TopNavigation: React.FC = () => {
           {/* Brand */}
           <div className="flex items-center gap-8">
             <Link to="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-lg bg-indigo-900 dark:bg-indigo-600 text-white flex items-center justify-center shadow-xs group-hover:bg-indigo-800 dark:group-hover:bg-indigo-500 transition-colors">
-                <div className="flex flex-col items-center justify-center gap-0.5">
-                  <div className="w-4 h-0.5 bg-blue-300 rounded-full" />
-                  <div className="w-4 h-0.5 bg-white rounded-full" />
-                  <div className="w-4 h-0.5 bg-blue-300 rounded-full" />
-                </div>
-              </div>
+              <TracklineLogo size="md" />
               <div>
                 <span className="font-extrabold tracking-tight text-slate-900 dark:text-white text-base">
                   TRACKLINE
                 </span>
-                <span className="hidden sm:inline-block text-[10px] uppercase font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100/80 dark:border-indigo-800/80 px-1.5 py-0.2 rounded ml-2">
+                <span className="hidden sm:inline-block text-[10px] uppercase font-semibold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100/80 dark:border-indigo-800/80 px-1.5 py-0.5 rounded ml-2">
                   Live
                 </span>
               </div>
@@ -79,7 +74,7 @@ export const TopNavigation: React.FC = () => {
                     <Icon className={`w-3.5 h-3.5 ${active ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`} />
                     <span>{link.label}</span>
                     {link.badge !== undefined && (
-                      <span className="ml-0.5 px-1.5 py-0.2 text-[10px] font-mono font-bold bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-full">
+                      <span className="ml-0.5 px-1.5 py-0.5 text-[10px] font-mono font-bold bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 rounded-full">
                         {link.badge}
                       </span>
                     )}

@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import CorridorMap from '../components/corridor/CorridorMap';
 import ControllerView from '../components/corridor/ControllerView';
 import AnalyticsView from '../components/corridor/AnalyticsView';
