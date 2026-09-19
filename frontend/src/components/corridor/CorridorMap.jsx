@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Polyline, CircleMarker, Marker, Popup, Tooltip, useMap, ZoomControl } from 'react-leaflet';
 import L from 'leaflet';
 import { AlertTriangle, Focus, MapPin, Compass, Layers, Radio } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 // Strict Corridor boundary limits (Delhi to Kanpur corridor focus)
 const CORRIDOR_BOUNDS = [
@@ -113,28 +114,32 @@ const CORRIDOR_SIGNALS = [
   { id: 'S-428', name: 'S-428', km: 428.0, lat: 26.4650, lng: 80.2200, sectionId: 'SEC-9', aspect: 'CLR' }
 ];
 
-// Signal Node Icon Generator (Aspect markers matching user snippet: S-xx [CLR], S-142 [CAUTION], S-150 [HOLD])
-const createSignalIcon = (signal) => {
+// Signal Node Icon Generator (Aspect markers adapting to light/dark themes)
+const createSignalIcon = (signal, isDark) => {
   let aspectBg = '#10B981'; // CLR (Green)
   let aspectText = signal.aspect || 'CLR';
-  let textColor = '#10B981';
+  let textColor = isDark ? '#34D399' : '#059669';
 
   if (aspectText === 'HOLD') {
     aspectBg = '#EF4444';
-    textColor = '#EF4444';
+    textColor = isDark ? '#F87171' : '#DC2626';
   } else if (aspectText === 'CAUTION') {
     aspectBg = '#F59E0B';
-    textColor = '#D97706';
+    textColor = isDark ? '#FBBF24' : '#D97706';
   }
+
+  const badgeBgClass = isDark
+    ? 'bg-[#0A0F1D]/95 border-slate-700/80 shadow-lg'
+    : 'bg-white/95 border-slate-200 shadow-xs';
 
   const html = `
     <div class="pointer-events-auto flex items-center space-x-1 -translate-x-1/2 -translate-y-1/2 cursor-pointer group select-none">
       <div class="relative w-3.5 h-3.5 flex items-center justify-center">
         ${aspectText === 'HOLD' ? `<div class="absolute inset-0 rounded-full bg-red-400 animate-ping opacity-75"></div>` : ''}
         ${aspectText === 'CAUTION' ? `<div class="absolute -inset-0.5 rounded-full border border-amber-400 opacity-80"></div>` : ''}
-        <div class="w-2 h-2 rounded-full shadow-xs border border-white" style="background-color: ${aspectBg};"></div>
+        <div class="w-2.5 h-2.5 rounded-full shadow-xs border ${isDark ? 'border-slate-800' : 'border-white'}" style="background-color: ${aspectBg};"></div>
       </div>
-      <span class="px-1 py-0.5 rounded text-[7.5px] font-mono font-bold bg-white/95 shadow-xs border border-slate-200" style="color: ${textColor};">
+      <span class="px-1 py-0.5 rounded text-[7.5px] font-mono font-bold border ${badgeBgClass}" style="color: ${textColor};">
         ${signal.name} [${aspectText}]
       </span>
     </div>
@@ -159,8 +164,8 @@ const calculateHeading = (fromLat, fromLng, toLat, toLng) => {
   return (brng + 360) % 360;
 };
 
-// Cyber-Tactical Moving Train Tracking Marker (Concentric GPS ripple radar waves, locomotive puck, headlight cone, status pill)
-const createUberTrainIcon = (train, isSelected) => {
+// Cyber-Tactical Moving Train Tracking Marker (Light/Dark adaptive pill, GPS radar waves, puck)
+const createUberTrainIcon = (train, isSelected, isDark) => {
   const isDelayed = (train.current_delay_min || 0) > 5;
   const delayMin = Math.round(train.current_delay_min || 0);
   const speed = Math.round(train.current_speed_kmh || 110);
@@ -172,37 +177,49 @@ const createUberTrainIcon = (train, isSelected) => {
     if (match) headingAngle = parseInt(match[1], 10);
   }
 
-  // Category Theme Colors matching user snippet and reference screenshot
+  // Category Theme Colors
   const cat = (train.category || '').toLowerCase();
   let vehicleColor = '#0284C7'; // Electric Sky Blue (High Speed default)
 
   if (cat.includes('vande')) {
-    vehicleColor = '#00F0FF'; // High-Speed Cyan
+    vehicleColor = isDark ? '#00F0FF' : '#0284C7'; // High-Speed Cyan
   } else if (cat.includes('shatabdi')) {
-    vehicleColor = '#0284C7'; // Electric Cyan / Blue
+    vehicleColor = isDark ? '#38BDF8' : '#0284C7'; // Electric Cyan / Blue
   } else if (cat.includes('rajdhani')) {
-    vehicleColor = '#E11D48'; // Rose Red
+    vehicleColor = isDark ? '#FB7185' : '#E11D48'; // Rose Red
   } else if (cat.includes('superfast')) {
-    vehicleColor = '#10B981'; // Commuter Emerald Green
+    vehicleColor = isDark ? '#34D399' : '#10B981'; // Commuter Emerald Green
   } else if (cat.includes('mail') || cat.includes('express')) {
-    vehicleColor = '#8B5CF6'; // Purple
+    vehicleColor = isDark ? '#A78BFA' : '#8B5CF6'; // Purple
   } else if (train.color) {
     vehicleColor = train.color;
   }
 
   const delayText = isDelayed ? `+${delayMin}m` : 'On Time';
-  const delayBadgeBg = isDelayed ? 'bg-rose-50 text-rose-600 border-rose-200' : 'bg-emerald-50 text-emerald-600 border-emerald-200';
+  
+  // Adaptive light/dark pill styling
+  const pillBgClass = isDark
+    ? 'bg-[#0A0F1D]/95 border-slate-700/80 shadow-xl text-white'
+    : 'bg-white/95 border-slate-200 shadow-md text-slate-800';
+
+  const trainNumColor = isDark ? 'text-white' : 'text-slate-800';
+  const speedColor = isDark ? 'text-slate-300' : 'text-slate-600';
+  const dotDividerColor = isDark ? 'text-slate-600' : 'text-slate-400';
+
+  const delayBadgeBg = isDelayed 
+    ? (isDark ? 'bg-rose-950/70 text-rose-300 border-rose-800/80' : 'bg-rose-50 text-rose-600 border-rose-200')
+    : (isDark ? 'bg-emerald-950/70 text-emerald-300 border-emerald-800/80' : 'bg-emerald-50 text-emerald-600 border-emerald-200');
 
   const html = `
     <div class="relative pointer-events-auto cursor-pointer group" style="width: 120px; height: 120px; margin-left: -60px; margin-top: -60px;">
       
-      <!-- 1. Floating Label Pill (#number • speed km/h • status) matching reference screenshot -->
-      <div class="absolute top-2 left-1/2 -translate-x-1/2 z-30 flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-white/95 backdrop-blur-md border border-slate-200 shadow-md shadow-slate-200/50 text-[10px] font-mono font-bold whitespace-nowrap transition-transform duration-200 group-hover:scale-105 pointer-events-auto">
+      <!-- 1. Floating Label Pill (#number • speed km/h • status) -->
+      <div class="absolute top-2 left-1/2 -translate-x-1/2 z-30 flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full backdrop-blur-md border ${pillBgClass} text-[10px] font-mono font-bold whitespace-nowrap transition-transform duration-200 group-hover:scale-105 pointer-events-auto">
         <span class="w-2 h-2 rounded-full" style="background-color: ${vehicleColor};"></span>
-        <span class="text-slate-800 font-extrabold">#${train.train_number}</span>
-        <span class="text-slate-400">•</span>
-        <span class="text-slate-600 font-medium">${speed} km/h</span>
-        <span class="text-slate-400">•</span>
+        <span class="${trainNumColor} font-extrabold">#${train.train_number}</span>
+        <span class="${dotDividerColor}">•</span>
+        <span class="${speedColor} font-medium">${speed} km/h</span>
+        <span class="${dotDividerColor}">•</span>
         <span class="px-1.5 py-0.5 rounded border text-[9px] ${delayBadgeBg}">${delayText}</span>
       </div>
 
@@ -215,11 +232,11 @@ const createUberTrainIcon = (train, isSelected) => {
         <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-12 h-12 rounded-full border-2 border-sky-400 bg-sky-400/20 animate-pulse shadow-[0_0_20px_rgba(2,132,199,0.7)] pointer-events-none"></div>
       ` : ''}
 
-      <!-- 4. Rotating Directional Group with Uber Headlight Beam Cone & Speed Vector Line -->
+      <!-- 4. Rotating Directional Group with Headlight Beam Cone & Speed Vector Line -->
       <div class="absolute left-1/2 top-1/2 w-0 h-0 pointer-events-none transition-transform duration-300" style="transform: rotate(${headingAngle}deg);">
-        <svg width="60" height="40" viewBox="-30 -20 60 40" class="overflow-visible" style="transform: translate(0, 0);">
+        <svg width="60" height="40" viewBox="-30 -20 60 40" class="overflow-visible">
           <!-- Forward Headlight Beam Cone -->
-          <path d="M 0,0 L 26,-9 A 28,28 0 0,1 26,9 Z" fill="${vehicleColor}" opacity="0.32"></path>
+          <path d="M 0,0 L 26,-9 A 28,28 0 0,1 26,9 Z" fill="${vehicleColor}" opacity="${isDark ? '0.45' : '0.32'}"></path>
           <!-- Direction Vector Line & Arrowhead -->
           <line x1="0" y1="0" x2="20" y2="0" stroke="${vehicleColor}" stroke-width="2.2" stroke-linecap="round" />
           <polygon points="24,0 18,-3.5 18,3.5" fill="${vehicleColor}" />
@@ -227,7 +244,7 @@ const createUberTrainIcon = (train, isSelected) => {
       </div>
 
       <!-- 5. Central Locomotive Puck (Tactical vehicle icon with train glyph) -->
-      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full border-2 border-white shadow-md flex items-center justify-center transition-transform duration-200 group-hover:scale-115 pointer-events-auto" style="background-color: ${vehicleColor}; box-shadow: 0 0 10px ${vehicleColor}80;">
+      <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-7 h-7 rounded-full border-2 ${isDark ? 'border-cyan-200' : 'border-white'} shadow-md flex items-center justify-center transition-transform duration-200 group-hover:scale-115 pointer-events-auto" style="background-color: ${vehicleColor}; box-shadow: 0 0 ${isDark ? '14px' : '8px'} ${vehicleColor}80;">
         <div class="w-4.5 h-4.5 rounded-full bg-[#0A0F1D] flex items-center justify-center">
           <!-- Clean Train Locomotive Icon -->
           <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -253,9 +270,15 @@ const createUberTrainIcon = (train, isSelected) => {
 };
 
 // Station Node Generator (Concentric rings matching 'Union Intermodal Hub / SkyRail Central' in reference)
-const createStationNodeIcon = (station) => {
+const createStationNodeIcon = (station, isDark) => {
   const isMajor = station.is_junction || station.tier === 1;
   const isTundlaHub = station.code === 'TDL';
+
+  const cardBgClass = isDark
+    ? 'bg-[#0A0F1D]/95 border-slate-700/80 shadow-2xl text-white'
+    : 'bg-white/95 border-slate-200 shadow-lg text-slate-800';
+
+  const nodeTargetBg = isDark ? 'bg-[#070B14]' : 'bg-white';
 
   if (isTundlaHub) {
     // Center Interchange Hub (Matching SkyRail Central in RailSync reference)
@@ -263,19 +286,19 @@ const createStationNodeIcon = (station) => {
       <div class="pointer-events-auto flex flex-col items-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group">
         <!-- Concentric Circular Target Node -->
         <div class="relative w-8 h-8 flex items-center justify-center">
-          <div class="absolute inset-0 rounded-full border-2 border-sky-400/40 animate-ping opacity-60"></div>
-          <div class="w-6 h-6 rounded-full border-2 border-[#0284C7] bg-white flex items-center justify-center shadow-md shadow-sky-500/20">
+          <div class="absolute inset-0 rounded-full border-2 border-sky-400/50 animate-ping opacity-60"></div>
+          <div class="w-6 h-6 rounded-full border-2 border-[#0284C7] ${nodeTargetBg} flex items-center justify-center shadow-md shadow-sky-500/20">
             <div class="w-2.5 h-2.5 rounded-full bg-[#0284C7]"></div>
           </div>
         </div>
 
         <!-- Floating Card Label (Matching 'SkyRail Central / Union Intermodal Hub' in reference) -->
-        <div class="mt-1 px-3 py-1 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-lg text-center whitespace-nowrap">
+        <div class="mt-1 px-3 py-1 rounded-xl backdrop-blur-md border ${cardBgClass} text-center whitespace-nowrap">
           <div class="flex items-center space-x-1 justify-center">
             <span class="w-1.5 h-1.5 rounded-full bg-purple-500"></span>
-            <span class="font-bold text-xs text-slate-800 tracking-tight">SkyRail Central (TDL)</span>
+            <span class="font-bold text-xs tracking-tight ${isDark ? 'text-white' : 'text-slate-800'}">SkyRail Central (TDL)</span>
           </div>
-          <span class="text-[9px] font-mono text-sky-600 font-semibold block">
+          <span class="text-[9px] font-mono text-sky-400 font-semibold block">
             INTERMODAL HUB • PLATFORM 3 • LIVE
           </span>
         </div>
@@ -293,13 +316,13 @@ const createStationNodeIcon = (station) => {
     const html = `
       <div class="pointer-events-auto flex flex-col items-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group">
         <!-- Concentric Target Ring -->
-        <div class="w-5 h-5 rounded-full border-2 border-[#0284C7] bg-white flex items-center justify-center shadow-sm group-hover:scale-125 transition">
-          <div class="w-2 h-2 rounded-full bg-[#0284C7]"></div>
+        <div class="w-5 h-5 rounded-full border-2 border-[#0284C7] ${nodeTargetBg} flex items-center justify-center shadow-sm group-hover:scale-125 transition">
+          <div class="w-2.5 h-2.5 rounded-full bg-[#0284C7]"></div>
         </div>
-        <!-- Light Clean Label -->
-        <div class="mt-1 px-2 py-0.5 rounded-md bg-white/90 border border-slate-200 shadow-sm text-center whitespace-nowrap">
-          <span class="font-extrabold text-[10px] font-mono text-slate-800">${station.name}</span>
-          <span class="text-[9px] font-mono text-slate-400 block">km ${station.km}</span>
+        <!-- Light/Dark Clean Label -->
+        <div class="mt-1 px-2 py-0.5 rounded-md border ${cardBgClass} text-center whitespace-nowrap">
+          <span class="font-extrabold text-[10px] font-mono ${isDark ? 'text-white' : 'text-slate-800'}">${station.name}</span>
+          <span class="text-[9px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-500'} block">km ${station.km}</span>
         </div>
       </div>
     `;
@@ -314,12 +337,12 @@ const createStationNodeIcon = (station) => {
     // Intermediate / Small Station (HRS, PHD, RURA, SKB)
     const html = `
       <div class="pointer-events-auto flex flex-col items-center -translate-x-1/2 -translate-y-1/2 cursor-pointer group">
-        <div class="w-3.5 h-3.5 rounded-full border-2 border-emerald-500 bg-white flex items-center justify-center shadow-sm group-hover:scale-125 transition">
+        <div class="w-3.5 h-3.5 rounded-full border-2 border-emerald-500 ${nodeTargetBg} flex items-center justify-center shadow-sm group-hover:scale-125 transition">
           <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
         </div>
-        <div class="mt-0.5 px-1.5 py-0.5 rounded bg-white/90 border border-slate-200 shadow-xs text-center whitespace-nowrap">
-          <span class="font-bold text-[9px] font-mono text-slate-700">${station.code}</span>
-          <span class="text-[8px] font-mono text-slate-400 block">${station.km}km</span>
+        <div class="mt-0.5 px-1.5 py-0.5 rounded border ${cardBgClass} shadow-xs text-center whitespace-nowrap">
+          <span class="font-bold text-[9px] font-mono ${isDark ? 'text-slate-200' : 'text-slate-700'}">${station.code}</span>
+          <span class="text-[8px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-400'} block">${station.km}km</span>
         </div>
       </div>
     `;
@@ -355,6 +378,15 @@ export default function CorridorMap({
   const [mapCenterState, setMapCenterState] = useState(CORRIDOR_CENTER);
   const [mapZoomState, setMapZoomState] = useState(DEFAULT_ZOOM);
 
+  // Read dark/light theme state
+  let isDark = false;
+  try {
+    const themeCtx = useTheme();
+    isDark = themeCtx?.theme === 'dark';
+  } catch {
+    isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  }
+
   // Build coordinate lines for each section
   const sectionPolylines = useMemo(() => {
     if (!stations.length || !sections.length) return [];
@@ -366,7 +398,7 @@ export default function CorridorMap({
       const sTo = stationMap.get(sec.to);
       if (!sFrom || !sTo) return null;
 
-      let color = "#0284C7"; // Vivid Sky Blue (High Speed)
+      let color = isDark ? "#38BDF8" : "#0284C7"; // High Speed Blue
       if (sec.occupancy_ratio > 0.85) {
         color = "#EF4444"; // Congested Rose Red
       } else if (sec.occupancy_ratio > 0.60) {
@@ -390,7 +422,7 @@ export default function CorridorMap({
         status: sec.status
       };
     }).filter(Boolean);
-  }, [stations, sections, disruptions]);
+  }, [stations, sections, disruptions, isDark]);
 
   // Map active sections to trains present for dynamic track illumination and colored sleepers
   const activeSectionMap = useMemo(() => {
@@ -420,14 +452,18 @@ export default function CorridorMap({
   };
 
   return (
-    <div className="relative w-full h-full min-h-[480px] overflow-hidden bg-[#F8FAFC]">
+    <div className={`relative w-full h-full min-h-[480px] overflow-hidden transition-colors duration-300 ${isDark ? 'bg-[#070B14]' : 'bg-[#F8FAFC]'}`}>
       
       {/* Floating Right Controls Stack (Matching reference icons) */}
       <div className="absolute top-20 right-4 z-[900] pointer-events-auto flex flex-col space-y-2">
         <button
           onClick={handleResetCorridor}
           title="Re-Center Corridor"
-          className="w-10 h-10 rounded-2xl bg-white border border-slate-200 hover:border-sky-500/50 shadow-md shadow-slate-200/50 flex items-center justify-center text-slate-700 hover:text-sky-600 transition active:scale-95"
+          className={`w-10 h-10 rounded-2xl border flex items-center justify-center transition active:scale-95 shadow-md ${
+            isDark
+              ? 'bg-[#0A0F1D]/90 border-slate-700/80 text-cyan-400 hover:text-cyan-300 hover:bg-cyan-950/40 shadow-2xl'
+              : 'bg-white border-slate-200 text-slate-700 hover:text-sky-600 hover:border-sky-500/50 shadow-slate-200/50'
+          }`}
         >
           <Compass className="w-5 h-5" />
         </button>
@@ -435,6 +471,7 @@ export default function CorridorMap({
 
       {/* The Leaflet Map Canvas */}
       <MapContainer
+        key={isDark ? 'map-dark' : 'map-light'}
         center={CORRIDOR_CENTER}
         zoom={DEFAULT_ZOOM}
         minZoom={7}
@@ -443,75 +480,99 @@ export default function CorridorMap({
         maxBoundsViscosity={1.0}
         scrollWheelZoom={true}
         zoomControl={false}
-        style={{ width: '100%', height: '100%', background: '#F8FAFC' }}
+        style={{ width: '100%', height: '100%', background: isDark ? '#070B14' : '#F8FAFC' }}
         attributionControl={false}
       >
         <ZoomControl position="topright" />
         <ChangeMapView center={mapCenterState} zoom={mapZoomState} />
 
-        {/* Crisp Pristine Light Gray Vector Base Canvas (Zero Watermarks) */}
+        {/* Vector Base Canvas (Light Gray for Light Theme, Dark Canvas for Dark Theme) */}
         <TileLayer
-          url="https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+          key={isDark ? 'tiles-base-dark' : 'tiles-base-light'}
+          url={
+            isDark
+              ? "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+              : "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}"
+          }
           maxZoom={16}
         />
-        {/* Subtle Light Labels Overlay */}
+        {/* Subtle Labels Overlay */}
         <TileLayer
-          url="https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+          key={isDark ? 'tiles-ref-dark' : 'tiles-ref-light'}
+          url={
+            isDark
+              ? "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+              : "https://services.arcgisonline.com/arcgis/rest/services/Canvas/World_Light_Gray_Reference/MapServer/tile/{z}/{y}/{x}"
+          }
           maxZoom={16}
-          opacity={0.65}
+          opacity={isDark ? 0.75 : 0.65}
         />
 
-        {/* 1. SOFT POWDER-BLUE RIVER CORRIDOR (Matching river in RailSync reference) */}
+        {/* 1. YAMUNA RIVER CORRIDOR (Matching river in reference) */}
         <Polyline
           positions={YAMUNA_RIVER_PATH}
           pathOptions={{
-            color: '#BAE6FD',
-            weight: 22,
-            opacity: 0.7,
+            color: isDark ? '#0369A1' : '#BAE6FD',
+            weight: isDark ? 24 : 22,
+            opacity: isDark ? 0.45 : 0.7,
             lineCap: 'round',
             lineJoin: 'round'
           }}
         >
           <Tooltip sticky>
-            <div className="text-[10px] font-mono text-sky-700 font-bold">
+            <div className={`text-[10px] font-mono font-bold ${isDark ? 'text-cyan-300' : 'text-sky-700'}`}>
               🌊 YAMUNA RIVER CORRIDOR
             </div>
           </Tooltip>
         </Polyline>
 
-        {/* 2. SECONDARY COMMUTER RAIL LINES (Emerald Green tracks in RailSync reference) */}
+        {/* River Dashed Flow Centerline in Dark Mode */}
+        {isDark && (
+          <Polyline
+            positions={YAMUNA_RIVER_PATH}
+            pathOptions={{
+              color: '#06B6D4',
+              weight: 2,
+              opacity: 0.6,
+              dashArray: '6, 10',
+              lineCap: 'round'
+            }}
+          />
+        )}
+
+        {/* 2. SECONDARY COMMUTER RAIL LINES (Emerald Green tracks in reference) */}
         {COMMUTER_RAIL_LINES.map((line) => (
           <Polyline
             key={line.id}
             positions={line.positions}
             pathOptions={{
-              color: line.color,
+              color: isDark ? '#34D399' : line.color,
               weight: 3.5,
               opacity: 0.85
             }}
           >
             <Tooltip sticky>
-              <div className="text-[10px] font-mono text-emerald-800 font-bold">
+              <div className="text-[10px] font-mono text-emerald-500 font-bold">
                 🚆 {line.name}
               </div>
             </Tooltip>
           </Polyline>
         ))}
 
-        {/* 3. ORBITAL METRO LOOP (Dashed Purple Ring around Tundla Hub in RailSync reference) */}
+        {/* 3. ORBITAL METRO LOOP (Dashed Purple Ring around Tundla Hub in reference) */}
         {ORBITAL_METRO_LOOP.map((loop) => (
           <Polyline
             key={loop.id}
             positions={loop.positions}
             pathOptions={{
-              color: '#8B5CF6',
+              color: isDark ? '#A78BFA' : '#8B5CF6',
               weight: 2,
               opacity: 0.8,
               dashArray: '5, 6'
             }}
           >
             <Tooltip sticky>
-              <div className="text-[10px] font-mono text-purple-700 font-bold">
+              <div className="text-[10px] font-mono text-purple-400 font-bold">
                 🔄 {loop.name}
               </div>
             </Tooltip>
@@ -520,15 +581,15 @@ export default function CorridorMap({
 
         {/* 4. DYNAMIC ILLUMINATED RAILWAY TRACK CORRIDOR (uber-track-system from snippet) */}
         
-        {/* Layer 4a: Foundation Ballast Bed (Dark casing along full corridor) */}
+        {/* Layer 4a: Foundation Ballast Bed (Casing along full corridor) */}
         {sectionPolylines.map((line) => (
           <Polyline
             key={`bed-${line.id}`}
             positions={line.positions}
             pathOptions={{
-              color: '#0F172A',
-              weight: 12,
-              opacity: 0.18,
+              color: isDark ? '#050810' : '#0F172A',
+              weight: isDark ? 14 : 12,
+              opacity: isDark ? 0.75 : 0.18,
               lineCap: 'round',
               lineJoin: 'round'
             }}
@@ -543,7 +604,7 @@ export default function CorridorMap({
             pathOptions={{
               color: '#EF4444',
               weight: 18,
-              opacity: 0.4,
+              opacity: isDark ? 0.55 : 0.4,
               lineCap: 'round'
             }}
           />
@@ -556,11 +617,11 @@ export default function CorridorMap({
           let trackThemeColor = activeTrain?.color || line.color;
           if (activeTrain) {
             const cat = (activeTrain.category || '').toLowerCase();
-            if (cat.includes('vande')) trackThemeColor = '#00F0FF';
-            else if (cat.includes('shatabdi')) trackThemeColor = '#0284C7';
-            else if (cat.includes('rajdhani')) trackThemeColor = '#E11D48';
-            else if (cat.includes('superfast')) trackThemeColor = '#10B981';
-            else if (cat.includes('mail') || cat.includes('express')) trackThemeColor = '#8B5CF6';
+            if (cat.includes('vande')) trackThemeColor = isDark ? '#00F0FF' : '#0284C7';
+            else if (cat.includes('shatabdi')) trackThemeColor = isDark ? '#38BDF8' : '#0284C7';
+            else if (cat.includes('rajdhani')) trackThemeColor = isDark ? '#FB7185' : '#E11D48';
+            else if (cat.includes('superfast')) trackThemeColor = isDark ? '#34D399' : '#10B981';
+            else if (cat.includes('mail') || cat.includes('express')) trackThemeColor = isDark ? '#A78BFA' : '#8B5CF6';
           }
 
           return (
@@ -572,7 +633,7 @@ export default function CorridorMap({
                   pathOptions={{
                     color: trackThemeColor,
                     weight: 12,
-                    opacity: 0.45,
+                    opacity: isDark ? 0.55 : 0.45,
                     lineCap: 'round'
                   }}
                 />
@@ -581,9 +642,9 @@ export default function CorridorMap({
               <Polyline
                 positions={line.positions}
                 pathOptions={{
-                  color: activeTrain ? '#0F172A' : '#475569',
+                  color: activeTrain ? (isDark ? '#070B14' : '#0F172A') : (isDark ? '#334155' : '#475569'),
                   weight: activeTrain ? 10 : 6,
-                  opacity: activeTrain ? 0.9 : 0.45,
+                  opacity: activeTrain ? 0.95 : (isDark ? 0.6 : 0.45),
                   dashArray: activeTrain ? '3, 6' : '2, 7',
                   className: 'sleeper-track'
                 }}
@@ -606,9 +667,9 @@ export default function CorridorMap({
           >
             <Tooltip sticky>
               <div className="text-xs font-sans p-1">
-                <p className="font-bold text-slate-900">{line.from} ➔ {line.to}</p>
-                <p className="text-slate-500">
-                  Occupancy: <span className="font-mono text-sky-600 font-bold">{Math.round(line.occupancy * 100)}%</span> ({line.status})
+                <p className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{line.from} ➔ {line.to}</p>
+                <p className={isDark ? 'text-slate-400' : 'text-slate-500'}>
+                  Occupancy: <span className="font-mono text-sky-400 font-bold">{Math.round(line.occupancy * 100)}%</span> ({line.status})
                 </p>
               </div>
             </Tooltip>
@@ -621,9 +682,9 @@ export default function CorridorMap({
             key={`flow-${line.id}`}
             positions={line.positions}
             pathOptions={{
-              color: '#38BDF8',
+              color: isDark ? '#00F0FF' : '#38BDF8',
               weight: 3,
-              opacity: 0.85,
+              opacity: isDark ? 0.9 : 0.85,
               dashArray: '8, 8',
               className: 'animated-route-flow'
             }}
@@ -638,12 +699,12 @@ export default function CorridorMap({
             pathOptions={{
               color: loop.color,
               weight: 2,
-              opacity: 0.8,
+              opacity: 0.85,
               dashArray: '4, 4'
             }}
           >
             <Tooltip sticky>
-              <div className="text-[10px] font-mono text-slate-700 font-bold">
+              <div className="text-[10px] font-mono text-slate-400 font-bold">
                 🔀 {loop.name}
               </div>
             </Tooltip>
@@ -655,12 +716,12 @@ export default function CorridorMap({
           <Marker
             key={`sig-${sig.id}`}
             position={[sig.lat, sig.lng]}
-            icon={createSignalIcon(sig)}
+            icon={createSignalIcon(sig, isDark)}
           >
             <Tooltip sticky>
               <div className="text-[10px] font-mono p-0.5 space-y-0.5">
-                <p className="font-bold text-slate-800">Signal {sig.name}</p>
-                <p className="text-slate-500">Section: {sig.sectionId} • km {sig.km}</p>
+                <p className={`font-bold ${isDark ? 'text-white' : 'text-slate-800'}`}>Signal {sig.name}</p>
+                <p className={isDark ? 'text-slate-400' : 'text-slate-500'}>Section: {sig.sectionId} • km {sig.km}</p>
                 <p className="font-bold" style={{ color: sig.aspect === 'HOLD' ? '#EF4444' : sig.aspect === 'CAUTION' ? '#F59E0B' : '#10B981' }}>
                   Aspect: {sig.aspect}
                 </p>
@@ -674,16 +735,16 @@ export default function CorridorMap({
           <Marker
             key={`st-${st.code}`}
             position={[st.lat, st.lng]}
-            icon={createStationNodeIcon(st)}
+            icon={createStationNodeIcon(st, isDark)}
           >
             <Popup>
               <div className="p-1 font-sans text-xs space-y-1">
-                <p className="font-bold text-sm text-slate-900 flex items-center space-x-1.5">
-                  <MapPin className="w-3.5 h-3.5 text-sky-600" />
+                <p className="font-bold text-sm text-slate-900 dark:text-white flex items-center space-x-1.5">
+                  <MapPin className="w-3.5 h-3.5 text-sky-500" />
                   <span>{st.name} ({st.code})</span>
                 </p>
-                <p className="text-slate-600">Corridor KM: <span className="font-mono font-bold text-slate-900">{st.km} km</span></p>
-                <p className="text-slate-600">Platforms: <span className="font-mono font-bold text-slate-900">{st.platforms}</span></p>
+                <p className="text-slate-600 dark:text-slate-300">Corridor KM: <span className="font-mono font-bold text-slate-900 dark:text-white">{st.km} km</span></p>
+                <p className="text-slate-600 dark:text-slate-300">Platforms: <span className="font-mono font-bold text-slate-900 dark:text-white">{st.platforms}</span></p>
               </div>
             </Popup>
           </Marker>
@@ -696,27 +757,27 @@ export default function CorridorMap({
             <Marker
               key={train.train_number}
               position={[train.lat, train.lng]}
-              icon={createUberTrainIcon(train, isSelected)}
+              icon={createUberTrainIcon(train, isSelected, isDark)}
               eventHandlers={{
                 click: () => onSelectTrain(train.train_number)
               }}
             >
               <Popup>
                 <div className="p-2 font-sans text-xs space-y-2 min-w-[200px]">
-                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200">
+                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-200 dark:border-slate-700">
                     <div>
-                      <h4 className="font-bold text-sm text-slate-900">{train.train_name}</h4>
-                      <span className="font-mono text-[11px] text-slate-500">#{train.train_number} • {train.category}</span>
+                      <h4 className="font-bold text-sm text-slate-900 dark:text-white">{train.train_name}</h4>
+                      <span className="font-mono text-[11px] text-slate-500 dark:text-slate-400">#{train.train_number} • {train.category}</span>
                     </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-1.5 text-slate-700 pt-1">
+                  <div className="grid grid-cols-2 gap-1.5 text-slate-700 dark:text-slate-300 pt-1">
                     <div>
-                      <span className="text-[10px] text-slate-500 uppercase block">Velocity</span>
-                      <span className="font-mono font-bold text-sky-600">{Math.round(train.current_speed_kmh)} km/h</span>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase block">Velocity</span>
+                      <span className="font-mono font-bold text-sky-500">{Math.round(train.current_speed_kmh)} km/h</span>
                     </div>
                     <div>
-                      <span className="text-[10px] text-slate-500 uppercase block">Status</span>
-                      <span className={`font-mono font-bold ${train.current_delay_min > 5 ? 'text-rose-600' : 'text-emerald-600'}`}>
+                      <span className="text-[10px] text-slate-500 dark:text-slate-400 uppercase block">Status</span>
+                      <span className={`font-mono font-bold ${train.current_delay_min > 5 ? 'text-rose-500' : 'text-emerald-500'}`}>
                         {train.current_delay_min > 5 ? `+${Math.round(train.current_delay_min)}m` : 'On Time'}
                       </span>
                     </div>

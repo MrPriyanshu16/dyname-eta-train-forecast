@@ -1,0 +1,11 @@
+code,name,km,lat,lng,platforms,is_junction,tier,zone,division
+NDLS,New Delhi,0.0,28.6429,77.2195,16,True,1,NR,DLI
+GZB,Ghaziabad Jn,25.6,28.6679,77.4326,6,True,1,NR,DLI
+ALJN,Aligarh Jn,126.0,27.8974,78.088,7,True,1,NCR,PRYJ
+HRS,Hathras Jn,157.0,27.6019,78.056,3,False,2,NCR,PRYJ
+TDL,Tundla Jn,204.2,27.2081,78.2393,5,True,1,NCR,PRYJ
+SKB,Shikohabad Jn,244.0,27.1085,78.584,3,False,2,NCR,PRYJ
+ETW,Etawah Jn,297.0,26.7725,79.0306,5,True,1,NCR,PRYJ
+PHD,Phaphund,355.0,26.5612,79.4625,2,False,2,NCR,PRYJ
+RURA,Rura,396.0,26.4915,79.9012,2,False,2,NCR,PRYJ
+CNB,Kanpur Central,440.3,26.4542,80.3507,10,True,1,NCR,PRYJ

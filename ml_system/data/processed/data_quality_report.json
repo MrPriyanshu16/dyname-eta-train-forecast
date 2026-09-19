@@ -1,0 +1,30 @@
+{
+  "total_records": 36669,
+  "valid_records": 36669,
+  "removed_records": 0,
+  "duplicate_percentage": 0.0,
+  "missing_value_percentage": 0.0,
+  "unique_trains": 12,
+  "unique_stations": 10,
+  "date_range": {
+    "start": "2025-01-01",
+    "end": "2025-06-29"
+  },
+  "chronological_split": {
+    "train_records": 25668,
+    "train_date_range": [
+      "2025-01-01",
+      "2025-05-06"
+    ],
+    "val_records": 5500,
+    "val_date_range": [
+      "2025-05-06",
+      "2025-06-03"
+    ],
+    "test_records": 5501,
+    "test_date_range": [
+      "2025-06-02",
+      "2025-06-29"
+    ]
+  }
+}

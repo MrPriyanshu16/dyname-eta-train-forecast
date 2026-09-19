@@ -29,11 +29,21 @@ const SimulationContext = createContext<SimulationContextType | undefined>(undef
 const SAVED_TRAINS_KEY = 'trackline_saved_trains_v1';
 const RECENT_SEARCHES_KEY = 'trackline_recent_searches_v1';
 
+import { getCurrentISTString } from '../utils/time';
+
 export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [trains, setTrains] = useState<Train[]>(INITIAL_TRAINS);
-  const [simulatedTime, setSimulatedTime] = useState<string>('10:42 AM');
+  const [simulatedTime, setSimulatedTime] = useState<string>(() => getCurrentISTString());
   const [activeScenarioId, setActiveScenarioId] = useState<string>('scenario-c'); // Default to Mumbai Rajdhani at Kota
   const [selectedTargetStations, setSelectedTargetStations] = useState<Record<string, string>>({});
+
+  // Continuously sync with live India time every 10 seconds if not manually adjusted
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSimulatedTime(getCurrentISTString());
+    }, 10000);
+    return () => clearInterval(timer);
+  }, []);
 
   // Saved trains in localStorage
   const [savedTrainIds, setSavedTrainIds] = useState<string[]>(() => {

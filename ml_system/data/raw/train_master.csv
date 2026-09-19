@@ -1,0 +1,13 @@
+train_number,train_name,train_type,priority_tier,zone,origin,destination,mps_kmh,scheduled_departure,num_stops
+22436,Vande Bharat Express,Vande Bharat,1,NR,NDLS,BSB,130,06:00,2
+12302,Howrah Rajdhani Express,Rajdhani,1,ER,NDLS,HWH,130,16:50,2
+12004,Lucknow Shatabdi Express,Shatabdi,2,NR,NDLS,LKO,130,06:10,7
+12566,Bihar Sampark Kranti Express,Superfast,3,ECR,NDLS,DBG,110,13:00,5
+12418,Prayagraj Express,Superfast,3,NCR,NDLS,PRYJ,130,22:10,4
+14218,Unchahar Express,Express,4,NR,CDG,PYGS,100,21:30,10
+12876,Neelachal Express,Superfast,3,ECoR,ANVT,PURI,110,07:30,6
+12398,Mahabodhi Express,Superfast,3,ECR,NDLS,GAYA,130,12:50,3
+12461,Mandore Superfast Express,Superfast,3,NWR,DLI,JU,110,21:15,5
+54308,Delhi - Aligarh Passenger,Passenger,5,NR,NDLS,ALJN,75,05:45,3
+64582,Tundla - Kanpur MEMU,MEMU,5,NCR,TDL,CNB,80,06:15,6
+64102,Delhi - Ghaziabad Suburban EMU,Suburban,5,NR,NDLS,GZB,70,08:00,2
