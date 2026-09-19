@@ -38,28 +38,24 @@ def clean_and_profile_data():
     clean_df = df[~removal_mask].copy()
     valid_records = len(clean_df)
     
-    # Sort chronologically by journey_date and sequence
-    clean_df['journey_date_dt'] = pd.to_datetime(clean_df['journey_date'])
-    clean_df = clean_df.sort_values(by=['journey_date_dt', 'journey_id', 'station_sequence']).reset_index(drop=True)
+    # Sort chronologically strictly by observation_timestamp
+    clean_df['obs_dt'] = pd.to_datetime(clean_df['observation_timestamp'], format='ISO8601')
+    clean_df = clean_df.sort_values(by=['obs_dt', 'journey_id', 'station_sequence']).reset_index(drop=True)
     
-    # Chronological Train / Val / Test Split (Strict non-leaking time series split)
-    unique_dates = np.sort(clean_df['journey_date_dt'].unique())
-    n_dates = len(unique_dates)
-    train_end_idx = int(0.70 * n_dates)
-    val_end_idx = int(0.85 * n_dates)
+    # Chronological Train / Val / Test Split (Strict point-in-time time series split: 70% / 15% / 15%)
+    n_records = len(clean_df)
+    train_end_idx = int(0.70 * n_records)
+    val_end_idx = int(0.85 * n_records)
     
-    train_cutoff = unique_dates[train_end_idx]
-    val_cutoff = unique_dates[val_end_idx]
-    
-    train_df = clean_df[clean_df['journey_date_dt'] < train_cutoff].copy()
-    val_df = clean_df[(clean_df['journey_date_dt'] >= train_cutoff) & (clean_df['journey_date_dt'] < val_cutoff)].copy()
-    test_df = clean_df[clean_df['journey_date_dt'] >= val_cutoff].copy()
+    train_df = clean_df.iloc[:train_end_idx].copy()
+    val_df = clean_df.iloc[train_end_idx:val_end_idx].copy()
+    test_df = clean_df.iloc[val_end_idx:].copy()
     
     # Drop temporary datetime sorting col
-    clean_df.drop(columns=['journey_date_dt'], inplace=True)
-    train_df.drop(columns=['journey_date_dt'], inplace=True)
-    val_df.drop(columns=['journey_date_dt'], inplace=True)
-    test_df.drop(columns=['journey_date_dt'], inplace=True)
+    clean_df.drop(columns=['obs_dt'], inplace=True)
+    train_df.drop(columns=['obs_dt'], inplace=True)
+    val_df.drop(columns=['obs_dt'], inplace=True)
+    test_df.drop(columns=['obs_dt'], inplace=True)
     
     # Save splits
     clean_df.to_csv(PROCESSED_DATA_DIR / 'cleaned_dataset.csv', index=False)

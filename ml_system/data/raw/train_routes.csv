@@ -38,3 +38,19 @@ train_number,station_code,station_name,station_sequence,distance_from_origin,sch
 12398,NDLS,New Delhi,1,0.0,--:--,12:50,0
 12398,ALJN,Aligarh Jn,2,126.0,14:19,14:29,10
 12398,CNB,Kanpur Central,3,440.3,18:11,--:--,0
+12461,NDLS,New Delhi,1,0.0,--:--,21:15,0
+12461,GZB,Ghaziabad Jn,2,25.6,21:33,21:43,10
+12461,ALJN,Aligarh Jn,3,126.0,22:54,23:04,10
+12461,TDL,Tundla Jn,4,204.2,23:59,00:09,10
+12461,CNB,Kanpur Central,5,440.3,02:56,--:--,0
+54308,NDLS,New Delhi,1,0.0,--:--,05:45,0
+54308,GZB,Ghaziabad Jn,2,25.6,06:03,06:13,10
+54308,ALJN,Aligarh Jn,3,126.0,07:24,--:--,0
+64582,TDL,Tundla Jn,1,204.2,--:--,06:15,0
+64582,SKB,Shikohabad Jn,2,244.0,06:43,06:45,2
+64582,ETW,Etawah Jn,3,297.0,07:22,07:32,10
+64582,PHD,Phaphund,4,355.0,08:13,08:15,2
+64582,RURA,Rura,5,396.0,08:44,08:46,2
+64582,CNB,Kanpur Central,6,440.3,09:17,--:--,0
+64102,NDLS,New Delhi,1,0.0,--:--,08:00,0
+64102,GZB,Ghaziabad Jn,2,25.6,08:18,--:--,0

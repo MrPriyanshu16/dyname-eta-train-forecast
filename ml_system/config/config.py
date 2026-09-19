@@ -140,6 +140,54 @@ CORRIDOR_TRAINS = [
         'mps_kmh': 130,
         'scheduled_departure_time': '12:50',
         'stops': ['NDLS', 'ALJN', 'CNB']
+    },
+    {
+        'train_number': '12461',
+        'train_name': 'Mandore Superfast Express',
+        'train_type': 'Superfast',
+        'priority_tier': 3,
+        'zone': 'NWR',
+        'origin': 'DLI',
+        'destination': 'JU',
+        'mps_kmh': 110,
+        'scheduled_departure_time': '21:15',
+        'stops': ['NDLS', 'GZB', 'ALJN', 'TDL', 'CNB']
+    },
+    {
+        'train_number': '54308',
+        'train_name': 'Delhi - Aligarh Passenger',
+        'train_type': 'Passenger',
+        'priority_tier': 5,
+        'zone': 'NR',
+        'origin': 'NDLS',
+        'destination': 'ALJN',
+        'mps_kmh': 75,
+        'scheduled_departure_time': '05:45',
+        'stops': ['NDLS', 'GZB', 'ALJN']
+    },
+    {
+        'train_number': '64582',
+        'train_name': 'Tundla - Kanpur MEMU',
+        'train_type': 'MEMU',
+        'priority_tier': 5,
+        'zone': 'NCR',
+        'origin': 'TDL',
+        'destination': 'CNB',
+        'mps_kmh': 80,
+        'scheduled_departure_time': '06:15',
+        'stops': ['TDL', 'SKB', 'ETW', 'PHD', 'RURA', 'CNB']
+    },
+    {
+        'train_number': '64102',
+        'train_name': 'Delhi - Ghaziabad Suburban EMU',
+        'train_type': 'Suburban',
+        'priority_tier': 5,
+        'zone': 'NR',
+        'origin': 'NDLS',
+        'destination': 'GZB',
+        'mps_kmh': 70,
+        'scheduled_departure_time': '08:00',
+        'stops': ['NDLS', 'GZB']
     }
 ]
 

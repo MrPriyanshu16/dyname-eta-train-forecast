@@ -121,9 +121,14 @@ def generate_historical_runs(n_trips=8000):
         journey_id = f'JRN-{d_str}-{train_num}-{trip_idx:05d}'
         trip_records = []
 
+        origin_km = station_lookup[stops[0]]['km']
+        dest_km = station_lookup[stops[-1]]['km']
+
         for seq, code in enumerate(stops, start=1):
             sta = station_lookup[code]
             dist = sta['km']
+            dist_from_orig = max(0.0, round(dist - origin_km, 1))
+            dist_rem = max(0.0, round(dest_km - dist, 1))
             if seq == 1:
                 trip_records.append({
                     'journey_id': journey_id,
@@ -133,8 +138,8 @@ def generate_historical_runs(n_trips=8000):
                     'priority_tier': p_tier,
                     'station_code': code,
                     'station_sequence': seq,
-                    'distance_from_origin': dist,
-                    'distance_remaining': 440.3 - dist,
+                    'distance_from_origin': dist_from_orig,
+                    'distance_remaining': dist_rem,
                     'sched_clock': sched_clock,
                     'actual_clock': actual_clock,
                     'scheduled_arrival': '--:--',
@@ -198,8 +203,8 @@ def generate_historical_runs(n_trips=8000):
                     'priority_tier': p_tier,
                     'station_code': code,
                     'station_sequence': seq,
-                    'distance_from_origin': dist,
-                    'distance_remaining': 440.3 - dist,
+                    'distance_from_origin': dist_from_orig,
+                    'distance_remaining': dist_rem,
                     'sched_clock': sched_clock,
                     'actual_clock': actual_clock,
                     'scheduled_arrival': sched_clock.strftime('%H:%M'),
@@ -220,6 +225,7 @@ def generate_historical_runs(n_trips=8000):
         dest_actual_time = trip_records[-1]['actual_clock']
         for i, rec in enumerate(trip_records):
             curr_actual = rec['actual_clock']
+            rec['observation_timestamp'] = curr_actual.isoformat()
             rec['target_remaining_time_to_destination'] = max(0.0, round((dest_actual_time - curr_actual).total_seconds() / 60.0, 2))
             if i < len(trip_records) - 1:
                 next_actual = trip_records[i + 1]['actual_clock']

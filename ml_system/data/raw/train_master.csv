@@ -7,3 +7,7 @@ train_number,train_name,train_type,priority_tier,zone,origin,destination,mps_kmh
 14218,Unchahar Express,Express,4,NR,CDG,PYGS,100,21:30,10
 12876,Neelachal Express,Superfast,3,ECoR,ANVT,PURI,110,07:30,6
 12398,Mahabodhi Express,Superfast,3,ECR,NDLS,GAYA,130,12:50,3
+12461,Mandore Superfast Express,Superfast,3,NWR,DLI,JU,110,21:15,5
+54308,Delhi - Aligarh Passenger,Passenger,5,NR,NDLS,ALJN,75,05:45,3
+64582,Tundla - Kanpur MEMU,MEMU,5,NCR,TDL,CNB,80,06:15,6
+64102,Delhi - Ghaziabad Suburban EMU,Suburban,5,NR,NDLS,GZB,70,08:00,2

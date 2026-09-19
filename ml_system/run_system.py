@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import uvicorn
 from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 def run_pipeline(stage: str):
     print(f"\n=======================================================")

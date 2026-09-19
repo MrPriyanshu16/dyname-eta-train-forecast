@@ -167,3 +167,104 @@ def get_model_explainability():
             {"driver": "Diurnal Time Pattern (Hour of Day)", "weight_pct": 1.6, "impact": "Peak junction congestion periods"}
         ]
     }
+
+@app.get("/api/trains")
+def search_master_trains(search: Optional[str] = None, category: Optional[str] = None, page: int = 1, limit: int = 50):
+    """
+    Search across all trains present in the verified master database (5,208 train entities).
+    Supports filtering by train number, train name, origin/destination, and category.
+    """
+    import sqlite3
+    db_path = "ml_system/data/railway_master.db"
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    
+    query = "SELECT train_number, train_name, train_type, normalized_category, from_station_code, to_station_code, departure_time, arrival_time, distance_km, zone FROM trains WHERE 1=1"
+    params = []
+    
+    if search:
+        s = f"%{search.strip()}%"
+        query += " AND (train_number LIKE ? OR train_name LIKE ? OR from_station_code LIKE ? OR to_station_code LIKE ?)"
+        params.extend([s, s, s, s])
+        
+    if category and category.upper() != "ALL":
+        query += " AND normalized_category = ?"
+        params.append(category)
+        
+    # Count total
+    count_query = query.replace("SELECT train_number, train_name, train_type, normalized_category, from_station_code, to_station_code, departure_time, arrival_time, distance_km, zone", "SELECT COUNT(1)")
+    total = cur.execute(count_query, params).fetchone()[0]
+    
+    # Paginate
+    offset = (page - 1) * limit
+    query += " ORDER BY train_number ASC LIMIT ? OFFSET ?"
+    params.extend([limit, offset])
+    
+    rows = cur.execute(query, params).fetchall()
+    conn.close()
+    
+    items = []
+    for r in rows:
+        items.append({
+            "train_number": r[0],
+            "train_name": r[1],
+            "train_type": r[2],
+            "category": r[3],
+            "origin": r[4],
+            "destination": r[5],
+            "departure": r[6],
+            "arrival": r[7],
+            "distance_km": r[8],
+            "zone": r[9]
+        })
+        
+    return {
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "trains": items
+    }
+
+@app.get("/api/system/data-status")
+def get_data_status():
+    """
+    Returns data provenance, dynamic record counts, and active operational mode.
+    """
+    import sqlite3
+    db_path = "ml_system/data/railway_master.db"
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+    
+    t_count = cur.execute("SELECT COUNT(1) FROM trains").fetchone()[0]
+    s_count = cur.execute("SELECT COUNT(1) FROM stations").fetchone()[0]
+    delays_count = cur.execute("SELECT COUNT(1) FROM train_station_delays").fetchone()[0]
+    
+    cats = {}
+    for r in cur.execute("SELECT normalized_category, COUNT(1) FROM trains GROUP BY normalized_category"):
+        cats[r[0]] = r[1]
+    conn.close()
+    
+    return {
+        "status": "HEALTHY",
+        "data_mode": "HISTORICAL_REPLAY",
+        "data_provenance": {
+            "master_source": "DataMeet Indian Railways Open Repository (CC0)",
+            "historical_delay_source": "Indian Railway Delay Visualization (adityaazad79 / NTES Crawl)",
+            "total_master_trains": t_count,
+            "total_master_stations": s_count,
+            "total_station_delay_records": delays_count,
+            "category_distribution": cats
+        }
+    }
+
+@app.get("/api/reports/summary")
+def get_reports_summary():
+    """
+    Returns the latest model benchmark comparisons, baseline metrics, and uncertainty calibration summary.
+    """
+    meta_path = MODELS_DIR / "model_metadata.json"
+    if not meta_path.exists():
+        raise HTTPException(status_code=404, detail="Model metadata report not found. Run training first.")
+    with open(meta_path, "r", encoding="utf-8") as f:
+        meta = json.load(f)
+    return meta

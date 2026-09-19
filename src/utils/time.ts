@@ -1,6 +1,44 @@
 /**
- * Utility functions for time arithmetic, parsing, and tabular formatting.
+ * Returns the current live India Standard Time (IST, UTC+5:30) as a formatted string e.g. "10:46 PM"
  */
+export function getCurrentISTString(): string {
+  try {
+    return new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: true
+    }).format(new Date());
+  } catch {
+    const d = new Date();
+    // Fallback to manual UTC+5:30 offset
+    const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
+    const istDate = new Date(utc + (3600000 * 5.5));
+    let hours = istDate.getHours();
+    const minutes = istDate.getMinutes();
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+  }
+}
+
+export function getCurrentISTMinutes(): number {
+  try {
+    const parts = new Intl.DateTimeFormat('en-IN', {
+      timeZone: 'Asia/Kolkata',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false
+    }).formatToParts(new Date());
+    const hr = parseInt(parts.find(p => p.type === 'hour')?.value || '0', 10);
+    const min = parseInt(parts.find(p => p.type === 'minute')?.value || '0', 10);
+    return hr * 60 + min;
+  } catch {
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
+  }
+}
 
 export function parseTimeToMinutes(timeStr: string): number {
   if (!timeStr || timeStr === '--') return -1;
