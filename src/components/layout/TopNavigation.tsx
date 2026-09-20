@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useSimulation } from '../../context/SimulationContext';
 import { ThemeToggle } from '../ui/ThemeToggle';
+import { fetchSystemDataStatus, SystemDataStatusResponse } from '../../utils/mlApi';
 import {
   Compass,
   Calendar,
@@ -10,13 +11,37 @@ import {
   Menu,
   X,
   Radio,
-  Search
+  Search,
+  Cpu
 } from 'lucide-react';
 
 export const TopNavigation: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dataStatus, setDataStatus] = useState<SystemDataStatusResponse | null>(null);
+  const [isBackendOnline, setIsBackendOnline] = useState<boolean>(false);
   const location = useLocation();
   const { savedTrainIds, simulatedTime } = useSimulation();
+
+  useEffect(() => {
+    let isMounted = true;
+    const checkStatus = async () => {
+      const status = await fetchSystemDataStatus();
+      if (isMounted) {
+        if (status && (status.status === 'OK' || status.status === 'HEALTHY')) {
+          setDataStatus(status);
+          setIsBackendOnline(true);
+        } else {
+          setIsBackendOnline(false);
+        }
+      }
+    };
+    checkStatus();
+    const interval = setInterval(checkStatus, 15000);
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   const navLinks = [
     { label: 'Track Train', path: '/', icon: Compass },
@@ -89,7 +114,33 @@ export const TopNavigation: React.FC = () => {
           </div>
 
           {/* Right Header Controls */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            {/* ML Status Pill */}
+            <div
+              className={`hidden lg:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border transition-colors ${
+                isBackendOnline
+                  ? 'bg-indigo-50/80 dark:bg-indigo-950/40 border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300'
+                  : 'bg-slate-50 dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400'
+              }`}
+              title={
+                isBackendOnline
+                  ? `ML Dynamic ETA Engine Active | ${dataStatus?.data_provenance.total_master_trains.toLocaleString() || '5,208'} Ingested Master Trains`
+                  : 'ML Service Offline | Local Standalone Mode'
+              }
+            >
+              <span className="relative flex h-2 w-2">
+                {isBackendOnline && (
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                )}
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${isBackendOnline ? 'bg-indigo-600 dark:bg-indigo-400' : 'bg-slate-400'}`} />
+              </span>
+              <span className="text-[11px] font-medium font-mono">
+                {isBackendOnline
+                  ? `ML Active (${dataStatus?.data_provenance.total_master_trains || '5,208'} Trains)`
+                  : 'Corridor Standalone'}
+              </span>
+            </div>
+
             {/* Live simulation indicator */}
             <div className="hidden sm:flex items-center gap-2 px-2.5 py-1 rounded-full bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-xs">
               <span className="relative flex h-2 w-2">
@@ -124,6 +175,16 @@ export const TopNavigation: React.FC = () => {
               Simulated Live Clock
             </span>
             <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{simulatedTime}</span>
+          </div>
+
+          <div className="flex items-center justify-between px-3 py-2 text-xs text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-800/70 rounded-lg mb-2 border border-slate-100 dark:border-slate-800">
+            <span className="flex items-center gap-1.5 font-medium">
+              <span className={`w-2 h-2 rounded-full ${isBackendOnline ? 'bg-indigo-500' : 'bg-slate-400'}`} />
+              ML Forecast Engine
+            </span>
+            <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
+              {isBackendOnline ? `${dataStatus?.data_provenance.total_master_trains || '5,208'} Trains Ingested` : 'Offline'}
+            </span>
           </div>
 
           {navLinks.map(link => {

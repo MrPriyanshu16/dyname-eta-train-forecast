@@ -1,16 +1,69 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useSimulation } from '../context/SimulationContext';
 import { ScheduleTable } from '../components/schedule/ScheduleTable';
 import { ArrowLeft, Compass, Calendar, ArrowRight, Info } from 'lucide-react';
 import { TrainStatusBadge } from '../components/train/TrainStatusBadge';
+import { fetchTrainDetailsFromMaster } from '../utils/mlApi';
+import { Train } from '../types/train';
 
 export const SchedulePage: React.FC = () => {
   const { trainId } = useParams<{ trainId: string }>();
   const navigate = useNavigate();
   const { getTrainById } = useSimulation();
 
-  const train = trainId ? getTrainById(trainId) : undefined;
+  const localTrain = trainId ? getTrainById(trainId) : undefined;
+  const [apiTrain, setApiTrain] = useState<Train | null>(null);
+  const [loading, setLoading] = useState<boolean>(!localTrain);
+
+  useEffect(() => {
+    if (localTrain) {
+      setLoading(false);
+      return;
+    }
+    if (!trainId) {
+      setLoading(false);
+      return;
+    }
+    let isMounted = true;
+    setLoading(true);
+    fetchTrainDetailsFromMaster(trainId)
+      .then((data) => {
+        if (isMounted) {
+          if (data && data.number) {
+            setApiTrain(data);
+          } else {
+            setApiTrain(null);
+          }
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setApiTrain(null);
+          setLoading(false);
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [trainId, localTrain]);
+
+  const train = localTrain || apiTrain;
+
+  if (loading) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-24 text-center space-y-4">
+        <div className="w-10 h-10 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin mx-auto" />
+        <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+          Loading timetable for train {trainId}...
+        </p>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
+          Querying railway master database (5,208 Trains)
+        </p>
+      </div>
+    );
+  }
 
   if (!train) {
     return (

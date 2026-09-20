@@ -1,7 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSimulation } from '../../context/SimulationContext';
 import { searchStations } from '../../data/mockStations';
+import { searchMasterTrains } from '../../utils/mlApi';
 import { Search, X, Train as TrainIcon, MapPin, Clock, ArrowRight, CornerDownLeft } from 'lucide-react';
 import { TrainStatusBadge } from '../train/TrainStatusBadge';
 
@@ -14,7 +15,7 @@ interface TrainSearchInputProps {
 }
 
 export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
-  placeholder = 'Search train number, train name, or station (e.g., 12951, Rajdhani, NDLS)',
+  placeholder = 'Search train number, train name, or station (e.g., 12461, Mandore, NDLS)',
   autoFocus = false,
   initialValue = '',
   size = 'default',
@@ -23,14 +24,45 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
   const [query, setQuery] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState<number>(-1);
+  const [apiTrains, setApiTrains] = useState<Array<{
+    id: string;
+    number: string;
+    name: string;
+    type: string;
+    origin: string;
+    destination: string;
+  }>>([]);
 
   const { trains, recentSearches, addRecentSearch } = useSimulation();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Filter matching trains
-  const matchingTrains = query.trim()
+  // Debounced API search across 5,208 master database trains
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setApiTrains([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      const res = await searchMasterTrains(q, 'ALL', 1, 8);
+      if (res && res.trains) {
+        setApiTrains(res.trains.map(t => ({
+          id: t.train_number,
+          number: t.train_number,
+          name: t.train_name,
+          type: t.category || t.train_type,
+          origin: t.origin,
+          destination: t.destination
+        })));
+      }
+    }, 180);
+    return () => clearTimeout(timer);
+  }, [query]);
+
+  // Filter matching local trains
+  const matchingLocalTrains = query.trim()
     ? trains.filter(
         t =>
           t.number.includes(query.trim()) ||
@@ -42,11 +74,60 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
       ).slice(0, 5)
     : [];
 
+  // Combined deduplicated train search results (local + master API)
+  const combinedTrains = useMemo(() => {
+    const seen = new Set<string>();
+    const results: Array<{
+      id: string;
+      number: string;
+      name: string;
+      type: string;
+      originName: string;
+      destName: string;
+      statusState?: any;
+      delayMinutes?: number;
+    }> = [];
+
+    // Prioritize exact local matches
+    for (const t of matchingLocalTrains) {
+      if (!seen.has(t.number)) {
+        seen.add(t.number);
+        results.push({
+          id: t.id,
+          number: t.number,
+          name: t.name,
+          type: t.type,
+          originName: t.origin.name,
+          destName: t.destination.name,
+          statusState: t.currentStatus.state,
+          delayMinutes: t.currentStatus.delayMinutes
+        });
+      }
+    }
+
+    // Add API matches from 5,208 master database
+    for (const at of apiTrains) {
+      if (!seen.has(at.number)) {
+        seen.add(at.number);
+        results.push({
+          id: at.id,
+          number: at.number,
+          name: at.name,
+          type: at.type,
+          originName: at.origin,
+          destName: at.destination
+        });
+      }
+    }
+
+    return results.slice(0, 7);
+  }, [matchingLocalTrains, apiTrains]);
+
   // Filter matching stations
   const matchingStations = query.trim() ? searchStations(query).slice(0, 4) : [];
 
   // Total items for keyboard navigation
-  const allResultsCount = matchingTrains.length + matchingStations.length;
+  const allResultsCount = combinedTrains.length + matchingStations.length;
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
@@ -77,20 +158,20 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
 
     // If an item was selected via arrow keys:
     if (selectedIndex >= 0) {
-      if (selectedIndex < matchingTrains.length) {
-        const selected = matchingTrains[selectedIndex];
+      if (selectedIndex < combinedTrains.length) {
+        const selected = combinedTrains[selectedIndex];
         handleSelectTrain(selected.id, `${selected.number} ${selected.name}`);
         return;
       } else {
-        const stationIdx = selectedIndex - matchingTrains.length;
+        const stationIdx = selectedIndex - combinedTrains.length;
         const selected = matchingStations[stationIdx];
         handleSelectStation(selected.code, `${selected.code} ${selected.name}`);
         return;
       }
     }
 
-    // Direct match check:
-    const exactTrain = trains.find(
+    // Direct match check from combined list:
+    const exactTrain = combinedTrains.find(
       t => t.number === trimmed || t.name.toLowerCase() === trimmed.toLowerCase()
     );
     if (exactTrain) {
@@ -200,12 +281,12 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
           {query.trim().length > 0 ? (
             <div className="max-h-96 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
               {/* Trains Section */}
-              {matchingTrains.length > 0 && (
+              {combinedTrains.length > 0 && (
                 <div className="p-2">
                   <div className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Trains ({matchingTrains.length})
+                    Trains ({combinedTrains.length})
                   </div>
-                  {matchingTrains.map((train, idx) => {
+                  {combinedTrains.map((train, idx) => {
                     const isSelected = selectedIndex === idx;
                     return (
                       <button
@@ -232,20 +313,29 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
                               <span className="font-medium text-xs text-slate-800 dark:text-slate-200 truncate">
                                 {train.name}
                               </span>
+                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                                {train.type}
+                              </span>
                             </div>
                             <div className="text-[11px] text-slate-500 dark:text-slate-400 flex items-center gap-1.5 mt-0.5">
-                              <span>{train.origin.name}</span>
+                              <span>{train.originName}</span>
                               <ArrowRight className="w-3 h-3 text-slate-300 dark:text-slate-600" />
-                              <span>{train.destination.name}</span>
+                              <span>{train.destName}</span>
                             </div>
                           </div>
                         </div>
                         <div className="shrink-0 ml-2">
-                          <TrainStatusBadge
-                            state={train.currentStatus.state}
-                            delayMinutes={train.currentStatus.delayMinutes}
-                            size="sm"
-                          />
+                          {train.statusState ? (
+                            <TrainStatusBadge
+                              state={train.statusState}
+                              delayMinutes={train.delayMinutes || 0}
+                              size="sm"
+                            />
+                          ) : (
+                            <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-full">
+                              Master Schedule
+                            </span>
+                          )}
                         </div>
                       </button>
                     );
@@ -260,7 +350,7 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
                     Stations ({matchingStations.length})
                   </div>
                   {matchingStations.map((station, idx) => {
-                    const overallIndex = matchingTrains.length + idx;
+                    const overallIndex = combinedTrains.length + idx;
                     const isSelected = selectedIndex === overallIndex;
                     return (
                       <button
@@ -303,7 +393,7 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
               )}
 
               {/* No results */}
-              {matchingTrains.length === 0 && matchingStations.length === 0 && (
+              {combinedTrains.length === 0 && matchingStations.length === 0 && (
                 <div className="p-6 text-center">
                   <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
                     No matching trains or stations found for "{query}"

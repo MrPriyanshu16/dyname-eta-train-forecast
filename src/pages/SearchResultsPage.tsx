@@ -1,9 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useSearchParams, useNavigate, Link } from 'react-router-dom';
 import { useSimulation } from '../context/SimulationContext';
 import { TrainSearchInput } from '../components/search/TrainSearchInput';
 import { TrainStatusBadge } from '../components/train/TrainStatusBadge';
 import { parseTimeToMinutes } from '../utils/time';
+import { searchMasterTrains } from '../utils/mlApi';
+import { Train } from '../types/train';
 import {
   Train as TrainIcon,
   Filter,
@@ -14,7 +16,8 @@ import {
   SlidersHorizontal,
   Bookmark,
   ChevronRight,
-  RotateCcw
+  RotateCcw,
+  Loader2
 } from 'lucide-react';
 
 export const SearchResultsPage: React.FC = () => {
@@ -24,21 +27,91 @@ export const SearchResultsPage: React.FC = () => {
 
   const { trains, savedTrainIds, toggleSaveTrain } = useSimulation();
 
+  // Master DB search state
+  const [masterTrains, setMasterTrains] = useState<Train[]>([]);
+  const [isSearchingMaster, setIsSearchingMaster] = useState<boolean>(false);
+
   // Filters state
   const [selectedType, setSelectedType] = useState<string>('ALL');
   const [selectedStatus, setSelectedStatus] = useState<string>('ALL');
   const [sortBy, setSortBy] = useState<'RELEVANCE' | 'EARLIEST_DEP' | 'EARLIEST_ARR' | 'SHORTEST_DURATION'>('RELEVANCE');
 
+  // Debounced search to master database when query changes
+  useEffect(() => {
+    const q = query.trim();
+    if (!q) {
+      setMasterTrains([]);
+      setIsSearchingMaster(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsSearchingMaster(true);
+    const timeoutId = setTimeout(async () => {
+      try {
+        const res = await searchMasterTrains(q, 'ALL', 1, 50);
+        if (isMounted && res && res.trains) {
+          const mapped: Train[] = res.trains.map(t => ({
+            id: t.train_number,
+            number: t.train_number,
+            name: t.train_name,
+            type: t.category,
+            origin: { code: t.origin, name: t.origin, city: t.origin },
+            destination: { code: t.destination, name: t.destination, city: t.destination },
+            departureTime: t.departure ? t.departure.slice(0, 5) : '--:--',
+            arrivalTime: t.arrival ? t.arrival.slice(0, 5) : '--:--',
+            duration: '--',
+            distanceKm: t.distance_km || 0,
+            daysOfOperation: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            classes: ['SL', '3A', '2A', '1A'],
+            currentStatus: {
+              state: 'ON_TIME',
+              delayMinutes: 0,
+              currentStationName: t.origin,
+              lastUpdated: 'Master DB',
+              statusExplanation: 'Verified Master Database Entry'
+            },
+            stops: []
+          }));
+          setMasterTrains(mapped);
+        }
+      } catch {
+        if (isMounted) setMasterTrains([]);
+      } finally {
+        if (isMounted) setIsSearchingMaster(false);
+      }
+    }, 250);
+
+    return () => {
+      isMounted = false;
+      clearTimeout(timeoutId);
+    };
+  }, [query]);
+
+  // Combined source: Local corridor trains + Master database trains (deduplicated)
+  const allSourceTrains = useMemo(() => {
+    const map = new Map<string, Train>();
+    // Add local trains first (priority for live simulation telemetry)
+    trains.forEach(t => map.set(t.number, t));
+    // Add master database trains
+    masterTrains.forEach(t => {
+      if (!map.has(t.number)) {
+        map.set(t.number, t);
+      }
+    });
+    return Array.from(map.values());
+  }, [trains, masterTrains]);
+
   // Filtered & Sorted trains
   const filteredTrains = useMemo(() => {
-    let result = trains;
+    let result = allSourceTrains;
 
-    // Query filter
+    // Query filter (in case not already filtered)
     if (query.trim()) {
       const q = query.trim().toLowerCase();
       result = result.filter(
         t =>
-          t.number.includes(q) ||
+          t.number.toLowerCase().includes(q) ||
           t.name.toLowerCase().includes(q) ||
           t.origin.name.toLowerCase().includes(q) ||
           t.destination.name.toLowerCase().includes(q) ||
@@ -56,7 +129,12 @@ export const SearchResultsPage: React.FC = () => {
 
     // Type filter
     if (selectedType !== 'ALL') {
-      result = result.filter(t => t.type === selectedType);
+      result = result.filter(t => {
+        if (selectedType === 'Mail / Express') {
+          return t.type === 'Mail / Express' || t.type === 'Express';
+        }
+        return t.type.toLowerCase().includes(selectedType.toLowerCase());
+      });
     }
 
     // Status filter
@@ -85,17 +163,18 @@ export const SearchResultsPage: React.FC = () => {
       }
       return 0; // Default relevance
     });
-  }, [trains, query, selectedType, selectedStatus, sortBy]);
+  }, [allSourceTrains, query, selectedType, selectedStatus, sortBy]);
 
   const trainTypes = [
     'ALL',
+    'Superfast',
+    'Express',
+    'Passenger',
+    'Suburban',
     'Rajdhani',
     'Vande Bharat',
     'Shatabdi',
-    'Superfast',
-    'Tejas Rajdhani',
-    'Duronto',
-    'Mail / Express'
+    'Duronto'
   ];
 
   return (
@@ -121,8 +200,13 @@ export const SearchResultsPage: React.FC = () => {
                 'All Monitored Train Services'
               )}
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-              Showing {filteredTrains.length} matching {filteredTrains.length === 1 ? 'train' : 'trains'}
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center">
+              <span>Showing {filteredTrains.length} matching {filteredTrains.length === 1 ? 'train' : 'trains'}</span>
+              {isSearchingMaster && (
+                <span className="inline-flex items-center gap-1 text-indigo-600 dark:text-indigo-400 ml-2 font-medium">
+                  <Loader2 className="w-3 h-3 animate-spin" /> Querying master database...
+                </span>
+              )}
             </p>
           </div>
 

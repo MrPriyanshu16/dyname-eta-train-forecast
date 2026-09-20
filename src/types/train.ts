@@ -5,7 +5,11 @@ export type TrainType =
   | 'Tejas Rajdhani'
   | 'Duronto'
   | 'Superfast'
-  | 'Mail / Express';
+  | 'Mail / Express'
+  | 'Passenger'
+  | 'Suburban'
+  | 'MEMU'
+  | string;
 
 export type RunningState =
   | 'ON_TIME'

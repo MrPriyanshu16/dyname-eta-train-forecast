@@ -162,7 +162,101 @@ export async function injectSimulatorDisruption(disruption_type: string, severit
 
 export async function fetchModelMetrics(): Promise<ModelMetricsResponse | null> {
   try {
-    const res = await fetch(`${ML_API_BASE_URL}/api/model/metrics`, {
+    const res = await fetch(`${ML_API_BASE_URL}/api/reports/summary`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(2000)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export interface MasterTrainSearchResult {
+  total: number;
+  page: number;
+  limit: number;
+  trains: Array<{
+    train_number: string;
+    train_name: string;
+    train_type: string;
+    category: string;
+    origin: string;
+    destination: string;
+    departure: string;
+    arrival: string;
+    distance_km: number;
+    zone: string;
+  }>;
+}
+
+export interface SystemDataStatusResponse {
+  status: string;
+  data_mode: string;
+  data_provenance: {
+    master_source: string;
+    historical_delay_source: string;
+    total_master_trains: number;
+    total_master_stations: number;
+    total_station_delay_records: number;
+    category_distribution: Record<string, number>;
+  };
+}
+
+export async function searchMasterTrains(
+  query: string,
+  category: string = 'ALL',
+  page: number = 1,
+  limit: number = 50
+): Promise<MasterTrainSearchResult | null> {
+  try {
+    const params = new URLSearchParams({
+      search: query,
+      category: category,
+      page: String(page),
+      limit: String(limit)
+    });
+    const res = await fetch(`${ML_API_BASE_URL}/api/trains?${params.toString()}`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(3000)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchTrainDetailsFromMaster(trainNumber: string): Promise<any | null> {
+  try {
+    const res = await fetch(`${ML_API_BASE_URL}/api/trains/${encodeURIComponent(trainNumber.trim())}`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(3000)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchStationSchedule(stationCode: string): Promise<any | null> {
+  try {
+    const res = await fetch(`${ML_API_BASE_URL}/api/stations/${encodeURIComponent(stationCode.trim())}/schedule`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(3000)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchSystemDataStatus(): Promise<SystemDataStatusResponse | null> {
+  try {
+    const res = await fetch(`${ML_API_BASE_URL}/api/system/data-status`, {
       method: 'GET',
       signal: AbortSignal.timeout(2000)
     });
