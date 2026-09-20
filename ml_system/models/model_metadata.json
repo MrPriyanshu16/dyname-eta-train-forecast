@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-18T00:09:02.554497",
+  "timestamp": "2026-09-20T22:24:43.607577",
   "model_name": "All-India Dynamic Coaching Train ETA Predictor",
   "primary_architecture": "XGBoost Regressor + Dual Quantile Regressors (P10, P90)",
   "target_variable": "target_remaining_time_to_destination",
