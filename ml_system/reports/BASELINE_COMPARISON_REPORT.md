@@ -1,27 +1,88 @@
-# Indian Railways Dynamic ETA: Operational Baseline Comparison Report
+# Indian Railways Dynamic Train ETA Forecasting System
+## Operational Baselines Formulation & Architectural Comparison
 
-## Executive Summary
-This report evaluates the Machine Learning Dynamic ETA model against four domain-standard operational baselines across a strictly chronological, non-overlapping test partition of coaching train movements.
+**Problem Statement ID**: 26028 | Ministry of Railways  
+**Geographic Scope**: Rajasthan Railway Network Scope  
+**Report Date**: 2026-09-20  
+**Model Status**: `INSUFFICIENT_GROUND_TRUTH` (Supervised ML Gated)  
 
-## Evaluation Results Table (Chronological Test Partition, N = 5,501)
+---
 
-| Model / Baseline | MAE (min) | RMSE (min) | MedAE (min) | R² Score | ±10m Punctuality (%) | ±15m Punctuality (%) | ±30m Punctuality (%) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Baseline 1: Schedule-Based Remaining Time** | 61.89 | 86.32 | 49.27 | 0.7122 | 26.6% | 29.47% | 39.03% |
-| **Baseline 2: Current Delay Propagation** | 74.53 | 94.02 | 63.76 | 0.6586 | 9.38% | 13.71% | 26.61% |
-| **Baseline 3: Historical Section Median** | 44.58 | 65.32 | 29.27 | 0.8352 | 32.7% | 37.97% | 50.86% |
-| **Baseline 4: Delay Recovery Model** | 78.24 | 100.0 | 64.23 | 0.6138 | 9.2% | 13.98% | 27.1% |
-| **Model 1: Random Forest Regressor** | 17.81 | 26.05 | 13.16 | 0.9738 | 43.39% | 54.24% | 78.44% |
-| **Model 2: HistGradientBoosting (LightGBM)** | 17.85 | 25.91 | 13.17 | 0.9741 | 43.65% | 54.08% | 78.71% |
-| **Model 3: XGBoost Regressor (Primary)** | **17.86** | **25.92** | **13.22** | **0.9741** | **42.76%** | **53.63%** | **78.53%** |
+### 1. The Critical Distinction: Timetable vs Delay Stats vs Ground Truth
 
-## Key Findings
-1. **Error Reduction over Current NTES Delay Propagation**:
-   - Baseline 2 (Current Delay Propagation) yields an MAE of **74.53 min**.
-   - Primary XGBoost achieves an MAE of **17.86 min**, delivering an absolute error reduction of **56.67 min** (**76.0% improvement**).
-2. **Failure Modes of Baselines**:
-   - **Baseline 1 (Schedule)** fails because delay accumulation is not reflected in scheduled remaining duration.
-   - **Baseline 2 (Propagation)** assumes linear invariance: it cannot model section recovery or non-linear delay cascading at junction choke points.
-   - **Baseline 3 (Historical Median)** fails to incorporate real-time headways, current accumulated delay, and seasonal fog.
-3. **Punctuality Tolerance Gain**:
-   - Trains predicted within ±15 minutes jumped from **13.71%** under Baseline 2 to **53.63%** under XGBoost.
+In strict accordance with scientific integrity, the project separates three distinct data layers:
+
+```text
+┌─────────────────────────────────────────────────────────────────────────┐
+│ Layer 1: MASTER TIMETABLE (DataMeet / IR Official Timetable)             │
+│ • Canonical train numbers, routes, station sequences, scheduled times   │
+│ • Powers: Schedule-Based ETA (Baseline 1)                               │
+├─────────────────────────────────────────────────────────────────────────┤
+│ Layer 2: AGGREGATE HISTORICAL DELAY STATISTICS (Auxiliary Data)          │
+│ • Monthly and weekly station-level delay averages from NTES crawls      │
+│ • Powers: Delay priors, section medians (Baseline 3), recovery slack    │
+├─────────────────────────────────────────────────────────────────────────┤
+│ Layer 3: OPERATIONAL DOMAIN BASELINES (Deterministic Heuristics)        │
+│ • Formulations for Schedule, Delay Propagation, Median, and Recovery    │
+├─────────────────────────────────────────────────────────────────────────┤
+│ Layer 4: SUPERVISED ML PIPELINE (Prepared & Gated)                      │
+│ • XGBoost / LightGBM architecture exists in codebase                    │
+│ • GATED: Cannot be trained or validated without Point-in-Time Actuals   │
+└─────────────────────────────────────────────────────────────────────────┘
+```
+
+Because public railway repositories contain only published timetables and aggregate station averages (not point-in-time run trajectories with actual arrival timestamps), **quantitative prediction error (MAE / RMSE) cannot be calculated without manufacturing synthetic actuals.** The system refuses to manufacture fake ground truth.
+
+---
+
+### 2. Operational Baselines Mathematical Formulations
+
+To deliver transparent ETA predictions under available data, four domain baselines are implemented:
+
+#### Baseline 1: Schedule-Based Remaining Time (Timetable Baseline)
+$$\text{ETA}_{B1} = \text{STA}_{\text{destination}}$$
+$$\text{Remaining Time}_{B1} = \max\left(0, \frac{\text{Distance Remaining}}{\text{Nominal Speed}} \times 60\right)$$
+- **Operational Logic**: Assumes the train runs strictly according to its published timetable.
+- **Limitation**: Completely ignores accumulated real-time delays. If a train is running 45 minutes late, Baseline 1 still shows the scheduled timetable arrival time.
+
+#### Baseline 2: Current Delay Propagation (NTES Standard Baseline)
+$$\text{ETA}_{B2} = \text{STA}_{\text{destination}} + \text{Delay}_{\text{current}}$$
+$$\text{Remaining Time}_{B2} = \text{Remaining Time}_{B1} + \text{Delay}_{\text{current}}$$
+- **Operational Logic**: The default method used by the National Train Enquiry System (NTES) and commercial enquiry apps. Assumes that delay observed at the last station remains static for all downstream stations.
+- **Limitation**: Ignores timetable recovery slack on open double/triple lines and underestimates delays on congested single-track bottlenecks.
+
+#### Baseline 3: Historical Section Median
+$$\text{ETA}_{B3} = T + \sum_{k \in \text{remaining sections}} \text{Median Section Run Time}_k$$
+- **Operational Logic**: Replaces nominal timetable section run-times with empirical median traversal times computed from Layer 2 auxiliary delay statistics (`train_station_delay_stats`).
+- **Advantage**: Automatically captures systemic section bottlenecks (e.g. junction congestion approaching Jaipur `JP` or Phulera `FL`).
+
+#### Baseline 4: Delay Recovery Heuristic (Dynamic Operational Recovery)
+$$\text{ETA}_{B4} = \text{STA}_{\text{destination}} + \text{Delay}_{\text{current}} - \text{Expected Recovery}(\text{tier}, \text{dist})$$
+$$\text{Expected Recovery} = \min\left(0.40 \times \text{Delay}_{\text{current}}, \frac{\text{Distance Remaining}}{100.0} \times \alpha_{\text{tier}}\right)$$
+- **Operational Logic**: Operational priority rules reflect Indian Railways operating practice:
+  - **Tier 1 (Vande Bharat / Rajdhani)**: $\alpha = 5.0$ (High timetable padding + absolute signaling precedence allows recovery of up to 20–25 minutes over 300+ km).
+  - **Tier 2 (Shatabdi / Garib Rath)**: $\alpha = 3.5$
+  - **Tier 3 (Superfast Express)**: $\alpha = 2.5$ (Moderate recovery capability).
+  - **Tier 4 (Express / Mail)**: $\alpha = 1.0$ (Standard running; limited recovery).
+  - **Tier 5 (Passenger / Ordinary)**: $\alpha = -1.5$ (Negative recovery factor: looped into sidings for higher-tier trains, accumulating further delays).
+
+---
+
+### 3. Comparison of Baseline Operational Properties
+
+| Property / Feature | Baseline 1 (Schedule) | Baseline 2 (NTES Propagation) | Baseline 3 (Section Median) | Baseline 4 (Delay Recovery) |
+|:---|:---:|:---:|:---:|:---:|
+| **Requires Live Delay** | No | Yes | Optional | Yes |
+| **Considers Priority Tier** | No | No | Indirectly | Yes |
+| **Accounts for Timetable Padding** | No | No | Yes | Yes |
+| **Adapts Downstream by Section** | No | No | Yes | Yes |
+| **Quantitative Validation Status** | Unvalidated (No ground truth) | Unvalidated (No ground truth) | Unvalidated (No ground truth) | Unvalidated (No ground truth) |
+| **Current Operational Role** | Schedule Anchor | Standard Reference | Historical Prior | Active Dynamic Heuristic |
+
+---
+
+### 4. Statement on Performance Metrics
+In adherence to academic and scientific honesty:
+- **No MAE or RMSE numbers are reported** because no point-in-time ground-truth actual arrival dataset is available.
+- Presenting numerical MAE figures without independently verified ground-truth actuals is scientifically invalid.
+- When an authorized CRIS/RTIS feed with historical station-level timestamps is integrated, the automated evaluation scripts in this repository can immediately compute empirical MAE, RMSE, and MedAE against these four baselines.

@@ -27,7 +27,7 @@ export const INITIAL_TRAINS: Train[] = [
       distanceToNextKm: 266,
       currentSpeedKmph: 0,
       platform: '1',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Train is currently halted at Platform 1 of Kota Junction. Scheduled halt: 10 mins.',
       haltCountdownSeconds: 240
     },
@@ -274,7 +274,7 @@ export const INITIAL_TRAINS: Train[] = [
       distanceToNextKm: 32,
       currentSpeedKmph: 78,
       platform: '1',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Running 38 minutes late due to congestion and track caution orders between Agra and Gwalior.'
     },
     stops: [
@@ -397,7 +397,7 @@ export const INITIAL_TRAINS: Train[] = [
       distanceToNextKm: 185,
       currentSpeedKmph: 112,
       platform: '1',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Departed Aligarh on time. Currently cruising at 112 km/h on NCR trunk route, approximately 4 mins behind scheduled section run.'
     },
     stops: [
@@ -484,7 +484,7 @@ export const INITIAL_TRAINS: Train[] = [
       currentStationCode: 'NDLS',
       currentStationName: 'New Delhi',
       platform: '16',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Journey completed successfully. The train arrived at New Delhi Platform 16 on time.'
     },
     stops: [
@@ -592,7 +592,7 @@ export const INITIAL_TRAINS: Train[] = [
       distanceToNextKm: 88,
       currentSpeedKmph: 118,
       platform: '3',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Running on time according to simulated schedule. Expected at Vadodara right on schedule.'
     },
     stops: [
@@ -730,7 +730,7 @@ export const INITIAL_TRAINS: Train[] = [
       distanceToNextKm: 8,
       currentSpeedKmph: 85,
       platform: '7',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Approaching Platform 7 at KSR Bengaluru with a minor 2 min speed restriction delay.'
     },
     stops: [
@@ -808,7 +808,7 @@ export const INITIAL_TRAINS: Train[] = [
       distanceToNextKm: 110,
       currentSpeedKmph: 105,
       platform: '2',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Running 24 minutes behind schedule due to earlier speed restrictions.'
     },
     stops: [
@@ -946,7 +946,7 @@ export const INITIAL_TRAINS: Train[] = [
       distanceToNextKm: 195,
       currentSpeedKmph: 120,
       platform: '12',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Running on time on non-stop high-speed corridor.'
     },
     stops: [
@@ -1054,7 +1054,7 @@ export const INITIAL_TRAINS: Train[] = [
       distanceToNextKm: 118,
       currentSpeedKmph: 0,
       platform: '1',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Halted at Platform 1 of Agra Cantt for watering and parcel loading. 8 min delay.',
       haltCountdownSeconds: 150
     },
@@ -1193,7 +1193,7 @@ export const INITIAL_TRAINS: Train[] = [
       distanceToNextKm: 115,
       currentSpeedKmph: 98,
       platform: '9',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Maintaining on-time run across Eastern coastal line.'
     },
     stops: [
@@ -1256,7 +1256,7 @@ export const INITIAL_TRAINS: Train[] = [
       distanceToNextKm: 12,
       currentSpeedKmph: 62,
       platform: '2',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Approaching Platform 2 at TVC with a slight 5m delay due to single-line track crossing.'
     },
     stops: [
@@ -1330,7 +1330,7 @@ export const INITIAL_TRAINS: Train[] = [
       nextStationCode: 'LKO',
       nextStationName: 'Lucknow Charbagh',
       platform: '7',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Rake placed at Platform 7. Scheduled departure at 23:25.'
     },
     stops: [
@@ -1393,7 +1393,7 @@ export const INITIAL_TRAINS: Train[] = [
       distanceToNextKm: 129,
       currentSpeedKmph: 125,
       platform: '2',
-      lastUpdated: '10:42 AM',
+      lastUpdated: '22:42',
       statusExplanation: 'Running on time at 125 km/h. Smooth run along Western Railway trunk line.'
     },
     stops: [

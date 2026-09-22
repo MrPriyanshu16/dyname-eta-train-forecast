@@ -36,13 +36,9 @@ export const TrainDetailsPage: React.FC = () => {
 
   const localTrain = trainId ? getTrainById(trainId) : undefined;
   const [apiTrain, setApiTrain] = useState<Train | null>(null);
-  const [loading, setLoading] = useState<boolean>(!localTrain);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    if (localTrain) {
-      setLoading(false);
-      return;
-    }
     if (!trainId) {
       setLoading(false);
       return;
@@ -54,24 +50,21 @@ export const TrainDetailsPage: React.FC = () => {
         if (isMounted) {
           if (data && data.number) {
             setApiTrain(data);
-          } else {
-            setApiTrain(null);
           }
           setLoading(false);
         }
       })
       .catch(() => {
         if (isMounted) {
-          setApiTrain(null);
           setLoading(false);
         }
       });
     return () => {
       isMounted = false;
     };
-  }, [trainId, localTrain]);
+  }, [trainId]);
 
-  const train = localTrain || apiTrain;
+  const train = apiTrain || localTrain;
 
   if (loading) {
     return (
@@ -115,14 +108,13 @@ export const TrainDetailsPage: React.FC = () => {
 
   const currentSelectedCode =
     selectedTargetStations[train.id] ||
-    train.stops.find(s => s.status === 'NEXT')?.stationCode ||
-    availableStops[0]?.stationCode ||
-    train.destination.code;
+    train.destination.code ||
+    (train.stops.length > 0 ? train.stops[train.stops.length - 1].stationCode : '');
 
   const targetStation =
     train.stops.find(s => s.stationCode === currentSelectedCode) ||
-    availableStops[0] ||
-    train.stops[train.stops.length - 1];
+    train.stops[train.stops.length - 1] ||
+    train.stops[0];
 
   const handleSelectStation = (stationCode: string) => {
     setSelectedTargetStation(train.id, stationCode);
@@ -223,7 +215,7 @@ export const TrainDetailsPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Status & Simulated Timestamp */}
+          {/* Status & Live Timestamp */}
           <div className="flex items-center gap-3 self-start lg:self-auto">
             <TrainStatusBadge
               state={train.currentStatus.state}
@@ -231,7 +223,9 @@ export const TrainDetailsPage: React.FC = () => {
               size="lg"
             />
             <div className="text-right text-[11px] text-slate-500 dark:text-slate-400 font-mono hidden sm:block">
-              <div>Simulated Update</div>
+              <div className="font-medium text-emerald-600 dark:text-emerald-400">
+                {train.startDate ? `Journey Date: ${train.startDate}` : 'Live NTES Telemetry'}
+              </div>
               <div className="font-semibold text-slate-700 dark:text-slate-300">{train.currentStatus.lastUpdated}</div>
             </div>
           </div>

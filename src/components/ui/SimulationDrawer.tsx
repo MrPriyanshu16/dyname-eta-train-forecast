@@ -151,10 +151,10 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({ currentTrain
               <Cpu className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
               <div>
                 <div className="font-semibold text-slate-800 dark:text-slate-200">
-                  {isMLConnected ? 'ML Engine Online (Port 8000)' : 'Local Simulation Fallback'}
+                  {isMLConnected ? 'Forecasting Engine Online (Port 8000)' : 'Local Simulation Fallback'}
                 </div>
                 <div className="text-[11px] text-slate-500 dark:text-slate-400">
-                  {isMLConnected ? 'XGBoost v1.0 · MAE 17.9m (vs NTES 76.6m)' : 'Start FastAPI backend for live predictions'}
+                  {isMLConnected ? 'Operational Domain Baselines & Empirical Priors' : 'Start FastAPI backend for live predictions'}
                 </div>
               </div>
             </div>
@@ -163,7 +163,7 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({ currentTrain
                 onClick={() => setShowMetricsModal(true)}
                 className="px-2.5 py-1 text-[11px] font-semibold bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
               >
-                <BarChart3 className="w-3 h-3" /> Metrics
+                <BarChart3 className="w-3 h-3" /> Baselines
               </button>
             ) : (
               <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
@@ -344,7 +344,7 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({ currentTrain
         </div>
       </div>
 
-      {/* Model Benchmark Metrics Modal */}
+      {/* Model Governance & Operational Baselines Modal */}
       {showMetricsModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs">
           <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-2xl max-w-lg w-full p-6 space-y-5">
@@ -352,7 +352,7 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({ currentTrain
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 <h3 className="font-bold text-slate-900 dark:text-white text-sm">
-                  Model Evaluation & Scientific Benchmark
+                  Operational Baselines & Model Governance
                 </h3>
               </div>
               <button
@@ -363,55 +363,59 @@ export const SimulationDrawer: React.FC<SimulationDrawerProps> = ({ currentTrain
               </button>
             </div>
 
-            <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-              Tested on <strong>5,850 unseen future trip observations</strong> across the NDLS-CNB trunk corridor under strict chronological separation:
-            </p>
+            <div className="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-200 dark:border-amber-800 text-xs text-amber-900 dark:text-amber-200">
+              <div className="font-bold mb-1">Status: INSUFFICIENT_GROUND_TRUTH</div>
+              <p className="leading-relaxed">
+                Supervised ML training is gated because open railway repositories contain published timetables and aggregate station statistics rather than point-in-time trajectory ground truth. No synthetic runs are manufactured.
+              </p>
+            </div>
 
             <div className="overflow-x-auto">
               <table className="w-full text-xs text-left">
                 <thead>
                   <tr className="border-b border-slate-200 dark:border-slate-800 text-slate-400 font-semibold">
-                    <th className="pb-2">Model / Baseline</th>
-                    <th className="pb-2 text-right">MAE</th>
-                    <th className="pb-2 text-right">RMSE</th>
-                    <th className="pb-2 text-right">R²</th>
+                    <th className="pb-2">Baseline Model</th>
+                    <th className="pb-2">Formulation</th>
+                    <th className="pb-2 text-right">Role</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800 font-mono">
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   <tr>
-                    <td className="py-2 text-slate-600 dark:text-slate-400">Timetable Baseline</td>
-                    <td className="py-2 text-right">64.66m</td>
-                    <td className="py-2 text-right">90.58m</td>
-                    <td className="py-2 text-right">0.693</td>
+                    <td className="py-2 font-medium text-slate-700 dark:text-slate-300">Baseline 1: Schedule</td>
+                    <td className="py-2 font-mono text-[11px] text-slate-500">STA - Current Time</td>
+                    <td className="py-2 text-right text-slate-400">Timetable</td>
                   </tr>
-                  <tr className="bg-rose-50/50 dark:bg-rose-950/20 text-rose-700 dark:text-rose-400">
-                    <td className="py-2 font-sans font-medium">NTES Delay Propagation</td>
-                    <td className="py-2 text-right font-bold">76.62m</td>
-                    <td className="py-2 text-right">97.11m</td>
-                    <td className="py-2 text-right">0.647</td>
+                  <tr>
+                    <td className="py-2 font-medium text-slate-700 dark:text-slate-300">Baseline 2: NTES Standard</td>
+                    <td className="py-2 font-mono text-[11px] text-slate-500">STA + Current Delay</td>
+                    <td className="py-2 text-right text-slate-400">Propagation</td>
                   </tr>
-                  <tr className="bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-950 dark:text-indigo-200 font-bold">
-                    <td className="py-2 font-sans flex items-center gap-1">
+                  <tr>
+                    <td className="py-2 font-medium text-slate-700 dark:text-slate-300">Baseline 3: Section Median</td>
+                    <td className="py-2 font-mono text-[11px] text-slate-500">T + Σ Median Section Times</td>
+                    <td className="py-2 text-right text-slate-400">Bottlenecks</td>
+                  </tr>
+                  <tr className="bg-indigo-50/50 dark:bg-indigo-950/30 text-indigo-950 dark:text-indigo-200 font-semibold">
+                    <td className="py-2 flex items-center gap-1">
                       <Sparkles className="w-3 h-3 text-indigo-500" />
-                      Dynamic XGBoost ML
+                      Baseline 4: Delay Recovery
                     </td>
-                    <td className="py-2 text-right text-emerald-600 dark:text-emerald-400">17.90m</td>
-                    <td className="py-2 text-right">25.61m</td>
-                    <td className="py-2 text-right">0.976</td>
+                    <td className="py-2 font-mono text-[11px]">STA + Delay - Recovery(Tier)</td>
+                    <td className="py-2 text-right text-indigo-600 dark:text-indigo-400">Active Engine</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
-            <div className="p-3 bg-emerald-50 dark:bg-emerald-950/40 rounded-xl border border-emerald-100 dark:border-emerald-800 text-xs text-emerald-900 dark:text-emerald-200 font-medium">
-              🎯 <strong>76.6% Error Reduction:</strong> Dynamic ML achieves 17.90 minutes Mean Absolute Error compared to 76.62 minutes in the standard railway NTES baseline.
-            </div>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+              When an authorized live or historical feed with actual arrival timestamps is ingested, automated scripts in this codebase will benchmark empirical MAE/RMSE across these baselines.
+            </p>
 
             <button
               onClick={() => setShowMetricsModal(false)}
               className="w-full py-2 bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
             >
-              Close Benchmark
+              Close Governance Overview
             </button>
           </div>
         </div>

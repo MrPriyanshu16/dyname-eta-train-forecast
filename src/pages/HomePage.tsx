@@ -14,11 +14,12 @@ import {
   Sparkles,
   ShieldCheck,
   Zap,
-  Radio
+  Radio,
+  RotateCcw
 } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
-  const { trains, savedTrainIds, getTrainById } = useSimulation();
+  const { trains, savedTrainIds, getTrainById, recentSearches } = useSimulation();
   const navigate = useNavigate();
 
   // Saved or recently viewed trains for quick card list
@@ -32,11 +33,31 @@ export const HomePage: React.FC = () => {
       id: '12951',
       number: '12951',
       name: 'Mumbai Rajdhani',
-      route: 'New Delhi → Mumbai Central',
+      route: 'New Delhi → Mumbai Central (via Kota)',
       departure: '16:55',
       duration: '15h 40m',
       badge: 'Superfast Premium',
       type: 'Rajdhani'
+    },
+    {
+      id: '22491',
+      number: '22491',
+      name: 'Mandore Superfast Express',
+      route: 'Jodhpur Jn → Old Delhi (via Jaipur)',
+      departure: '20:30',
+      duration: '10h 15m',
+      badge: 'Rajasthan Superfast',
+      type: 'Superfast'
+    },
+    {
+      id: '14888',
+      number: '14888',
+      name: 'Barmer - Rishikesh Express',
+      route: 'Barmer → Rishikesh (43 Halts)',
+      departure: '06:00',
+      duration: '27h 54m',
+      badge: 'Desert Express',
+      type: 'Express'
     },
     {
       id: '22436',
@@ -47,44 +68,24 @@ export const HomePage: React.FC = () => {
       duration: '8h 00m',
       badge: 'Semi-High Speed',
       type: 'Vande Bharat'
-    },
-    {
-      id: '12004',
-      number: '12004',
-      name: 'Lucknow Shatabdi',
-      route: 'New Delhi → Lucknow Charbagh',
-      departure: '06:10',
-      duration: '6h 45m',
-      badge: 'Daily Intercity',
-      type: 'Shatabdi'
-    },
-    {
-      id: '12626',
-      number: '12626',
-      name: 'Kerala Express',
-      route: 'New Delhi → Thiruvananthapuram',
-      departure: '20:10',
-      duration: '50h 00m',
-      badge: 'Trans-India Trunk',
-      type: 'Superfast'
     }
   ];
 
   return (
     <div className="space-y-12 sm:space-y-16 pb-12 transition-colors">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900/80 dark:to-slate-950 pt-12 pb-16 sm:pt-16 sm:pb-20 border-b border-slate-200/70 dark:border-slate-800 transition-colors">
+      <section className="relative z-20 bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900/80 dark:to-slate-950 pt-12 pb-16 sm:pt-16 sm:pb-20 border-b border-slate-200/70 dark:border-slate-800 transition-colors">
         {/* Subtle geometric line representing track movement */}
-        <div className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-30">
+        <div className="absolute inset-0 pointer-events-none opacity-20 dark:opacity-30 overflow-hidden">
           <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-600 dark:via-indigo-400 to-transparent" />
           <div className="absolute top-1/2 left-1/3 w-32 h-1 bg-indigo-500 rounded-full blur-xs" />
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-10">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-30">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100/90 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-6">
             <Radio className="w-3.5 h-3.5 animate-pulse text-indigo-600 dark:text-indigo-400" />
-            <span>Real-Time Transit & AI ETA Forecast Engine</span>
+            <span>Rajasthan Network Scope · 882 Ingested Trains</span>
           </div>
 
           {/* Headline */}
@@ -97,38 +98,63 @@ export const HomePage: React.FC = () => {
 
           {/* Concise Supporting Description */}
           <p className="mt-4 text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Minimal, instant train tracking, running delays, platform allocations, and arrival estimation—without the clutter of traditional railway portals.
+            Minimal, instant train tracking, running delays, platform allocations, and arrival estimation across Rajasthan network services.
           </p>
 
           {/* Search Bar */}
-          <div className="mt-8 max-w-2xl mx-auto">
-            <TrainSearchInput size="large" autoFocus />
+          <div className="mt-8 max-w-2xl mx-auto relative z-50">
+            <TrainSearchInput size="large" />
           </div>
 
+          {/* Recent Searches Quick Access Row */}
+          {recentSearches.length > 0 && (
+            <div className="mt-3 flex items-center justify-center gap-1.5 flex-wrap text-xs">
+              <span className="text-slate-400 dark:text-slate-500 flex items-center gap-1 font-medium">
+                <Clock className="w-3 h-3 text-indigo-500" /> Recent:
+              </span>
+              {recentSearches.slice(0, 4).map((item, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => navigate(`/search?q=${encodeURIComponent(item)}`)}
+                  className="px-2.5 py-0.5 rounded-full bg-white dark:bg-slate-850 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-medium transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                >
+                  <RotateCcw className="w-2.5 h-2.5 text-slate-400" />
+                  <span>{item}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Quick Query Suggestions */}
-          <div className="mt-4 flex items-center justify-center gap-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
-            <span className="text-slate-400 dark:text-slate-500">Popular:</span>
+          <div className="mt-3 flex items-center justify-center gap-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
+            <span className="text-slate-400 dark:text-slate-500 font-medium">Popular:</span>
             <button
-              onClick={() => navigate('/train/12951')}
-              className="px-2 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              onClick={() => navigate('/train/14888')}
+              className="px-2.5 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
             >
-              12951 Rajdhani
+              14888 Barmer - Rishikesh
             </button>
             <button
-              onClick={() => navigate('/train/22436')}
-              className="px-2 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              onClick={() => navigate('/train/22491')}
+              className="px-2.5 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
             >
-              22436 Vande Bharat
+              22491 Mandore Express
             </button>
             <button
-              onClick={() => navigate('/station/NDLS')}
-              className="px-2 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              onClick={() => navigate('/station/JP')}
+              className="px-2.5 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
             >
-              NDLS Station Board
+              JP Jaipur Board
+            </button>
+            <button
+              onClick={() => navigate('/station/JU')}
+              className="px-2.5 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+            >
+              JU Jodhpur Board
             </button>
             <button
               onClick={() => navigate('/journey-planner')}
-              className="px-2 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              className="px-2.5 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
             >
               Plan Journey
             </button>

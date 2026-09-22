@@ -153,24 +153,95 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
                       )}
                     </div>
 
-                    {/* Time & Delay */}
-                    <div className="flex items-center gap-3 shrink-0 text-xs">
+                    {/* Time & Delay - NTES Style */}
+                    <div className="flex items-center gap-2.5 sm:gap-4 shrink-0 text-xs mt-1 sm:mt-0">
                       {isCompleted ? (
-                        <div className="text-slate-500 dark:text-slate-400 font-mono text-right">
-                          <span className="text-[11px] text-slate-400 dark:text-slate-500 mr-1.5">Departed</span>
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">
-                            {stop.estimatedDeparture !== '--' ? stop.estimatedDeparture : stop.scheduledDeparture}
-                          </span>
+                        <div className="flex items-center gap-3">
+                          {/* Sch Time (Neutral / White) */}
+                          <div className="text-right font-mono">
+                            <div className="text-[10px] text-slate-400 dark:text-slate-500 uppercase flex items-center justify-end gap-1">
+                              <span>Sch</span>
+                              {stop.scheduledArrivalDate ? (
+                                <span className="text-[9px] text-slate-400 font-normal">({stop.scheduledArrivalDate.replace(/^[A-Za-z]+,\s*/, '')})</span>
+                              ) : stop.day > 1 ? (
+                                <span className="text-[9px] text-slate-400 font-normal">(D{stop.day})</span>
+                              ) : null}
+                            </div>
+                            <span className="font-semibold text-slate-700 dark:text-slate-300">
+                              {stop.scheduledDeparture !== '--' ? stop.scheduledDeparture : stop.scheduledArrival}
+                            </span>
+                          </div>
+
+                          {/* Act Time (Red if late, Green if on time) */}
+                          <div className="text-right font-mono">
+                            <div className={`text-[10px] uppercase font-bold flex items-center justify-end gap-1 ${isDelayed ? 'text-red-500' : 'text-emerald-500'}`}>
+                              <span>Act</span>
+                              {stop.estimatedArrivalDate ? (
+                                <span className="text-[9px] font-normal">({stop.estimatedArrivalDate.replace(/^[A-Za-z]+,\s*/, '')})</span>
+                              ) : null}
+                            </div>
+                            <span className={`font-bold ${isDelayed ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                              {stop.estimatedDeparture !== '--' ? stop.estimatedDeparture : stop.estimatedArrival}
+                            </span>
+                          </div>
+
+                          {/* Delay Block: Late by Xm or Departed On Time */}
+                          <div className="shrink-0 flex items-center gap-1.5">
+                            {isDelayed ? (
+                              <span className="inline-block px-2 py-0.5 rounded bg-red-600 text-white font-bold text-[10px] tracking-wide shadow-xs uppercase">
+                                +{stop.delayArrivalMinutes}m Late
+                              </span>
+                            ) : (
+                              <span className="inline-block px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px] tracking-wide shadow-xs uppercase">
+                                On Time
+                              </span>
+                            )}
+                            <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-[10px] font-bold uppercase tracking-wider">
+                              Departed
+                            </span>
+                          </div>
                         </div>
                       ) : (
-                        <div className="text-right">
-                          <div className="font-mono font-bold text-slate-950 dark:text-white flex items-center justify-end gap-1">
-                            <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase">ETA</span>
-                            <span>{stop.estimatedArrival !== '--' ? stop.estimatedArrival : stop.estimatedDeparture}</span>
+                        <div className="flex items-center gap-3">
+                          {/* Sch Time (Neutral / White) */}
+                          <div className="text-right font-mono">
+                            <div className="text-[10px] text-slate-400 dark:text-slate-500 uppercase flex items-center justify-end gap-1">
+                              <span>Sch</span>
+                              {stop.scheduledArrivalDate ? (
+                                <span className="text-[9px] text-slate-400 font-normal">({stop.scheduledArrivalDate.replace(/^[A-Za-z]+,\s*/, '')})</span>
+                              ) : stop.day > 1 ? (
+                                <span className="text-[9px] text-slate-400 font-normal">(D{stop.day})</span>
+                              ) : null}
+                            </div>
+                            <span className="font-semibold text-slate-700 dark:text-slate-200">
+                              {stop.scheduledArrival !== '--' ? stop.scheduledArrival : stop.scheduledDeparture}
+                            </span>
                           </div>
-                          <div className="text-[11px] text-slate-400 dark:text-slate-500 font-mono flex items-center justify-end gap-1">
-                            <span>STA:</span>
-                            <span className="text-slate-600 dark:text-slate-400">{stop.scheduledArrival !== '--' ? stop.scheduledArrival : stop.scheduledDeparture}</span>
+
+                          {/* Exp Time (Red if late, Green if on time) */}
+                          <div className="text-right font-mono">
+                            <div className={`text-[10px] uppercase font-bold flex items-center justify-end gap-1 ${isDelayed ? 'text-red-500' : 'text-emerald-500'}`}>
+                              <span>Exp</span>
+                              {stop.estimatedArrivalDate ? (
+                                <span className="text-[9px] font-normal">({stop.estimatedArrivalDate.replace(/^[A-Za-z]+,\s*/, '')})</span>
+                              ) : null}
+                            </div>
+                            <span className={`font-bold ${isDelayed ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+                              {stop.estimatedArrival !== '--' ? stop.estimatedArrival : stop.estimatedDeparture}
+                            </span>
+                          </div>
+
+                          {/* NTES Delay Block (Red/Green) */}
+                          <div className="shrink-0">
+                            {isDelayed ? (
+                              <span className="inline-block px-2 py-0.5 rounded bg-red-600 text-white font-bold text-[10px] tracking-wide shadow-xs uppercase">
+                                +{stop.delayArrivalMinutes}m Late
+                              </span>
+                            ) : (
+                              <span className="inline-block px-2 py-0.5 rounded bg-emerald-600 text-white font-bold text-[10px] tracking-wide shadow-xs uppercase">
+                                On Time
+                              </span>
+                            )}
                           </div>
                         </div>
                       )}
@@ -179,7 +250,7 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
                       <button
                         type="button"
                         onClick={e => toggleExpand(stop.stationCode, e)}
-                        className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700 transition-colors"
+                        className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700 transition-colors ml-1"
                         title="View station details"
                       >
                         {isExpanded ? (
@@ -196,11 +267,6 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
                     <span>{stop.distanceFromOriginKm} km from start</span>
                     {stop.platform && <span>Platform {stop.platform}</span>}
                     {stop.haltMinutes > 0 && <span>Halt: {stop.haltMinutes}m</span>}
-                    {isDelayed && (
-                      <span className="text-amber-700 dark:text-amber-400 font-medium font-mono text-[11px]">
-                        +{stop.delayArrivalMinutes}m delay
-                      </span>
-                    )}
                   </div>
 
                   {/* Expanded Station Card */}
@@ -212,7 +278,7 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
                             Scheduled Arrival
                           </span>
                           <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
-                            {stop.scheduledArrival}
+                            {stop.scheduledArrival} {stop.scheduledArrivalDate ? <span className="text-[10px] text-slate-400 font-normal">({stop.scheduledArrivalDate})</span> : (stop.day > 1 ? <span className="text-[10px] text-amber-500 font-normal">(Day {stop.day})</span> : '')}
                           </span>
                         </div>
                         <div>
@@ -220,7 +286,7 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
                             Scheduled Departure
                           </span>
                           <span className="font-mono font-semibold text-slate-800 dark:text-slate-200">
-                            {stop.scheduledDeparture}
+                            {stop.scheduledDeparture} {stop.scheduledArrivalDate ? <span className="text-[10px] text-slate-400 font-normal">({stop.scheduledArrivalDate})</span> : ''}
                           </span>
                         </div>
                         <div>

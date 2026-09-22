@@ -1,37 +1,53 @@
 import unittest
 from ml_system.src.inference.pipeline import RealTimeETAPredictor
-from ml_system.src.simulator.rtis_simulator import RTISTelemetrySimulator
 
-class TestInferenceAndSimulator(unittest.TestCase):
-    def test_inference_pipeline(self):
-        predictor = RealTimeETAPredictor()
-        res = predictor.predict_eta(
-            train_number="22436",
-            timestamp_str="2026-08-15T07:30:00",
-            latitude=27.8974,
-            longitude=78.0880,
-            speed_kmh=118.0,
-            current_delay_min=8.0
+class TestInferencePipeline(unittest.TestCase):
+    def setUp(self):
+        self.predictor = RealTimeETAPredictor()
+
+    def test_rajasthan_train_22491_canonical_itinerary(self):
+        """Test Mandore Superfast Express (22491) JU -> DLI"""
+        res = self.predictor.predict_eta(
+            train_number="22491",
+            current_delay_min=12.0
         )
-        self.assertEqual(res["train_number"], "22436")
-        self.assertTrue(res["current_location"]["is_valid"])
-        self.assertEqual(res["current_location"]["nearest_station"], "ALJN")
-        
-        dest_pred = res["predictions"]["destination"]
-        self.assertEqual(dest_pred["station_code"], "CNB")
-        self.assertGreater(dest_pred["predicted_remaining_minutes"], 0)
-        self.assertNotEqual(dest_pred["predicted_eta"], "")
+        self.assertEqual(res["train_number"], "22491")
+        self.assertEqual(res["train_name"], "Mandore Superfast Express")
+        self.assertEqual(res["category"], "Superfast")
+        self.assertEqual(res["predictions"]["destination"]["station_code"], "DLI")
+        self.assertEqual(res["telemetry"]["telemetry_status"], "UNAVAILABLE")
+        self.assertIsNone(res["current_location"]["latitude"])
+        self.assertIsNone(res["current_location"]["longitude"])
+        self.assertGreater(res["predictions"]["destination"]["predicted_remaining_minutes"], 0)
 
-    def test_simulator_step_and_disruption(self):
-        sim = RTISTelemetrySimulator()
-        step_normal = sim.step(10.0)
-        self.assertGreater(step_normal["simulator_state"]["km_position"], 0)
-        self.assertGreater(step_normal["simulator_state"]["current_speed_kmh"], 100.0)
-        
-        sim.inject_fog(0.85)
-        step_fog = sim.step(10.0)
-        self.assertEqual(step_fog["simulator_state"]["active_disruption"], "DENSE_FOG_WARNING")
-        self.assertLessEqual(step_fog["simulator_state"]["current_speed_kmh"], 60.0)
+    def test_rajasthan_train_14888_barmer_rishikesh(self):
+        """Test Barmer - Rishikesh Express (14888) BME -> RKSH"""
+        res = self.predictor.predict_eta(
+            train_number="14888",
+            current_delay_min=20.0
+        )
+        self.assertEqual(res["train_number"], "14888")
+        self.assertEqual(res["train_name"], "Barmer - Rishikesh Express")
+        self.assertEqual(res["predictions"]["destination"]["station_code"], "RKSH")
+
+    def test_honest_telemetry_gps_mapping(self):
+        """Test that real coordinates within Rajasthan match correctly to nearest station"""
+        # Jaipur coordinates: lat 26.9202, lon 75.7869
+        res = self.predictor.predict_eta(
+            train_number="22491",
+            latitude=26.9202,
+            longitude=75.7869,
+            speed_kmh=90.0,
+            current_delay_min=5.0
+        )
+        self.assertEqual(res["telemetry"]["telemetry_status"], "AVAILABLE")
+        self.assertEqual(res["current_location"]["nearest_station"], "JP")
+        self.assertEqual(res["current_location"]["route_status"], "CONSISTENT")
+
+    def test_nonexistent_train_raises_error(self):
+        """Non-existent train raises error"""
+        with self.assertRaises(ValueError):
+            self.predictor.predict_eta(train_number="999999")
 
 if __name__ == '__main__':
     unittest.main()

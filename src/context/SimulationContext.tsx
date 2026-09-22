@@ -86,25 +86,20 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   };
 
   const advanceSimulatedTime = (minutes: number) => {
-    // Parse simulated time "10:42 AM"
-    const [time, period] = simulatedTime.split(' ');
-    const [hStr, mStr] = time.split(':');
-    let h = parseInt(hStr, 10);
-    let m = parseInt(mStr, 10);
-    if (period === 'PM' && h !== 12) h += 12;
-    if (period === 'AM' && h === 12) h = 0;
+    // Parse 24-hour simulated time "22:42"
+    const cleanTime = simulatedTime.replace(/ [AP]M/i, '').trim();
+    const [hStr, mStr] = cleanTime.split(':');
+    let h = parseInt(hStr, 10) || 0;
+    let m = parseInt(mStr, 10) || 0;
 
     let totalMins = h * 60 + m + minutes;
     if (totalMins < 0) totalMins += 1440;
     totalMins = totalMins % 1440;
 
-    let newH = Math.floor(totalMins / 60);
+    const newH = Math.floor(totalMins / 60);
     const newM = totalMins % 60;
-    const newPeriod = newH >= 12 ? 'PM' : 'AM';
-    newH = newH % 12;
-    if (newH === 0) newH = 12;
 
-    const newTimeStr = `${newH.toString().padStart(2, '0')}:${newM.toString().padStart(2, '0')} ${newPeriod}`;
+    const newTimeStr = `${newH.toString().padStart(2, '0')}:${newM.toString().padStart(2, '0')}`;
     setSimulatedTime(newTimeStr);
 
     // Update timestamp on all trains
@@ -231,7 +226,7 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const resetToDefaults = () => {
     setTrains(INITIAL_TRAINS);
-    setSimulatedTime('10:42 AM');
+    setSimulatedTime(getCurrentISTString());
     setActiveScenarioId('scenario-c');
     setSelectedTargetStations({});
   };

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Train } from '../../types/train';
-import { Navigation, Gauge, Clock, ShieldCheck, MapPin, Radio } from 'lucide-react';
+import { Navigation, Gauge, Clock, ShieldCheck, MapPin, Radio, Calendar } from 'lucide-react';
 
 interface CurrentLocationBannerProps {
   train: Train;
@@ -35,6 +35,16 @@ export const CurrentLocationBanner: React.FC<CurrentLocationBannerProps> = ({ tr
 
         {/* Right: Telemetry chips */}
         <div className="flex items-center gap-2.5 flex-wrap self-start md:self-auto border-t md:border-t-0 pt-3 md:pt-0 border-slate-100 dark:border-slate-800">
+          {train.startDate && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200/80 dark:border-indigo-800 text-xs">
+              <Calendar className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
+              <span className="text-slate-500 dark:text-slate-400 text-[11px]">Journey:</span>
+              <span className="font-mono font-bold text-indigo-950 dark:text-indigo-200">
+                {train.startDate}
+              </span>
+            </div>
+          )}
+
           {status.currentSpeedKmph !== undefined && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs">
               <Gauge className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400" />

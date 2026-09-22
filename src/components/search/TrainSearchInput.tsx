@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useSimulation } from '../../context/SimulationContext';
 import { searchStations } from '../../data/mockStations';
 import { searchMasterTrains } from '../../utils/mlApi';
-import { Search, X, Train as TrainIcon, MapPin, Clock, ArrowRight, CornerDownLeft } from 'lucide-react';
+import { Search, X, Train as TrainIcon, MapPin, Clock, ArrowRight, CornerDownLeft, RotateCcw } from 'lucide-react';
 import { TrainStatusBadge } from '../train/TrainStatusBadge';
 
 interface TrainSearchInputProps {
@@ -15,7 +15,7 @@ interface TrainSearchInputProps {
 }
 
 export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
-  placeholder = 'Search train number, train name, or station (e.g., 12461, Mandore, NDLS)',
+  placeholder = 'Search train number, train name, or station (e.g., 14888, 12138, Mandore)',
   autoFocus = false,
   initialValue = '',
   size = 'default',
@@ -33,7 +33,7 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
     destination: string;
   }>>([]);
 
-  const { trains, recentSearches, addRecentSearch } = useSimulation();
+  const { trains, recentSearches, addRecentSearch, clearRecentSearches } = useSimulation();
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -276,7 +276,7 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
 
       {/* Autocomplete / Suggestions Dropdown */}
       {isFocused && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden z-50 text-left animate-in fade-in-50 duration-150">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 overflow-hidden z-[100] text-left animate-in fade-in-50 duration-150">
           {/* If there is a query, show matching results */}
           {query.trim().length > 0 ? (
             <div className="max-h-96 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800">
@@ -405,72 +405,50 @@ export const TrainSearchInput: React.FC<TrainSearchInputProps> = ({
               )}
             </div>
           ) : (
-            /* Recent Searches & Suggested Quick Queries when input is empty */
+            /* Recent Searches & Helpful Search Prompt when input is empty */
             <div className="p-3">
-              {recentSearches.length > 0 && (
+              {recentSearches.length > 0 ? (
                 <div>
                   <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500 flex items-center justify-between">
                     <span className="flex items-center gap-1.5">
                       <Clock className="w-3 h-3 text-slate-400 dark:text-slate-500" /> Recent Searches
                     </span>
+                    <button
+                      type="button"
+                      onClick={clearRecentSearches}
+                      className="text-[10px] text-slate-400 hover:text-red-500 transition-colors cursor-pointer"
+                    >
+                      Clear
+                    </button>
                   </div>
-                  <div className="flex flex-wrap gap-1.5 mt-2">
+                  <div className="flex flex-wrap gap-1.5 mt-1.5">
                     {recentSearches.map((item, idx) => (
                       <button
                         key={idx}
                         type="button"
                         onClick={() => {
                           setQuery(item);
-                          handleSubmit();
+                          navigate(`/search?q=${encodeURIComponent(item)}`);
+                          setIsFocused(false);
                         }}
                         className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-200/80 dark:border-slate-700 transition-colors cursor-pointer"
                       >
+                        <RotateCcw className="w-3 h-3 text-slate-400" />
                         <span>{item}</span>
                       </button>
                     ))}
                   </div>
                 </div>
+              ) : (
+                <div className="py-2 px-1 text-center">
+                  <p className="text-xs font-medium text-slate-600 dark:text-slate-400">
+                    Search across 882 Rajasthan network trains & verified stations
+                  </p>
+                  <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">
+                    Try searching by train number (e.g. 14888, 22491, 12951) or city / station code (e.g. JP, JU, KOTA).
+                  </p>
+                </div>
               )}
-
-              <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800">
-                <div className="px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                  Quick Examples
-                </div>
-                <div className="grid grid-cols-2 gap-1.5 mt-1.5">
-                  <button
-                    type="button"
-                    onClick={() => handleSelectTrain('12951', '12951 Mumbai Rajdhani')}
-                    className="p-2 text-left rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-100 dark:hover:border-slate-700 text-xs transition-colors cursor-pointer"
-                  >
-                    <span className="font-mono font-semibold text-slate-900 dark:text-white">12951</span>
-                    <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Mumbai Rajdhani</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectTrain('22436', '22436 Vande Bharat')}
-                    className="p-2 text-left rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-100 dark:hover:border-slate-700 text-xs transition-colors cursor-pointer"
-                  >
-                    <span className="font-mono font-semibold text-slate-900 dark:text-white">22436</span>
-                    <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Vande Bharat Express</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectStation('NDLS', 'NDLS New Delhi')}
-                    className="p-2 text-left rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-100 dark:hover:border-slate-700 text-xs transition-colors cursor-pointer"
-                  >
-                    <span className="font-mono font-semibold text-slate-900 dark:text-white">NDLS</span>
-                    <span className="text-slate-500 dark:text-slate-400 block text-[11px]">New Delhi Station</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSelectStation('MMCT', 'MMCT Mumbai Central')}
-                    className="p-2 text-left rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 border border-transparent hover:border-slate-100 dark:hover:border-slate-700 text-xs transition-colors cursor-pointer"
-                  >
-                    <span className="font-mono font-semibold text-slate-900 dark:text-white">MMCT</span>
-                    <span className="text-slate-500 dark:text-slate-400 block text-[11px]">Mumbai Central</span>
-                  </button>
-                </div>
-              </div>
             </div>
           )}
         </div>

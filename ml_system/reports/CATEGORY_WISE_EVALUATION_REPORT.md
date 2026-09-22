@@ -1,26 +1,54 @@
-# Category-Wise Generalization & Evaluation Report
+# Indian Railways Dynamic Train ETA Forecasting System
+## Category-Wise Operational Analysis & Priority Tier Modeling
 
-## Overview
-Indian Railways operates diverse coaching services with distinct priority tiers, signalling precedence, and operational rules. To guarantee network-wide equity, the model was evaluated independently across all coaching categories.
+**Problem Statement ID**: 26028 | Ministry of Railways  
+**Geographic Scope**: Rajasthan Railway Network Scope  
+**Report Date**: 2026-09-20  
+**Model Status**: `INSUFFICIENT_GROUND_TRUTH` (Supervised ML Gated)  
 
-## Performance Breakdown by Coaching Category
+---
 
-| Category | Priority Tier | Sample Count | Baseline 2 MAE (min) | XGBoost MAE (min) | Improvement (%) | ±15m Punctuality (%) | Interval Coverage (ECP) | Sharpness (min) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Rajdhani** | Tier 1 | 200 | 20.15 | 6.95 | 65.5% | 82.0% | 86.0% | 18.65m |
-| **Vande Bharat** | Tier 1 | 200 | 23.79 | 7.27 | 69.4% | 81.0% | 88.0% | 20.05m |
-| **Shatabdi** | Tier 2 | 700 | 49.26 | 13.81 | 72.0% | 61.43% | 84.57% | 45.84m |
-| **Superfast** | Tier 3 | 2,300 | 77.09 | 19.31 | 75.0% | 49.65% | 86.0% | 67.49m |
-| **Express** | Tier 4 | 1,005 | 118.49 | 22.77 | 80.8% | 45.47% | 83.28% | 76.41m |
-| **MEMU** | Tier 5 | 600 | 75.25 | 20.29 | 73.0% | 45.33% | 83.0% | 63.32m |
-| **Passenger** | Tier 5 | 296 | 61.95 | 15.49 | 75.0% | 57.43% | 87.5% | 49.00m |
-| **Suburban** | Tier 5 | 200 | 34.23 | 8.49 | 75.2% | 76.5% | 88.5% | 25.91m |
+### 1. Coaching Category Audit Status
 
-## Analysis & Operational Insights
-1. **Ordinary Passenger & Suburban Services (Tier 5)**:
-   - Passenger and MEMU trains experience frequent loop-line crossings and lower dispatch priority.
-   - The ML model captures dispatch precedence dynamics, outperforming Baseline 2 propagation by significant margins.
-2. **Superfast & Express Trains (Tier 3-4)**:
-   - Represent the majority share of trunk network coaching volume. XGBoost achieves superior calibration with sharpness averaging under 15 minutes.
-3. **High-Priority Corridors (Rajdhani & Vande Bharat, Tier 1)**:
-   - High speed and sectional recovery headroom allow Tier 1 trains to make up 15-25% of minor delays on open corridors, which the non-linear gradient booster captures accurately.
+In strict accordance with Section 20 of the instructions, all candidate categories within the Rajasthan network have been audited and classified as:
+1. **Present and Evaluated** (Active regular services in Rajasthan scope)
+2. **Present but Insufficient Data** (Infrequent / low-frequency services)
+3. **Not Present** (No services operating on Rajasthan lines)
+
+| Train Category | Presence in Rajasthan Network | Operational Status | Active Trains in RJ Scope | Priority Tier | Operational Running Characteristics |
+|:---|:---:|:---:|:---:|:---:|:---|
+| **Superfast Express** | Present | **Present & Active** | 278 trains | Tier 3 | High commercial speed; scheduled halts at major junctions |
+| **Express / Mail** | Present | **Present & Active** | 412 trains | Tier 4 | Standard long-distance services with intermediate halts |
+| **Passenger / Ordinary** | Present | **Present & Active** | 134 trains | Tier 5 | Frequent station halts; looped into sidings for higher priority |
+| **Vande Bharat Express** | Present | **Present & Active** | 18 trains | Tier 1 | MPS 130 km/h; absolute signaling precedence |
+| **Rajdhani Express** | Present | **Present & Active** | 14 trains | Tier 1 | Premium corridor trains (e.g. Mumbai Rajdhani via Kota) |
+| **Garib Rath / Shatabdi** | Present | **Present & Active** | 16 trains | Tier 2 | High priority air-conditioned point-to-point services |
+| **MEMU / DEMU** | Present | *Low Frequency* | 6 trains | Tier 5 | Short-distance commuter shuttles (e.g. Kota-Bina) |
+| **Special / Seasonal** | Present | *Seasonal* | 4 trains | Tier 4 | Seasonal festival trains with non-standard timetable paths |
+| **EMU / Suburban** | Absent | **Not Present** | 0 trains | — | Suburban EMU services do not operate in Rajasthan |
+| **Duronto Express** | Absent | **Not Present** | 0 trains | — | No direct Duronto services on Rajasthan lines |
+| **Jan Shatabdi** | Absent | **Not Present** | 0 trains | — | No dedicated Jan Shatabdi in verified Rajasthan routes |
+
+---
+
+### 2. Priority-Tier Recovery Parameters (Baseline 4 Heuristic)
+
+The Delay Recovery Model (Baseline 4) parameterizes recovery behavior based on operational dispatch precedence:
+
+$$\text{Expected Recovery} = \min\left(0.40 \times \text{Delay}_{\text{current}}, \frac{\text{Distance Remaining}}{100.0} \times \alpha_{\text{tier}}\right)$$
+
+| Category | Commercial Precedence | Recovery Factor ($\alpha_{\text{tier}}$) | Timetable Recovery Slack | Operational Siding Behavior |
+|:---|:---:|:---:|:---:|:---|
+| **Vande Bharat Express** | Highest (Tier 1) | $+5.0\text{ min / 100 km}$ | 20–30 min terminal padding | Never looped into sidings; green aspect clearance |
+| **Rajdhani Express** | Highest (Tier 1) | $+5.0\text{ min / 100 km}$ | 20–30 min terminal padding | Full line clear across double/triple track |
+| **Garib Rath / Shatabdi** | High (Tier 2) | $+3.5\text{ min / 100 km}$ | 15–20 min terminal padding | High priority overtakes; minimal siding halts |
+| **Superfast Express** | Moderate (Tier 3) | $+2.5\text{ min / 100 km}$ | 10–15 min terminal padding | Moderate recovery on open double lines |
+| **Express / Mail** | Standard (Tier 4) | $+1.0\text{ min / 100 km}$ | 5–10 min terminal padding | Subject to intermediate precedence delays |
+| **Passenger / Ordinary** | Lowest (Tier 5) | $-1.5\text{ min / 100 km}$ | Minimal / zero padding | Frequently looped into sidings; delay accumulates |
+
+---
+
+### 3. Scientific Statement on Numerical Metrics
+- **Quantitative Error Metrics Not Claimed**: In the absence of recorded point-in-time actual arrivals, **no category-wise MAE or RMSE figures are reported**.
+- The parameters above reflect qualitative operational dispatch rules and timetable engineering principles implemented in Baseline 4.
+- When an authorized actual-arrival feed is connected, empirical category-wise validation can be computed using the test framework in this codebase.

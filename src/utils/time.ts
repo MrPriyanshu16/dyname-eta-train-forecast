@@ -1,25 +1,22 @@
 /**
- * Returns the current live India Standard Time (IST, UTC+5:30) as a formatted string e.g. "10:46 PM"
+ * Returns the current live India Standard Time (IST, UTC+5:30) as a 24-hour railway time string e.g. "22:45"
  */
 export function getCurrentISTString(): string {
   try {
-    return new Intl.DateTimeFormat('en-IN', {
+    return new Intl.DateTimeFormat('en-GB', {
       timeZone: 'Asia/Kolkata',
-      hour: 'numeric',
-      minute: 'numeric',
-      hour12: true
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
     }).format(new Date());
   } catch {
     const d = new Date();
     // Fallback to manual UTC+5:30 offset
     const utc = d.getTime() + (d.getTimezoneOffset() * 60000);
     const istDate = new Date(utc + (3600000 * 5.5));
-    let hours = istDate.getHours();
-    const minutes = istDate.getMinutes();
-    const ampm = hours >= 12 ? 'PM' : 'AM';
-    hours = hours % 12;
-    hours = hours ? hours : 12;
-    return `${hours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+    const hours = istDate.getHours().toString().padStart(2, '0');
+    const minutes = istDate.getMinutes().toString().padStart(2, '0');
+    return `${hours}:${minutes}`;
   }
 }
 
@@ -75,7 +72,7 @@ export function getDelayBadgeText(delayMinutes: number): string {
   }
 }
 
-export function getRemainingTimeText(estimatedTimeStr: string, currentTimeStr: string = '10:42'): string {
+export function getRemainingTimeText(estimatedTimeStr: string, currentTimeStr: string = getCurrentISTString()): string {
   const estMins = parseTimeToMinutes(estimatedTimeStr);
   const curMins = parseTimeToMinutes(currentTimeStr);
   if (estMins === -1 || curMins === -1) return '';

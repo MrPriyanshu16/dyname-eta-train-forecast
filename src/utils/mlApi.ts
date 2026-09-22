@@ -9,15 +9,21 @@ export interface MLPredictionResponse {
   train_number: string;
   train_name: string;
   timestamp: string;
+  telemetry?: {
+    telemetry_status: string;
+    latitude: number | null;
+    longitude: number | null;
+    speed_kmh: number | null;
+  };
   current_location: {
-    latitude: number;
-    longitude: number;
-    speed_kmh: number;
+    latitude: number | null;
+    longitude: number | null;
+    speed_kmh: number | null;
     nearest_station: string;
     current_section: string;
     distance_from_origin_km: number;
     distance_remaining_km: number;
-    route_status: 'CONSISTENT' | 'INCONSISTENT' | 'UNCERTAIN';
+    route_status: string;
     is_valid: boolean;
     validation_issues: string[];
   };
@@ -109,11 +115,12 @@ export async function checkMLBackendHealth(): Promise<boolean> {
 
 export async function predictETAWithML(params: {
   train_number: string;
-  timestamp: string;
-  latitude: number;
-  longitude: number;
-  speed: number;
+  timestamp?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  speed?: number | null;
   current_delay_minutes?: number;
+  current_station_code?: string;
   weather_fog_index?: number;
 }): Promise<MLPredictionResponse | null> {
   try {

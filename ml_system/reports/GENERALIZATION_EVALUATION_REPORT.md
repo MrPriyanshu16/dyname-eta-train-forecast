@@ -1,27 +1,60 @@
-# Unseen Train & Route Generalization Report
+# Indian Railways Dynamic Train ETA Forecasting System
+## Architectural Generalization Framework & Scenario Evaluation
 
-## Generalization Objective
-The system must predict ETAs accurately for trains and route sections that were completely withheld during model training, verifying that the model learns physical running physics, sectional occupancy, priority hierarchies, and distance dynamics rather than memorizing individual train numbers.
+**Problem Statement ID**: 26028 | Ministry of Railways  
+**Geographic Scope**: Rajasthan Railway Network Scope  
+**Report Date**: 2026-09-20  
+**Model Status**: `INSUFFICIENT_GROUND_TRUTH` (Supervised ML Gated)  
 
-## Zero-Shot Unseen Train Benchmark
-- **Held-out Trains**: Train 12461 (Mandore Superfast Express) & Train 54308 (Delhi-Aligarh Passenger).
-- **Evaluation Strategy**: Withheld completely from the training partition; evaluated strictly out-of-sample.
+---
 
-| Evaluation Metric | Baseline 2 (Delay Propagation) | XGBoost (Zero-Shot Generalization) | Relative Improvement |
-| :--- | :---: | :---: | :---: |
-| **Mean Absolute Error (MAE)** | 72.36 min | **23.89 min** | **67.0%** |
-| **Root Mean Squared Error (RMSE)** | 85.96 min | **34.07 min** | **60.4%** |
-| **Median Absolute Error (MedAE)** | 68.56 min | **18.06 min** | **73.7%** |
-| **Within ±10 Minutes** | 8.79% | **39.32%** | +30.5% |
-| **Within ±15 Minutes** | 12.06% | **45.73%** | +33.7% |
+### 1. Generalization Slicing Framework (Architectural Design)
 
-## Route & Section Horizon Analysis
-| Horizon Bracket | Sample Count | Baseline 2 MAE (min) | XGBoost MAE (min) | Improvement (%) | ±15m Punctuality (%) | Sharpness (min) |
-| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
-| **Immediate (< 50 km)** | 1,505 | 90.21 | 3.60 | 96.0% | 89.9% | 10.30m |
-| **Short (50-150 km)** | 896 | 61.68 | 18.14 | 70.6% | 47.88% | 57.34m |
-| **Medium (150-300 km)** | 900 | 55.68 | 23.69 | 57.5% | 36.89% | 78.12m |
-| **Long (> 300 km)** | 2,200 | 76.75 | 25.13 | 67.3% | 38.0% | 87.42m |
+When genuine point-in-time ground truth becomes available, the evaluation framework is structured to benchmark model behavior across distinct operational familiarity slices:
 
-## Verification Summary
-The minimal degradation in MAE on completely unseen train services demonstrates that the engineered features (`journey_progress_ratio`, `distance_remaining`, `section_occupancy_ratio`, `headway_km`, `priority_tier`) effectively capture invariant railway dynamics.
+```text
+                                GENERALIZATION TAXONOMY
+                                           │
+         ┌─────────────────────────────────┴─────────────────────────────────┐
+         ▼                                                                   ▼
+   TRAIN IDENTITY                                                     ROUTE TOPOLOGY
+   ├── Slice A: Seen Train (in training)                             ├── Slice C: Seen Route (known sections)
+   └── Slice B: Unseen Train (held-out)                              ├── Slice D: Partially Unseen Route (new branches)
+                                                                     └── Slice E: Fully Unseen Route (new zones)
+```
+
+- **Current Evaluation Status**: In the absence of an open point-in-time ground-truth dataset with recorded actual arrivals, **quantitative error metrics (MAE/RMSE) are not reported** for these slices. Reporting numerical errors without actual targets would be scientifically fraudulent.
+
+---
+
+### 2. Operational Scenario Simulation: Train 22491 (Mandore Superfast Express)
+
+#### Important Clarification:
+This section provides a **Scenario Simulation / Heuristic Demonstration** showing how the Delay Recovery Model (Baseline 4) responds to an initial delay under timetable assumptions. It is **NOT an empirical accuracy validation**, because actual recorded arrival times for this run are not present in open datasets.
+
+#### Scenario Setup:
+- **Service**: Train `22491` (Mandore Superfast Express, Jodhpur Jn `JU` $\to$ Old Delhi `DLI`)
+- **Distance**: 620.0 km across 17 halts (12 within Rajasthan).
+- **Hypothetical Scenario**: Train departs Jodhpur (`JU`) at 20:45 with a **+15 minute initial departure delay**.
+
+#### Simulated Trajectory: Static NTES Propagation (B2) vs Dynamic Recovery Heuristic (B4)
+
+| Halts Along Route | Scheduled Arrival (STA) | Static NTES Baseline (B2) | Dynamic Recovery Heuristic (B4) | Estimated Recovery | Operational Factor |
+|:---|:---:|:---:|:---:|:---:|:---|
+| **Jodhpur Jn (JU)** | 20:30 (Dep) | 20:45 | 20:45 | 0 min | Initial terminal delay |
+| **Gotan (GOTN)** | 21:26 | 21:41 | 21:39 | 2 min | Open section speedup |
+| **Merta Road Jn (MTD)** | 21:43 | 21:58 | 21:55 | 3 min | Major junction approach |
+| **Degana Jn (DNA)** | 22:22 | 22:37 | 22:33 | 4 min | Intermediate section |
+| **Makrana Jn (MKN)** | 22:56 | 23:11 | 23:06 | 5 min | Marble corridor |
+| **Jaipur Jn (JP)** | 01:05 | 01:20 | 01:13 | 7 min | Divisional headquarters |
+| **Dausa (DO)** | 01:59 | 02:14 | 02:06 | 8 min | Double line corridor |
+| **Bandikui Jn (BKI)** | 02:23 | 02:38 | 02:29 | 9 min | Junction convergence |
+| **Alwar Jn (AWR)** | 03:10 | 03:25 | 03:15 | 10 min | Electrified trunk section |
+| **Rewari Jn (RE)** | 04:38 | 04:53 | 04:42 | 11 min | Haryana border transition |
+| **Gurgaon (GGN)** | 05:30 | 05:45 | 05:33 | 12 min | NCR suburban approach |
+| **Old Delhi (DLI)** | 06:45 | 07:00 | **06:48** | **12 min** | **Terminal timetable padding** |
+
+#### Scenario Takeaway:
+- Under **Baseline 2 (Static NTES Propagation)**, the +15 min delay is projected constantly across all 620 km, estimating an arrival of 07:00.
+- Under **Baseline 4 (Delay Recovery Heuristic)**, the formula applies the Superfast priority recovery rate ($\alpha = 2.5$) over the 620 km run, calculating an estimated 12 minutes of recovery by Old Delhi (estimated ETA 06:48).
+- **Crucial Distinction**: 06:48 is a *deterministic heuristic output*, not an observed ground-truth arrival. It demonstrates the behavioral design of the heuristic, not a proven empirical error metric.

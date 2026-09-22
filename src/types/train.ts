@@ -30,6 +30,8 @@ export interface StationStop {
   scheduledDeparture: string; // "18:45" or "--"
   estimatedArrival: string;
   estimatedDeparture: string;
+  scheduledArrivalDate?: string;
+  estimatedArrivalDate?: string;
   delayArrivalMinutes: number;
   delayDepartureMinutes: number;
   platform: string;
@@ -61,6 +63,7 @@ export interface Train {
   id: string; // Train number e.g. "12951"
   number: string;
   name: string;
+  startDate?: string;
   type: TrainType;
   origin: {
     code: string;

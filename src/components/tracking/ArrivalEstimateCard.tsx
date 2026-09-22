@@ -12,6 +12,7 @@ import {
   ShieldCheck,
   Cpu,
   TrendingDown,
+  Radio,
   Info
 } from 'lucide-react';
 import { TrainStatusBadge } from '../train/TrainStatusBadge';
@@ -36,6 +37,7 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
   const isCompleted = train.currentStatus.state === 'COMPLETED';
   const isDelayed = targetStation.delayArrivalMinutes > 0;
   const isTargetDestination = targetStation.stationCode === train.destination.code;
+  const isOrigin = targetStation.stationCode === train.origin.code;
 
   // Poll / Query ML Model when train or target station changes
   useEffect(() => {
@@ -45,10 +47,11 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
       const res = await predictETAWithML({
         train_number: train.number,
         timestamp: new Date().toISOString(),
-        latitude: 27.2081, // TDL Corridor coordinates
-        longitude: 78.2393,
-        speed: train.currentStatus.currentSpeedKmph || 115.0,
+        latitude: null,
+        longitude: null,
+        speed: train.currentStatus.currentSpeedKmph ?? null,
         current_delay_minutes: train.currentStatus.delayMinutes || 0.0,
+        current_station_code: targetStation.stationCode,
         weather_fog_index: 0.0
       });
       if (isMounted && res) {
@@ -94,7 +97,7 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
         targetStation.estimatedArrival !== '--'
           ? targetStation.estimatedArrival
           : targetStation.estimatedDeparture,
-        train.currentStatus.lastUpdated.replace(' AM', '').replace(' PM', '')
+        train.currentStatus.lastUpdated.replace(/ [AP]M/i, '')
       );
 
   return (
@@ -133,16 +136,14 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
             <ChevronDown className="w-3.5 h-3.5 text-slate-500 dark:text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
           </div>
 
-          {/* Machine Learning Model Indicator Badge */}
-          {mlData ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/80 dark:border-indigo-800">
-              <Sparkles className="w-3 h-3 text-indigo-500 animate-pulse" />
-              <span>XGBoost ML Active</span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
-              <Cpu className="w-3 h-3 text-slate-400" />
-              <span>{isMlLoading ? 'Connecting to ML...' : 'Local Engine'}</span>
+          {/* Live Telemetry Indicator Badge */}
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200/80 dark:border-emerald-800">
+            <Radio className="w-3 h-3 text-emerald-500 animate-pulse" />
+            <span>Official NTES Live Tracking</span>
+          </span>
+          {train.startDate && (
+            <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded border border-slate-200/80 dark:border-slate-700">
+              Journey Date: <strong className="text-slate-900 dark:text-white">{train.startDate}</strong>
             </span>
           )}
         </div>
@@ -161,103 +162,117 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
         </div>
       </div>
 
-      {/* Main ETA Display Section */}
-      <div className="py-6 sm:py-7 grid grid-cols-1 md:grid-cols-12 gap-6 items-baseline">
-        {/* Left dominant block: Station and Estimated Time */}
-        <div className="md:col-span-8 space-y-4">
-          <div className="flex items-baseline gap-3 flex-wrap">
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-              {targetStation.stationName}
-            </h1>
-            <span className="font-mono text-sm font-semibold text-slate-500 dark:text-slate-400 px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800">
-              {targetStation.stationCode}
-            </span>
-          </div>
-
-          {/* Large tabular numerals for arrival estimate */}
-          <div className="flex items-baseline gap-5 flex-wrap">
-            <div>
-              <div className="text-xs uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 mb-1 flex items-center gap-1.5">
-                <span>Dynamic Estimated Arrival (ETA)</span>
-                {mlData && <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold">● AI PREDICTION</span>}
-              </div>
-              <div className="font-mono text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 dark:text-white tabular-nums">
-                {activeETA}
-              </div>
+      {/* Main NTES-Style Clean Status & ETA Display Section */}
+      <div className="py-5 space-y-5">
+        {/* Station Title & Platform */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              {isTargetDestination ? 'Target Destination' : (isOrigin ? 'Origin Station' : 'Selected Intermediate Station')}
             </div>
-
-            {/* Scheduled Timetable Comparison */}
-            <div className="border-l border-slate-200 dark:border-slate-800 pl-4 sm:pl-5 space-y-1.5">
-              <div className="text-xs text-slate-500 dark:text-slate-400">
-                Scheduled Timetable (STA):{' '}
-                <span className="font-mono font-bold text-slate-800 dark:text-slate-200 tabular-nums">
-                  {scheduledTime}
-                </span>
-              </div>
-
-              {/* NTES Baseline comparison if ML is connected */}
-              {ntesBaselineETA && (
-                <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                  <span>Static NTES Baseline:</span>
-                  <span className="font-mono text-slate-600 dark:text-slate-300 font-semibold line-through">
-                    {ntesBaselineETA}
-                  </span>
-                </div>
-              )}
-
-              <div className="text-xs font-medium">
-                {isDelayed ? (
-                  <span className="text-amber-700 dark:text-amber-400 font-semibold flex items-center gap-1">
-                    <AlertTriangle className="w-3.5 h-3.5" />
-                    +{targetStation.delayArrivalMinutes} min behind schedule
-                  </span>
-                ) : (
-                  <span className="text-emerald-700 dark:text-emerald-400 font-semibold flex items-center gap-1">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    On schedule
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Statistical Uncertainty / Prediction Interval (from ML) */}
-          {mlDestPred && isTargetDestination && (
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900 text-xs text-indigo-900 dark:text-indigo-200">
-              <ShieldCheck className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-              <span>
-                <strong>80% Prediction Interval:</strong>{' '}
-                <span className="font-mono font-bold">
-                  {mlDestPred.prediction_interval_80pct.lower_eta} – {mlDestPred.prediction_interval_80pct.upper_eta}
-                </span>{' '}
-                <span className="text-[11px] text-indigo-600 dark:text-indigo-400">(Quantile regression bounds)</span>
+            <div className="flex items-center gap-2.5 mt-0.5">
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                {targetStation.stationName}
+              </h1>
+              <span className="font-mono text-sm font-bold px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
+                {targetStation.stationCode}
               </span>
             </div>
-          )}
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-auto">
+            {targetStation.platform && (
+              <span className="text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700">
+                Platform {targetStation.platform}
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Right side: Countdown & proximity badge */}
-        <div className="md:col-span-4 bg-slate-50 dark:bg-slate-850 rounded-xl p-4 border border-slate-100 dark:border-slate-800 flex flex-col justify-center space-y-2">
-          <div className="text-[11px] uppercase tracking-wider font-semibold text-slate-400 dark:text-slate-500 mb-0.5">
-            Status Countdown
-          </div>
-          <div className="text-lg font-bold text-indigo-900 dark:text-indigo-300">
-            {remainingText}
-          </div>
-          <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-            {train.currentStatus.statusExplanation}
-          </p>
-
-          {/* Route Consistency Tag */}
-          {mlData && (
-            <div className="pt-2 border-t border-slate-200/60 dark:border-slate-750 flex items-center justify-between text-[11px]">
-              <span className="text-slate-400">Route Geometry:</span>
-              <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3" />
-                {mlData.current_location.route_status}
-              </span>
+        {/* 3 NTES-Style Color-Coded Metric Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {/* Box 1: Scheduled Time (White / Neutral text) */}
+          <div className="p-4 rounded-xl bg-slate-900 text-white border border-slate-800 shadow-xs flex flex-col justify-between">
+            <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1 flex items-center gap-1.5">
+              <Clock className="w-3.5 h-3.5 text-slate-400" />
+              <span>Scheduled Time (STA)</span>
             </div>
-          )}
+            <div className="font-mono text-3xl sm:text-4xl font-extrabold text-white tracking-tight tabular-nums my-1">
+              {scheduledTime}
+            </div>
+            <div className="text-[11px] text-slate-300 flex items-center justify-between">
+              <span>{targetStation.scheduledArrivalDate || (train.startDate ? `Day ${targetStation.day}` : 'Official Indian Railways Timetable')}</span>
+              {targetStation.day > 1 && (
+                <span className="px-1.5 py-0.2 rounded bg-slate-800 text-amber-300 border border-slate-700 font-semibold text-[10px]">
+                  Day {targetStation.day}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Box 2: Actual / Expected Time (Red if Delayed, Green if On Time) */}
+          <div className={`p-4 rounded-xl border shadow-xs flex flex-col justify-between ${
+            isDelayed
+              ? 'bg-red-50/80 dark:bg-red-950/40 border-red-200 dark:border-red-900 text-red-950 dark:text-red-100'
+              : 'bg-emerald-50/80 dark:bg-emerald-950/40 border-emerald-200 dark:border-emerald-900 text-emerald-950 dark:text-emerald-100'
+          }`}>
+            <div className="text-[11px] font-bold uppercase tracking-wider mb-1 flex items-center justify-between">
+              <span className={isDelayed ? 'text-red-700 dark:text-red-400' : 'text-emerald-700 dark:text-emerald-400'}>
+                Actual / Expected Time (ETA)
+              </span>
+              {mlData && (
+                <span className="text-[9px] font-bold px-1.5 py-0.2 rounded bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300">
+                  LIVE TELEMETRY
+                </span>
+              )}
+            </div>
+            <div className={`font-mono text-3xl sm:text-4xl font-extrabold tracking-tight tabular-nums my-1 ${
+              isDelayed ? 'text-red-600 dark:text-red-400' : 'text-emerald-600 dark:text-emerald-400'
+            }`}>
+              {activeETA}
+            </div>
+            <div className={`text-[11px] font-medium flex items-center justify-between ${
+              isDelayed ? 'text-red-700 dark:text-red-300' : 'text-emerald-700 dark:text-emerald-300'
+            }`}>
+              <div className="flex items-center gap-1">
+                {isDelayed ? (
+                  <>
+                    <AlertTriangle className="w-3 h-3 text-red-500 shrink-0" />
+                    <span>{targetStation.estimatedArrivalDate || targetStation.scheduledArrivalDate || 'Expected with delay'}</span>
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 className="w-3 h-3 text-emerald-500 shrink-0" />
+                    <span>{targetStation.estimatedArrivalDate || targetStation.scheduledArrivalDate || 'Running on schedule'}</span>
+                  </>
+                )}
+              </div>
+              {targetStation.day > 1 && (
+                <span className={`px-1.5 py-0.2 rounded font-semibold text-[10px] ${
+                  isDelayed ? 'bg-red-100 dark:bg-red-900/60 text-red-800 dark:text-red-200' : 'bg-emerald-100 dark:bg-emerald-900/60 text-emerald-800 dark:text-emerald-200'
+                }`}>
+                  Day {targetStation.day}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Box 3: Big NTES Solid Color Delay Block */}
+          <div className={`p-4 rounded-xl shadow-xs text-white flex flex-col justify-between ${
+            isDelayed
+              ? 'bg-red-600 dark:bg-red-600'
+              : 'bg-emerald-600 dark:bg-emerald-600'
+          }`}>
+            <div className="text-[11px] font-bold uppercase tracking-wider opacity-90 mb-1">
+              Current Delay Status
+            </div>
+            <div className="text-xl sm:text-2xl font-extrabold tracking-tight my-1">
+              {isDelayed ? `LATE BY ${targetStation.delayArrivalMinutes} MINS` : 'RIGHT TIME (ON TIME)'}
+            </div>
+            <div className="text-[11px] opacity-90 leading-tight">
+              {train.currentStatus.statusExplanation}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -282,8 +297,10 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
         </div>
 
         <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400 font-mono text-[11px]">
-          {train.currentStatus.currentSpeedKmph !== undefined && (
+          {train.currentStatus.currentSpeedKmph !== undefined && train.currentStatus.currentSpeedKmph !== null ? (
             <span>Speed: {train.currentStatus.currentSpeedKmph} km/h</span>
+          ) : (
+            <span className="text-slate-400 dark:text-slate-500">Speed: Offline (Timetable Mode)</span>
           )}
           {train.currentStatus.distanceToNextKm !== undefined && (
             <span>Distance: {train.currentStatus.distanceToNextKm} km to go</span>
