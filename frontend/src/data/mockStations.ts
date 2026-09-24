@@ -1,6 +1,171 @@
 import { Station } from '../types/station';
 
 export const MOCK_STATIONS: Station[] = [
+  // --- PRIMARY RAJASTHAN STATE RAIL NETWORK (NWR) STATIONS ---
+  {
+    code: 'JU',
+    name: 'Jodhpur Junction',
+    city: 'Jodhpur',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 6,
+    facilities: ['High-speed Wi-Fi', 'Executive Air-Conditioned Lounge', 'Waiting Rooms', 'Food Plaza', 'Battery Buggy']
+  },
+  {
+    code: 'JP',
+    name: 'Jaipur Junction',
+    city: 'Jaipur',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 8,
+    facilities: ['Heritage Royal Lounge', 'Free Wi-Fi', 'Food Court', 'Metro Connectivity', 'Prepaid Taxi Stand']
+  },
+  {
+    code: 'AII',
+    name: 'Ajmer Junction',
+    city: 'Ajmer',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 6,
+    facilities: ['Wi-Fi', 'AC Executive Lounge', 'Cloakroom', 'Dargah Pilgrim Helpdesk', 'Jan Aahar Cafeteria']
+  },
+  {
+    code: 'FL',
+    name: 'Phulera Junction',
+    city: 'Phulera',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 5,
+    facilities: ['Wi-Fi', 'Interchange Junction Concourse', 'Waiting Hall', 'Catering Stalls']
+  },
+  {
+    code: 'KSG',
+    name: 'Kishangarh',
+    city: 'Kishangarh',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 3,
+    facilities: ['Wi-Fi', 'Marble City Exhibition Counter', 'AC Waiting Hall', 'Tea Stalls']
+  },
+  {
+    code: 'BER',
+    name: 'Beawar',
+    city: 'Beawar',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 3,
+    facilities: ['Wi-Fi', 'Passenger Waiting Hall', 'Water Cooler Stations']
+  },
+  {
+    code: 'MJ',
+    name: 'Marwar Junction',
+    city: 'Marwar',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 5,
+    facilities: ['Wi-Fi', 'Junction Transshipment Hall', 'Retiring Rooms', 'Refreshment Canteen']
+  },
+  {
+    code: 'PMY',
+    name: 'Pali Marwar',
+    city: 'Pali',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 3,
+    facilities: ['Wi-Fi', 'Industrial Textile Hub Info', 'Waiting Hall', 'Prepaid Auto Bay']
+  },
+  {
+    code: 'BKN',
+    name: 'Bikaner Junction',
+    city: 'Bikaner',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 6,
+    facilities: ['Heritage Red Sandstone Terminal', 'Wi-Fi', 'AC Retiring Rooms', 'Rajasthani Handicraft Outlets']
+  },
+  {
+    code: 'UDZ',
+    name: 'Udaipur City',
+    city: 'Udaipur',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 5,
+    facilities: ['City of Lakes Tourist Lounge', 'Wi-Fi', 'Food Court', 'Luggage Cloakroom', 'Prepaid Taxi']
+  },
+  {
+    code: 'KOTA',
+    name: 'Kota Junction',
+    city: 'Kota',
+    state: 'Rajasthan',
+    zone: 'WCR',
+    platforms: 6,
+    facilities: ['High-speed Wi-Fi', 'Student & Transit Lounge', 'Food Plaza', 'Multi-level Waiting Hall']
+  },
+  {
+    code: 'SWM',
+    name: 'Sawai Madhopur Junction',
+    city: 'Sawai Madhopur',
+    state: 'Rajasthan',
+    zone: 'WCR',
+    platforms: 4,
+    facilities: ['Ranthambore Tiger Murals & Heritage Art', 'Wi-Fi', 'Waiting Room', 'Safari Transit Desk']
+  },
+  {
+    code: 'AWR',
+    name: 'Alwar Junction',
+    city: 'Alwar',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 4,
+    facilities: ['Wi-Fi', 'Executive Lounge', 'Heritage Railway Museum Corner']
+  },
+  {
+    code: 'BKI',
+    name: 'Bandikui Junction',
+    city: 'Bandikui',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 4,
+    facilities: ['Wi-Fi', 'Historical Railway Colony Junction', 'Refreshment Room']
+  },
+  {
+    code: 'DO',
+    name: 'Dausa',
+    city: 'Dausa',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 3,
+    facilities: ['Wi-Fi', 'Waiting Hall', 'Water Dispensers']
+  },
+  {
+    code: 'MTD',
+    name: 'Merta Road Junction',
+    city: 'Merta',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 3,
+    facilities: ['Wi-Fi', 'Waiting Hall', 'Tea & Snack Stalls']
+  },
+  {
+    code: 'DNA',
+    name: 'Degana Junction',
+    city: 'Degana',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 3,
+    facilities: ['Wi-Fi', 'Tea Stalls', 'Drinking Water Facilities']
+  },
+  {
+    code: 'MKN',
+    name: 'Makrana Junction',
+    city: 'Makrana',
+    state: 'Rajasthan',
+    zone: 'NWR',
+    platforms: 3,
+    facilities: ['White Marble City Counter', 'Wi-Fi', 'Waiting Hall']
+  },
+
+  // --- CONNECTING EXTERNAL GATEWAYS ---
   {
     code: 'NDLS',
     name: 'New Delhi',
@@ -11,391 +176,13 @@ export const MOCK_STATIONS: Station[] = [
     facilities: ['High-speed Wi-Fi', 'Executive Lounge', 'Food Court', 'Metro Connectivity', 'Wheelchair Support']
   },
   {
-    code: 'MMCT',
-    name: 'Mumbai Central',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    zone: 'WR',
-    platforms: 8,
-    facilities: ['Wi-Fi', 'Air-conditioned Waiting Hall', 'Cloakroom', 'Food Plaza', 'Taxi Stand']
-  },
-  {
-    code: 'CSMT',
-    name: 'Chhatrapati Shivaji Maharaj Terminus',
-    city: 'Mumbai',
-    state: 'Maharashtra',
-    zone: 'CR',
-    platforms: 18,
-    facilities: ['Heritage Lounge', 'Wi-Fi', 'Suburban Metro Concourse', 'Cafeteria', 'Elevators']
-  },
-  {
-    code: 'HWH',
-    name: 'Howrah Junction',
-    city: 'Kolkata',
-    state: 'West Bengal',
-    zone: 'ER',
-    platforms: 23,
-    facilities: ['Yatri Niwas', 'Wi-Fi', 'Multi-cuisine Food Court', 'Ferry Terminal Access', 'Escalators']
-  },
-  {
-    code: 'SDAH',
-    name: 'Sealdah',
-    city: 'Kolkata',
-    state: 'West Bengal',
-    zone: 'ER',
-    platforms: 21,
-    facilities: ['Wi-Fi', 'Executive Lounge', 'Retiring Rooms', 'Metro Station Link']
-  },
-  {
-    code: 'MAS',
-    name: 'MGR Chennai Central',
-    city: 'Chennai',
-    state: 'Tamil Nadu',
-    zone: 'SR',
-    platforms: 12,
-    facilities: ['Air-conditioned Waiting Rooms', 'Free Wi-Fi', 'Multi-cuisine Dining', 'Prepaid Taxi', 'Luggage Cloakroom']
-  },
-  {
-    code: 'BSB',
-    name: 'Varanasi Junction',
-    city: 'Varanasi',
-    state: 'Uttar Pradesh',
-    zone: 'NR',
-    platforms: 9,
-    facilities: ['Executive Lounge', 'Wi-Fi', 'Pilgrim Amenities', 'Battery Operated Buggies']
-  },
-  {
-    code: 'LKO',
-    name: 'Lucknow Charbagh',
-    city: 'Lucknow',
-    state: 'Uttar Pradesh',
-    zone: 'NR',
-    platforms: 9,
-    facilities: ['Heritage Waiting Hall', 'Wi-Fi', 'Food Court', 'Metro Link']
-  },
-  {
-    code: 'CNB',
-    name: 'Kanpur Central',
-    city: 'Kanpur',
-    state: 'Uttar Pradesh',
-    zone: 'NCR',
-    platforms: 10,
-    facilities: ['Wi-Fi', 'AC Retiring Rooms', 'Food Outlets', 'Wheelchair Assistance']
-  },
-  {
-    code: 'KOTA',
-    name: 'Kota Junction',
-    city: 'Kota',
-    state: 'Rajasthan',
-    zone: 'WCR',
-    platforms: 5,
-    facilities: ['Wi-Fi', 'Student Information Desk', 'Food Corner', 'AC Waiting Hall']
-  },
-  {
-    code: 'BRC',
-    name: 'Vadodara Junction',
-    city: 'Vadodara',
-    state: 'Gujarat',
-    zone: 'WR',
-    platforms: 7,
-    facilities: ['Wi-Fi', 'Executive Lounge', 'Refreshment Rooms', 'Escalators']
-  },
-  {
-    code: 'ST',
-    name: 'Surat',
-    city: 'Surat',
-    state: 'Gujarat',
-    zone: 'WR',
-    platforms: 4,
-    facilities: ['High-speed Wi-Fi', 'Food Court', 'Battery Cars', 'Deluxe Lounge']
-  },
-  {
-    code: 'BPL',
-    name: 'Bhopal Junction',
-    city: 'Bhopal',
-    state: 'Madhya Pradesh',
-    zone: 'WCR',
-    platforms: 6,
-    facilities: ['Wi-Fi', 'Waiting Halls', 'Jan Aahar', 'Cloakroom']
-  },
-  {
-    code: 'AGC',
-    name: 'Agra Cantt',
-    city: 'Agra',
-    state: 'Uttar Pradesh',
-    zone: 'NCR',
-    platforms: 6,
-    facilities: ['Tourist Information Counter', 'Wi-Fi', 'VIP Lounge', 'Prepaid Taxi']
-  },
-  {
-    code: 'GWL',
-    name: 'Gwalior Junction',
-    city: 'Gwalior',
-    state: 'Madhya Pradesh',
-    zone: 'NCR',
-    platforms: 5,
-    facilities: ['Wi-Fi', 'Waiting Room', 'Food Stalls']
-  },
-  {
-    code: 'RTM',
-    name: 'Ratlam Junction',
-    city: 'Ratlam',
-    state: 'Madhya Pradesh',
-    zone: 'WR',
-    platforms: 7,
-    facilities: ['Wi-Fi', 'Refuel & Catering Stalls', 'Waiting Hall']
-  },
-  {
-    code: 'NZM',
-    name: 'Hazrat Nizamuddin',
-    city: 'New Delhi',
-    state: 'Delhi',
-    zone: 'NR',
-    platforms: 8,
-    facilities: ['Premium AC Lounge', 'Wi-Fi', 'Food Plaza', 'Dedicated Taxi Bay']
-  },
-  {
-    code: 'SBC',
-    name: 'KSR Bengaluru City',
-    city: 'Bengaluru',
-    state: 'Karnataka',
-    zone: 'SWR',
-    platforms: 10,
-    facilities: ['Tech Passenger Lounge', 'Wi-Fi', 'Metro Interconnection', 'Food Street']
-  },
-  {
-    code: 'MYS',
-    name: 'Mysuru Junction',
-    city: 'Mysuru',
-    state: 'Karnataka',
-    zone: 'SWR',
-    platforms: 6,
-    facilities: ['Eco-friendly Station', 'Wi-Fi', 'Tourist Help Desk', 'Waiting Hall']
-  },
-  {
-    code: 'HYB',
-    name: 'Hyderabad Deccan Nampally',
-    city: 'Hyderabad',
-    state: 'Telangana',
-    zone: 'SCR',
-    platforms: 6,
-    facilities: ['Wi-Fi', 'AC Lounges', 'Prepaid Auto Stand', 'Food Courts']
-  },
-  {
-    code: 'SC',
-    name: 'Secunderabad Junction',
-    city: 'Hyderabad',
-    state: 'Telangana',
-    zone: 'SCR',
-    platforms: 10,
-    facilities: ['Ultra-modern Waiting Lounge', 'Wi-Fi', 'Food Court', 'Metro Skywalk']
-  },
-  {
-    code: 'TVC',
-    name: 'Thiruvananthapuram Central',
-    city: 'Thiruvananthapuram',
-    state: 'Kerala',
-    zone: 'SR',
-    platforms: 5,
-    facilities: ['Wi-Fi', 'Executive Lounge', 'Retiring Rooms', 'Prepaid Taxi']
-  },
-  {
-    code: 'CAPE',
-    name: 'Kanyakumari',
-    city: 'Kanyakumari',
-    state: 'Tamil Nadu',
-    zone: 'SR',
-    platforms: 4,
-    facilities: ['Wi-Fi', 'Tourist Information', 'Waiting Hall']
-  },
-  {
-    code: 'BKN',
-    name: 'Bikaner Junction',
-    city: 'Bikaner',
-    state: 'Rajasthan',
-    zone: 'NWR',
-    platforms: 6,
-    facilities: ['Wi-Fi', 'AC Retiring Rooms', 'Handicraft Outlets']
-  },
-  {
-    code: 'FZR',
-    name: 'Firozpur Cantt',
-    city: 'Firozpur',
-    state: 'Punjab',
-    zone: 'NR',
-    platforms: 5,
-    facilities: ['Wi-Fi', 'Waiting Hall', 'Catering Stalls']
-  },
-  {
-    code: 'MTJ',
-    name: 'Mathura Junction',
-    city: 'Mathura',
-    state: 'Uttar Pradesh',
-    zone: 'NCR',
-    platforms: 10,
-    facilities: ['Wi-Fi', 'AC Waiting Hall', 'Jan Aahar', 'Cloakroom']
-  },
-  {
-    code: 'SWM',
-    name: 'Sawai Madhopur Junction',
-    city: 'Sawai Madhopur',
-    state: 'Rajasthan',
-    zone: 'WCR',
-    platforms: 4,
-    facilities: ['Ranthambore Wildlife Murals', 'Wi-Fi', 'Waiting Room']
-  },
-  {
-    code: 'PRYJ',
-    name: 'Prayagraj Junction',
-    city: 'Prayagraj',
-    state: 'Uttar Pradesh',
-    zone: 'NCR',
-    platforms: 10,
-    facilities: ['Executive Lounge', 'Wi-Fi', 'Retiring Rooms', 'Pilgrim Center']
-  },
-  {
-    code: 'DDU',
-    name: 'Pt. Deen Dayal Upadhyaya Jn',
-    city: 'Mughalsarai',
-    state: 'Uttar Pradesh',
-    zone: 'ECR',
-    platforms: 8,
-    facilities: ['Major Junction Facilities', 'Wi-Fi', 'Food Court', 'Dormitories']
-  },
-  {
-    code: 'ALJN',
-    name: 'Aligarh Junction',
-    city: 'Aligarh',
-    state: 'Uttar Pradesh',
-    zone: 'NCR',
-    platforms: 7,
-    facilities: ['Wi-Fi', 'Waiting Rooms', 'Food Plaza']
-  },
-  {
-    code: 'ANVT',
-    name: 'Anand Vihar Terminal',
+    code: 'DLI',
+    name: 'Old Delhi Junction',
     city: 'Delhi',
     state: 'Delhi',
     zone: 'NR',
-    platforms: 7,
-    facilities: ['Wi-Fi', 'Executive Lounge', 'Metro Connectivity', 'Prepaid Taxi']
-  },
-  {
-    code: 'MB',
-    name: 'Moradabad Junction',
-    city: 'Moradabad',
-    state: 'Uttar Pradesh',
-    zone: 'NR',
-    platforms: 5,
-    facilities: ['Wi-Fi', 'Waiting Rooms', 'Food Plaza']
-  },
-  {
-    code: 'BE',
-    name: 'Bareilly Junction',
-    city: 'Bareilly',
-    state: 'Uttar Pradesh',
-    zone: 'NR',
-    platforms: 6,
-    facilities: ['Wi-Fi', 'Waiting Hall', 'Canteen']
-  },
-  {
-    code: 'MFP',
-    name: 'Muzaffarpur Junction',
-    city: 'Muzaffarpur',
-    state: 'Bihar',
-    zone: 'ECR',
-    platforms: 6,
-    facilities: ['Wi-Fi', 'Executive Lounge', 'Retiring Rooms', 'Food Court']
-  },
-  {
-    code: 'JU',
-    name: 'Jodhpur Junction',
-    city: 'Jodhpur',
-    state: 'Rajasthan',
-    zone: 'NWR',
-    platforms: 5,
-    facilities: ['Wi-Fi', 'Executive Lounge', 'Waiting Rooms', 'Food Plaza']
-  },
-  {
-    code: 'MTD',
-    name: 'Merta Road Junction',
-    city: 'Merta',
-    state: 'Rajasthan',
-    zone: 'NWR',
-    platforms: 3,
-    facilities: ['Wi-Fi', 'Waiting Hall']
-  },
-  {
-    code: 'DNA',
-    name: 'Degana Junction',
-    city: 'Degana',
-    state: 'Rajasthan',
-    zone: 'NWR',
-    platforms: 3,
-    facilities: ['Wi-Fi', 'Tea Stalls']
-  },
-  {
-    code: 'MKN',
-    name: 'Makrana Junction',
-    city: 'Makrana',
-    state: 'Rajasthan',
-    zone: 'NWR',
-    platforms: 3,
-    facilities: ['Marble City Counter', 'Wi-Fi']
-  },
-  {
-    code: 'JP',
-    name: 'Jaipur Junction',
-    city: 'Jaipur',
-    state: 'Rajasthan',
-    zone: 'NWR',
-    platforms: 8,
-    facilities: ['Heritage Lounge', 'Wi-Fi', 'Food Court', 'Prepaid Taxi']
-  },
-  {
-    code: 'DO',
-    name: 'Dausa',
-    city: 'Dausa',
-    state: 'Rajasthan',
-    zone: 'NWR',
-    platforms: 3,
-    facilities: ['Wi-Fi', 'Waiting Room']
-  },
-  {
-    code: 'BKI',
-    name: 'Bandikui Junction',
-    city: 'Bandikui',
-    state: 'Rajasthan',
-    zone: 'NWR',
-    platforms: 4,
-    facilities: ['Wi-Fi', 'Refreshment Room']
-  },
-  {
-    code: 'AWR',
-    name: 'Alwar Junction',
-    city: 'Alwar',
-    state: 'Rajasthan',
-    zone: 'NWR',
-    platforms: 4,
-    facilities: ['Wi-Fi', 'Executive Lounge']
-  },
-  {
-    code: 'RE',
-    name: 'Rewari Junction',
-    city: 'Rewari',
-    state: 'Haryana',
-    zone: 'NWR',
-    platforms: 8,
-    facilities: ['Heritage Steam Shed Access', 'Wi-Fi', 'Food Plaza']
-  },
-  {
-    code: 'GGN',
-    name: 'Gurgaon (Gurugram)',
-    city: 'Gurugram',
-    state: 'Haryana',
-    zone: 'NR',
-    platforms: 3,
-    facilities: ['Cyber City Link', 'Wi-Fi', 'Waiting Lounge']
+    platforms: 16,
+    facilities: ['Historic Red Stone Concourse', 'Wi-Fi', 'Food Court', 'Metro Connectivity']
   },
   {
     code: 'DEC',
@@ -407,13 +194,31 @@ export const MOCK_STATIONS: Station[] = [
     facilities: ['Wi-Fi', 'Executive Lounge', 'Metro Feeder']
   },
   {
-    code: 'DLI',
-    name: 'Old Delhi Junction',
-    city: 'Delhi',
-    state: 'Delhi',
-    zone: 'NR',
-    platforms: 16,
-    facilities: ['Historic Red Stone Concourse', 'Wi-Fi', 'Food Court', 'Metro Connectivity']
+    code: 'RE',
+    name: 'Rewari Junction',
+    city: 'Rewari',
+    state: 'Haryana',
+    zone: 'NWR',
+    platforms: 8,
+    facilities: ['Heritage Steam Shed Access', 'Wi-Fi', 'Food Plaza']
+  },
+  {
+    code: 'ADI',
+    name: 'Ahmedabad Junction',
+    city: 'Ahmedabad',
+    state: 'Gujarat',
+    zone: 'WR',
+    platforms: 12,
+    facilities: ['Wi-Fi', 'Executive Lounge', 'Metro Skywalk', 'Food Court']
+  },
+  {
+    code: 'INDB',
+    name: 'Indore Junction',
+    city: 'Indore',
+    state: 'Madhya Pradesh',
+    zone: 'WR',
+    platforms: 6,
+    facilities: ['Cleanliness Award Station', 'Wi-Fi', 'Food Plaza', 'Waiting Hall']
   }
 ];
 

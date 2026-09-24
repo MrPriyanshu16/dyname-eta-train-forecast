@@ -6,7 +6,7 @@ interface ScheduleTableProps {
   train: Train;
 }
 
-export const ScheduleTable: React.FC<ScheduleTableProps> = ({ train }) => {
+export const ScheduleTableComponent: React.FC<ScheduleTableProps> = ({ train }) => {
   const [filterQuery, setFilterQuery] = useState('');
 
   const filteredStops = train.stops.filter(
@@ -216,3 +216,5 @@ export const ScheduleTable: React.FC<ScheduleTableProps> = ({ train }) => {
     </div>
   );
 };
+
+export const ScheduleTable = React.memo(ScheduleTableComponent);

@@ -19,7 +19,7 @@ interface RouteProgressTimelineProps {
   onSelectStation: (stationCode: string) => void;
 }
 
-export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
+export const RouteProgressTimelineComponent: React.FC<RouteProgressTimelineProps> = ({
   train,
   selectedStationCode,
   onSelectStation
@@ -60,13 +60,9 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
           <span>Jump to Current Position</span>
         </button>
       </div>
-
-      {/* Vertical Station Timeline */}
-      <div className="p-5 sm:p-7 relative">
-        {/* Continuous Track Spine Line */}
-        <div className="absolute left-[33px] sm:left-[41px] top-10 bottom-10 w-0.5 bg-slate-200 dark:bg-slate-700 -z-0" />
-
-        <div className="space-y-6 relative z-10">
+      {/* Vertical Station Timeline */}
+      <div className="p-4 sm:p-6 relative">
+        <div className="space-y-1.5 relative z-10">
           {train.stops.map((stop, idx) => {
             const isCompleted = stop.status === 'COMPLETED';
             const isCurrent = stop.status === 'CURRENT';
@@ -82,95 +78,125 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
                 key={stop.stationCode}
                 ref={isCurrent ? currentStationRef : null}
                 onClick={() => onSelectStation(stop.stationCode)}
-                className={`group flex items-start gap-4 p-3.5 -mx-3.5 rounded-xl transition-all cursor-pointer ${
+                className={`group content-auto relative flex items-start gap-3.5 sm:gap-4 p-3.5 rounded-xl transition-colors cursor-pointer ${
                   isSelected
-                    ? 'bg-indigo-50/80 dark:bg-indigo-950/60 ring-1 ring-indigo-300 dark:ring-indigo-700'
+                    ? 'bg-indigo-50/90 dark:bg-indigo-950/70 ring-1 ring-indigo-300 dark:ring-indigo-700 shadow-2xs'
                     : isCurrent
-                    ? 'bg-blue-50/50 dark:bg-blue-950/40'
+                    ? 'bg-blue-50/60 dark:bg-blue-950/40 ring-1 ring-blue-200 dark:ring-blue-900/60'
                     : 'hover:bg-slate-50 dark:hover:bg-slate-800/50'
                 }`}
               >
-                {/* Node Icon */}
-                <div className="shrink-0 flex items-center justify-center w-8 sm:w-10">
-                  {isCompleted ? (
-                    <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950/80 border-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 flex items-center justify-center">
-                      <CheckCircle2 className="w-3.5 h-3.5" />
-                    </div>
-                  ) : isCurrent ? (
-                    <div className="relative flex items-center justify-center">
-                      <span className="animate-ping absolute inline-flex h-7 w-7 rounded-full bg-blue-400 opacity-75" />
-                      <div className="w-6 h-6 rounded-full bg-blue-600 border-2 border-white dark:border-slate-900 text-white flex items-center justify-center shadow-xs">
-                        <MapPin className="w-3 h-3" />
-                      </div>
-                    </div>
-                  ) : isNext ? (
-                    <div className="w-6 h-6 rounded-full bg-indigo-600 border-2 border-white dark:border-slate-900 text-white flex items-center justify-center shadow-xs">
-                      <div className="w-2 h-2 rounded-full bg-white" />
-                    </div>
-                  ) : (
-                    <div className="w-5 h-5 rounded-full bg-white dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-600 group-hover:border-slate-400 flex items-center justify-center">
-                      <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
-                    </div>
+                {/* Node & Dedicated Track Spine Column (Guaranteed Dead-Center Alignment & Zero Gap) */}
+                <div className="relative shrink-0 flex flex-col items-center justify-start w-8 sm:w-9 -my-3.5 py-3.5 self-stretch">
+                  {/* Top Incoming Track Segment */}
+                  {!isOrigin && (
+                    <div
+                      className={`absolute top-0 h-[32px] w-0.5 left-1/2 -translate-x-1/2 ${
+                        isCompleted || isCurrent
+                          ? 'bg-emerald-500 dark:bg-emerald-400'
+                          : 'bg-slate-200 dark:bg-slate-700'
+                      }`}
+                    />
                   )}
+                  {/* Bottom Outgoing Track Segment (Reaches -bottom-1.5 across the space-y-1.5 gap to seamlessly touch next stop) */}
+                  {!isDestination && (
+                    <div
+                      className={`absolute top-[32px] -bottom-1.5 w-0.5 left-1/2 -translate-x-1/2 ${
+                        isCompleted
+                          ? 'bg-emerald-500 dark:bg-emerald-400'
+                          : 'bg-slate-200 dark:bg-slate-700'
+                      }`}
+                    />
+                  )}
+
+                  {/* Station Node Marker */}
+                  <div className="relative z-10 flex items-center justify-center pt-1.5">
+                    {isCompleted ? (
+                      <div className="w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-950/90 border-2 border-emerald-600 text-emerald-700 dark:text-emerald-400 flex items-center justify-center shadow-xs">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                      </div>
+                    ) : isCurrent ? (
+                      <div className="relative flex items-center justify-center w-6 h-6">
+                        <span className="animate-ping absolute inline-flex h-6 w-6 rounded-full bg-blue-400 opacity-75" />
+                        <div className="w-6 h-6 rounded-full bg-blue-600 border-2 border-white dark:border-slate-900 text-white flex items-center justify-center shadow-xs">
+                          <MapPin className="w-3 h-3" />
+                        </div>
+                      </div>
+                    ) : isNext ? (
+                      <div className="w-6 h-6 rounded-full bg-indigo-600 border-2 border-white dark:border-slate-900 text-white flex items-center justify-center shadow-xs">
+                        <div className="w-2 h-2 rounded-full bg-white" />
+                      </div>
+                    ) : (
+                      <div className="w-6 h-6 flex items-center justify-center">
+                        <div className="w-5 h-5 rounded-full bg-white dark:bg-slate-850 border-2 border-slate-300 dark:border-slate-600 group-hover:border-slate-400 flex items-center justify-center shadow-2xs">
+                          <div className="w-1.5 h-1.5 rounded-full bg-slate-300 dark:bg-slate-600" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Station Info Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-1">
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <div className="flex items-center justify-between gap-3">
                     {/* Station Name, Code & Badges */}
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-bold text-sm text-slate-900 dark:text-white">
+                    <div className="flex items-center gap-2 flex-wrap min-w-0">
+                      <span className="font-bold text-sm text-slate-900 dark:text-white truncate">
                         {stop.stationName}
                       </span>
-                      <span className="font-mono text-xs font-semibold px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700">
+                      <span className="font-mono text-xs font-semibold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200/80 dark:border-slate-700">
                         {stop.stationCode}
                       </span>
 
                       {isOrigin && (
-                        <span className="text-[10px] font-semibold uppercase px-1.5 py-0.2 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                           Origin
                         </span>
                       )}
                       {isDestination && (
-                        <span className="text-[10px] font-semibold uppercase px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300">
+                        <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300">
                           Destination
                         </span>
                       )}
                       {isCurrent && (
-                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 animate-pulse">
+                        <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950/80 text-blue-800 dark:text-blue-300 animate-pulse">
                           Current Location
                         </span>
                       )}
                       {isNext && (
-                        <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300">
+                        <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950/80 text-indigo-800 dark:text-indigo-300">
                           Next Stop
                         </span>
                       )}
                       {isSelected && (
-                        <span className="text-[10px] font-semibold px-2 py-0.2 rounded-full bg-indigo-600 text-white">
+                        <span className="text-[10px] font-semibold px-2.5 py-0.5 rounded-full bg-indigo-600 text-white">
                           Selected for ETA
                         </span>
                       )}
                     </div>
 
-                    {/* Time & Delay */}
-                    <div className="flex items-center gap-3 shrink-0 text-xs">
+                    {/* Time & Expand Button */}
+                    <div className="flex items-center gap-2.5 shrink-0">
                       {isCompleted ? (
-                        <div className="text-slate-500 dark:text-slate-400 font-mono text-right">
-                          <span className="text-[11px] text-slate-400 dark:text-slate-500 mr-1.5">Departed</span>
-                          <span className="font-semibold text-slate-700 dark:text-slate-300">
-                            {stop.estimatedDeparture !== '--' ? stop.estimatedDeparture : stop.scheduledDeparture}
-                          </span>
+                        <div className="text-right flex flex-col items-end min-w-[70px]">
+                          <div className="font-mono font-semibold text-slate-700 dark:text-slate-300 text-xs flex items-center justify-end gap-1.5">
+                            <span className="text-[10px] text-slate-400 dark:text-slate-500 font-sans uppercase font-medium">Departed</span>
+                            <span>{stop.estimatedDeparture !== '--' ? stop.estimatedDeparture : stop.scheduledDeparture}</span>
+                          </div>
+                          <div className="text-[10.5px] text-slate-400 dark:text-slate-500 font-mono flex items-center justify-end gap-1 leading-none mt-0.5">
+                            <span>STD:</span>
+                            <span>{stop.scheduledDeparture !== '--' ? stop.scheduledDeparture : stop.scheduledArrival}</span>
+                          </div>
                         </div>
                       ) : (
-                        <div className="text-right">
-                          <div className="font-mono font-bold text-slate-950 dark:text-white flex items-center justify-end gap-1">
-                            <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 uppercase">ETA</span>
+                        <div className="text-right flex flex-col items-end min-w-[70px]">
+                          <div className="font-mono font-bold text-slate-900 dark:text-white text-xs flex items-center justify-end gap-1.5">
+                            <span className="text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 font-sans uppercase">ETA</span>
                             <span>{stop.estimatedArrival !== '--' ? stop.estimatedArrival : stop.estimatedDeparture}</span>
                           </div>
-                          <div className="text-[11px] text-slate-400 dark:text-slate-500 font-mono flex items-center justify-end gap-1">
+                          <div className="text-[10.5px] text-slate-400 dark:text-slate-500 font-mono flex items-center justify-end gap-1 leading-none mt-0.5">
                             <span>STA:</span>
-                            <span className="text-slate-600 dark:text-slate-400">{stop.scheduledArrival !== '--' ? stop.scheduledArrival : stop.scheduledDeparture}</span>
+                            <span>{stop.scheduledArrival !== '--' ? stop.scheduledArrival : stop.scheduledDeparture}</span>
                           </div>
                         </div>
                       )}
@@ -179,27 +205,40 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
                       <button
                         type="button"
                         onClick={e => toggleExpand(stop.stationCode, e)}
-                        className="p-1 rounded text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700 transition-colors"
+                        className="w-7 h-7 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center transition-colors shrink-0 cursor-pointer"
                         title="View station details"
                       >
                         {isExpanded ? (
-                          <ChevronUp className="w-4 h-4" />
+                          <ChevronUp className="w-3.5 h-3.5" />
                         ) : (
-                          <ChevronDown className="w-4 h-4" />
+                          <ChevronDown className="w-3.5 h-3.5" />
                         )}
                       </button>
                     </div>
                   </div>
 
-                  {/* Subline: Distance & Platform */}
-                  <div className="flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  {/* Subline: Distance, Platform, Halt & Delays */}
+                  <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1 flex-wrap">
                     <span>{stop.distanceFromOriginKm} km from start</span>
-                    {stop.platform && <span>Platform {stop.platform}</span>}
-                    {stop.haltMinutes > 0 && <span>Halt: {stop.haltMinutes}m</span>}
+                    {stop.platform && (
+                      <>
+                        <span className="text-slate-300 dark:text-slate-700">·</span>
+                        <span>Platform {stop.platform}</span>
+                      </>
+                    )}
+                    {stop.haltMinutes > 0 && (
+                      <>
+                        <span className="text-slate-300 dark:text-slate-700">·</span>
+                        <span>Halt: {stop.haltMinutes}m</span>
+                      </>
+                    )}
                     {isDelayed && (
-                      <span className="text-amber-700 dark:text-amber-400 font-medium font-mono text-[11px]">
-                        +{stop.delayArrivalMinutes}m delay
-                      </span>
+                      <>
+                        <span className="text-slate-300 dark:text-slate-700">·</span>
+                        <span className="text-amber-600 dark:text-amber-400 font-semibold font-mono text-[11px]">
+                          +{stop.delayArrivalMinutes}m delay
+                        </span>
+                      </>
                     )}
                   </div>
 
@@ -272,3 +311,5 @@ export const RouteProgressTimeline: React.FC<RouteProgressTimelineProps> = ({
     </div>
   );
 };
+
+export const RouteProgressTimeline = React.memo(RouteProgressTimelineComponent);

@@ -20,34 +20,43 @@ The existing production system (**NTES** - National Train Enquiry System at `enq
 $$\text{ETA}_{\text{NTES}} = \text{Scheduled Arrival} + \text{Current Delay}$$
 
 This static method completely fails to account for:
-- Track section congestion and bottleneck delays.
+- Track section congestion and line capacity bottlenecks.
 - Preceding train headway and cautionary yellow/red signals.
 - Train priority clearance rules (e.g. Vande Bharat and Rajdhani getting priority over standard Express trains).
-- Severe weather events (e.g. North Indian winter fog restricting speeds to $60\text{ km/h}$).
+- Severe weather events (e.g. North Indian winter fog/sandstorms restricting speeds to $60\text{ km/h}$).
+- Torrential monsoon downpours and track waterlogging (restricting speeds to $30\text{ km/h}$).
+- Extreme ambient heatwaves ($>42^\circ\text{C}$) causing continuous welded rail (CWR) buckling cautions.
+- Temporary Speed Restrictions (TSR Caution Orders for track/bridge work).
 - Downstream junction conflicts and platform clashes.
+- Peak hour timetable bunching and intermediate station passenger boarding crowd surges.
 
-This project delivers an **intelligent, data-driven dynamic ETA forecasting platform** tested and deployed on the high-density **New Delhi (NDLS) to Kanpur Central (CNB)** trunk corridor ($440\text{ km}$).
+This project delivers an **intelligent, data-driven dynamic ETA forecasting platform** tested and deployed on high-density trunk rail corridors.
 
 ---
 
 ## 2. Benchmark Results (Scientific Proof)
 
-Trained on 8,000 corridor trip runs and validated on 1,600 test trips:
+Trained on 9,000 corridor trip runs across 12 operational conditions and validated on 1,800 test trips:
 
 | Evaluation Metric | Static NTES Baseline | Dynamic ML Model (Our System) | Improvement |
 |---|---|---|---|
-| **Mean Absolute Error (MAE)** | **50.57 minutes** | **4.65 minutes** | **90.8% Error Reduction** 🎯 |
-| **Root Mean Squared Error (RMSE)** | **68.26 minutes** | **6.16 minutes** | **91.0% Outlier Reduction** |
-| **Model Explained Variance ($R^2$)** | -0.819 | **0.985** | High Precision |
+| **Mean Absolute Error (MAE)** | **73.60 minutes** | **6.34 minutes** | **91.4% Error Reduction** 🎯 |
+| **Root Mean Squared Error (RMSE)** | **97.14 minutes** | **9.04 minutes** | **90.7% Outlier Reduction** |
+| **Model Explained Variance ($R^2$)** | -0.852 | **0.978** | High Precision |
 
-### Primary Drivers of Rail Delays (Feature Importance):
-1. **Track Section Congestion Ratio:** 25.78%
-2. **Distance Remaining to Station:** 20.97%
-3. **Weather Visibility / Fog Index:** 20.57%
-4. **Current Accumulated Delay:** 13.94%
-5. **Train Priority Tier:** 11.68%
-6. **Junction Bottleneck Ahead:** 4.09%
-7. **Preceding Train Headway:** 2.97%
+### Primary Drivers of Rail Delays (12 Evaluated Operational Conditions):
+1. **Distance Remaining to Station:** 26.34%
+2. **Monsoon Rain & Track Waterlogging:** 17.39%
+3. **Track Section Congestion Ratio:** 13.67%
+4. **Weather Visibility / Fog Index:** 10.12%
+5. **Temporary Speed Restriction (TSR Caution):** 9.91%
+6. **Current Accumulated Delay:** 8.38%
+7. **Ambient Temperature / Rail Buckling Alert:** 5.82%
+8. **Train Priority Precedence Tier:** 5.20%
+9. **Junction Bottleneck Ahead:** 1.64%
+10. **Preceding Train Headway Spacing:** 1.29%
+11. **Intermediate Station Dwell Delay:** 0.14%
+12. **Peak Traffic Hour Bunching:** 0.10%
 
 ---
 
@@ -93,9 +102,12 @@ Trained on 8,000 corridor trip runs and validated on 1,600 test trips:
    - **Platform Allocation Advisor:** Real-time detection of platform schedule clashes at Kanpur Central with 1-click auto-reassignment.
    - Signaling priority matrix (Tier 1 Vande Bharat down to Tier 4 Mail/Express).
 3. **🛠️ The "What-If" Disruption Sandbox (Viva Demo Tool):**
-   - **`[ Inject Fog ]`:** Dynamically drops corridor speed limit to $60\text{ km/h}$.
-   - **`[ Signal Failure ]`:** Simulates red aspect halt and cascading delay.
-   - **`[ Track Maintenance Block ]`:** Simulates single-line restriction.
+   - **`[ 🌪️ Desert Sandstorm ]`:** Simulates low visibility & caps speed to $60\text{ km/h}$.
+   - **`[ 🔴 Signal Halt at Phulera ]`:** Simulates interlocking red aspect and cascading delay.
+   - **`[ 🚧 Track Maintenance Block ]`:** Simulates single-line working & capacity halving.
+   - **`[ 🌧️ Monsoon Rain & Waterlogging ]`:** Simulates submerged track caution ($30\text{ km/h}$).
+   - **`[ ☀️ Extreme Heatwave Alert ]`:** Simulates rail temperature $>45^\circ\text{C}$ expansion alert ($50\text{ km/h}$).
+   - **`[ ⚠️ TSR Caution Order ]`:** Simulates Temporary Speed Restriction ($40\text{ km/h}$) for track works.
    - **`[ Reset All Disruptions ]`:** Instantly restores normal operation.
 4. **📊 Model Analytics & Viva Tab:**
    - Accuracy cards, error distribution histogram, and feature importance bar charts ready for inclusion in project reports.

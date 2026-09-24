@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export const StationSchedulePage: React.FC = () => {
-  const { stationId = 'NDLS' } = useParams<{ stationId: string }>();
+  const { stationId = 'JU' } = useParams<{ stationId: string }>();
   const navigate = useNavigate();
   const { trains, simulatedTime } = useSimulation();
 
@@ -249,15 +249,15 @@ export const StationSchedulePage: React.FC = () => {
                 <div
                   key={`${service.trainId}-${service.type}`}
                   onClick={() => navigate(`/train/${service.trainId}`)}
-                  className="p-5 hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4 cursor-pointer"
+                  className="group content-auto p-5 hover:bg-slate-50/80 dark:hover:bg-slate-800/60 transition-colors grid grid-cols-1 lg:grid-cols-12 items-center gap-4 cursor-pointer"
                 >
-                  {/* Left: Train Identity & Service Details */}
-                  <div className="space-y-1.5">
+                  {/* Left: Train Identity & Service Details (5 cols) */}
+                  <div className="lg:col-span-5 space-y-1.5">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <span className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900">
                         {service.trainNumber}
                       </span>
-                      <h3 className="font-bold text-sm text-slate-900 dark:text-white hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors">
+                      <h3 className="font-bold text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                         {service.trainName}
                       </h3>
                       <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
@@ -279,9 +279,9 @@ export const StationSchedulePage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Middle: Timing & Platform */}
-                  <div className="flex items-center gap-6 text-xs">
-                    <div>
+                  {/* Middle: Timing & Platform (4 cols, centered on desktop) */}
+                  <div className="lg:col-span-4 flex items-center justify-start lg:justify-center gap-6 text-xs border-y lg:border-y-0 py-3 lg:py-0 border-slate-100 dark:border-slate-800">
+                    <div className="min-w-[64px]">
                       <div className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500">
                         Scheduled
                       </div>
@@ -290,7 +290,7 @@ export const StationSchedulePage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div>
+                    <div className="min-w-[64px]">
                       <div className="text-[10px] uppercase font-semibold text-slate-400 dark:text-slate-500">
                         Estimated
                       </div>
@@ -303,7 +303,7 @@ export const StationSchedulePage: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-1.5 text-center border border-slate-200 dark:border-slate-700">
+                    <div className="bg-slate-100 dark:bg-slate-800 rounded-lg px-3 py-1.5 text-center border border-slate-200 dark:border-slate-700 shrink-0">
                       <div className="text-[9px] uppercase font-bold text-slate-400 dark:text-slate-500">
                         Platform
                       </div>
@@ -313,15 +313,15 @@ export const StationSchedulePage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Right: Status & Action */}
-                  <div className="flex items-center justify-between md:justify-end gap-3 shrink-0">
+                  {/* Right: Status & Action (3 cols, right-aligned) */}
+                  <div className="lg:col-span-3 flex items-center justify-between lg:justify-end gap-3 shrink-0">
                     <TrainStatusBadge
                       state={service.status}
                       delayMinutes={service.delayMinutes}
                       size="sm"
                     />
 
-                    <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 hover:underline">
+                    <span className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform">
                       Track →
                     </span>
                   </div>

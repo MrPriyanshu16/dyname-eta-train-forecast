@@ -3,37 +3,37 @@ import { SimulationScenario } from '../types/train';
 export const DEMO_SCENARIOS: SimulationScenario[] = [
   {
     id: 'scenario-a',
-    name: 'Scenario A: On-Time High-Speed Service',
-    description: 'Vande Bharat Express (22436) running precisely on-time, approaching Kanpur Central at 124 km/h.',
-    trainId: '22436',
+    name: 'Scenario A: On-Time Semi-High Speed',
+    description: 'Vande Bharat Express (20978) running precisely on-time, approaching Jaipur Junction at 128 km/h.',
+    trainId: '20978',
     badge: 'On Time (0 min)'
   },
   {
     id: 'scenario-b',
-    name: 'Scenario B: Delayed Trunk Express',
-    description: 'Kerala Express (12626) running 38 minutes late due to caution orders, dynamically re-projecting upcoming arrival times.',
-    trainId: '12626',
-    badge: 'Delayed (38 min)'
+    name: 'Scenario B: Delayed Trunk Superfast',
+    description: 'Mandore Superfast (12461) delayed by 24 mins near Pali Marwar due to desert sandstorm caution order.',
+    trainId: '12461',
+    badge: 'Delayed (24 min)'
   },
   {
     id: 'scenario-c',
     name: 'Scenario C: Standing at Station Platform',
-    description: 'Mumbai Rajdhani (12951) halted at Platform 1 of Kota Junction with active halt countdown.',
-    trainId: '12951',
+    description: 'Ajmer Shatabdi (12015) halted at Platform 1 of Jaipur Junction with active passenger boarding countdown.',
+    trainId: '12015',
     badge: 'Halted at Platform'
   },
   {
     id: 'scenario-d',
     name: 'Scenario D: Cruising Between Stations',
-    description: 'Lucknow Shatabdi (12004) between Aligarh and Tundla corridor, speed ~112 km/h.',
-    trainId: '12004',
+    description: 'Marudhar Express (14853) between Phulera and Kishangarh corridor, speed ~104 km/h.',
+    trainId: '14853',
     badge: 'Between Stations'
   },
   {
     id: 'scenario-e',
     name: 'Scenario E: Completed Journey',
-    description: 'Howrah Rajdhani (12302) arrived at destination New Delhi on Platform 16.',
-    trainId: '12302',
+    description: 'Ranthambhore Superfast (12465) arrived at destination Jodhpur Junction Platform 4.',
+    trainId: '12465',
     badge: 'Journey Completed'
   }
 ];

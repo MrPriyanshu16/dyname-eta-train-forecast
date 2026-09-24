@@ -1,35 +1,35 @@
 {
   "baseline": {
     "name": "Static Timetable Heuristic (Current NTES)",
-    "mae_minutes": 50.57,
-    "rmse_minutes": 68.26,
-    "r2_score": -0.819,
+    "mae_minutes": 73.6,
+    "rmse_minutes": 97.14,
+    "r2_score": -1.124,
     "histogram": [
       0,
-      9,
-      84,
-      137,
-      189,
-      252,
-      279,
-      434
+      11,
+      47,
+      76,
+      149,
+      212,
+      320,
+      507
     ]
   },
   "ml_model": {
     "name": "Dynamic Spatio-Temporal ML Regressor (Our Model)",
-    "mae_minutes": 4.65,
-    "rmse_minutes": 6.16,
-    "r2_score": 0.985,
-    "accuracy_gain_pct": 90.8,
+    "mae_minutes": 6.34,
+    "rmse_minutes": 9.04,
+    "r2_score": 0.982,
+    "accuracy_gain_pct": 91.4,
     "histogram": [
-      0,
-      8,
-      294,
-      1031,
-      242,
-      22,
-      3,
-      0
+      4,
+      51,
+      396,
+      954,
+      313,
+      68,
+      10,
+      4
     ]
   },
   "bin_labels": [
@@ -43,14 +43,19 @@
     ">+50m"
   ],
   "feature_importance": {
-    "current_delay_min": 13.94,
-    "distance_remaining_km": 20.97,
-    "section_occupancy_ratio": 25.78,
-    "priority_tier": 11.68,
-    "weather_fog_index": 20.57,
-    "headway_km": 2.97,
-    "is_junction_ahead": 4.09
+    "current_delay_min": 8.38,
+    "distance_remaining_km": 26.34,
+    "section_occupancy_ratio": 13.67,
+    "priority_tier": 5.2,
+    "weather_fog_index": 10.12,
+    "headway_km": 1.29,
+    "is_junction_ahead": 1.64,
+    "rainfall_intensity": 17.39,
+    "ambient_temp_c": 5.82,
+    "tsr_speed_restriction_kmh": 9.91,
+    "is_peak_hour": 0.1,
+    "station_dwell_delay_min": 0.14
   },
-  "sample_count": 8000,
-  "test_count": 1600
+  "sample_count": 9000,
+  "test_count": 1800
 }

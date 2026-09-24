@@ -13,10 +13,10 @@ export default function AboutView() {
           </span>
           <span className="text-xs text-rail-muted">Ministry of Railways • Smart Automation</span>
         </div>
-        <h2 className="text-xl font-bold text-white tracking-tight">
+        <h2 className="text-xl font-bold text-slate-900 dark:text-white tracking-tight">
           Dynamic Forecast of Expected Time of Arrival (ETA) for Coaching Trains
         </h2>
-        <p className="text-sm text-slate-300 leading-relaxed">
+        <p className="text-sm text-slate-600 dark:text-slate-300 leading-relaxed">
           Accurate forecasting of the Expected Time of Arrival (ETA) for coaching trains is vital for improving passenger satisfaction and operational efficiency in Indian Railways. Currently, ETA is estimated using static schedules, current delays, and in-built recovery times, which fail to reflect real-world ground realities such as speed restrictions, section congestion, signal halts, or weather disruptions.
         </p>
       </div>
@@ -33,7 +33,7 @@ export default function AboutView() {
           <div className="space-y-2">
             <div className="p-3 bg-rail-bg rounded-lg border border-rail-border flex items-center justify-between">
               <div>
-                <h5 className="font-semibold text-sm text-white">Priyanshu Prajapat</h5>
+                <h5 className="font-semibold text-sm text-slate-900 dark:text-white">Priyanshu Prajapat</h5>
                 <p className="text-xs text-rail-muted">B.Tech Computer Science & Engineering</p>
               </div>
               <span className="font-mono text-xs text-rail-accent bg-rail-accent/10 px-2 py-0.5 rounded border border-rail-accent/20">
@@ -42,7 +42,7 @@ export default function AboutView() {
             </div>
             <div className="p-3 bg-rail-bg rounded-lg border border-rail-border flex items-center justify-between">
               <div>
-                <h5 className="font-semibold text-sm text-white">Keshav Solanki</h5>
+                <h5 className="font-semibold text-sm text-slate-900 dark:text-white">Keshav Solanki</h5>
                 <p className="text-xs text-rail-muted">B.Tech Computer Science & Engineering</p>
               </div>
               <span className="font-mono text-xs text-rail-accent bg-rail-accent/10 px-2 py-0.5 rounded border border-rail-accent/20">
@@ -61,7 +61,7 @@ export default function AboutView() {
           <div className="space-y-2">
             <div className="p-3 bg-rail-bg rounded-lg border border-rail-border flex items-center justify-between">
               <div>
-                <h5 className="font-semibold text-sm text-white">Ms. Harshita Khangarot</h5>
+                <h5 className="font-semibold text-sm text-slate-900 dark:text-white">Ms. Harshita Khangarot</h5>
                 <p className="text-xs text-rail-muted">Faculty Mentor / Guide</p>
               </div>
               <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
@@ -70,7 +70,7 @@ export default function AboutView() {
             </div>
             <div className="p-3 bg-rail-bg rounded-lg border border-rail-border flex items-center justify-between">
               <div>
-                <h5 className="font-semibold text-sm text-white">Mr. Dushyant Sharma</h5>
+                <h5 className="font-semibold text-sm text-slate-900 dark:text-white">Mr. Dushyant Sharma</h5>
                 <p className="text-xs text-rail-muted">Faculty Mentor / Guide</p>
               </div>
               <span className="text-xs text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/20">
@@ -84,7 +84,7 @@ export default function AboutView() {
 
       {/* Full-Stack Architecture & Technology Stack */}
       <div className="p-6 bg-rail-card border border-rail-border rounded-xl shadow-md space-y-4">
-        <h4 className="font-bold text-base text-white flex items-center space-x-2">
+        <h4 className="font-bold text-base text-slate-900 dark:text-white flex items-center space-x-2">
           <Cpu className="w-5 h-5 text-rail-accent" />
           <span>Technical Architecture Stack</span>
         </h4>
@@ -96,7 +96,7 @@ export default function AboutView() {
               <Layout className="w-4 h-4" />
               <span>Frontend Client</span>
             </div>
-            <p className="text-sm font-semibold text-white">React 19 + Vite</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-white">React 19 + Vite</p>
             <p className="text-xs text-rail-muted">Tailwind CSS, Leaflet GIS mapping, Lucide icons, responsive layout.</p>
           </div>
 
@@ -105,7 +105,7 @@ export default function AboutView() {
               <Server className="w-4 h-4" />
               <span>Backend Engine</span>
             </div>
-            <p className="text-sm font-semibold text-white">FastAPI (Python)</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-white">FastAPI (Python)</p>
             <p className="text-xs text-rail-muted">Asynchronous REST APIs & WebSocket real-time event streaming pipeline.</p>
           </div>
 
@@ -114,7 +114,7 @@ export default function AboutView() {
               <Cpu className="w-4 h-4" />
               <span>Machine Learning</span>
             </div>
-            <p className="text-sm font-semibold text-white">Scikit-Learn Ensemble</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-white">Scikit-Learn Ensemble</p>
             <p className="text-xs text-rail-muted">Gradient Boosted Regressor with Explainable AI delay attribution.</p>
           </div>
 
@@ -123,8 +123,8 @@ export default function AboutView() {
               <Database className="w-4 h-4" />
               <span>Railway Data</span>
             </div>
-            <p className="text-sm font-semibold text-white">NDLS-CNB Corridor</p>
-            <p className="text-xs text-rail-muted">440 km high-density trunk route, 7 stations, block headway physics.</p>
+            <p className="text-sm font-semibold text-slate-900 dark:text-white">JP-AII-JU Corridor</p>
+            <p className="text-xs text-rail-muted">412 km Rajasthan lifeline route, 8 stations, 7 block sections, 4,594 tracks.</p>
           </div>
 
         </div>

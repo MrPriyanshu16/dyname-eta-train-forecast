@@ -1,16 +1,21 @@
 """
 Dynamic ETA Inference Engine and Explainable AI (XAI) Reason Generator
+Predicts arrival delays across 12 authentic railway operational and environmental conditions.
 """
 
 import os
 import datetime
 import joblib
 import numpy as np
+import pandas as pd
 
 MODEL_PATH = os.path.join(os.path.dirname(__file__), "..", "ml", "model.pkl")
 
 class DynamicETAPredictor:
     def __init__(self):
+        self.reload_model()
+
+    def reload_model(self):
         if os.path.exists(MODEL_PATH):
             self.model = joblib.load(MODEL_PATH)
             print("Loaded trained ML model from:", MODEL_PATH)
@@ -19,9 +24,10 @@ class DynamicETAPredictor:
             self.model = None
 
     def format_time(self, time_str: str, add_minutes: float) -> str:
-        """Adds minutes to HH:MM format string."""
+        """Adds minutes to HH:MM or HH:MM:SS format string."""
         try:
-            h, m = map(int, time_str.split(":"))
+            parts = [int(p) for p in time_str.split(":")[:2]]
+            h, m = parts[0], parts[1]
             total_minutes = h * 60 + m + int(round(add_minutes))
             total_minutes = total_minutes % (24 * 60)
             new_h = total_minutes // 60
@@ -34,29 +40,59 @@ class DynamicETAPredictor:
         self,
         predicted_delay: float,
         current_delay: float,
-        fog_index: float,
-        occupancy_ratio: float,
-        priority_tier: int,
-        headway_km: float,
-        is_junction: bool
+        fog_index: float = 0.0,
+        occupancy_ratio: float = 0.4,
+        priority_tier: int = 3,
+        headway_km: float = 15.0,
+        is_junction: bool = False,
+        rainfall_intensity: float = 0.0,
+        ambient_temp_c: float = 32.0,
+        tsr_speed_restriction_kmh: float = 130.0,
+        is_peak_hour: int = 0,
+        station_dwell_delay_min: float = 0.0
     ) -> str:
         """
-        Generates clear, human-understandable Explainable AI (XAI) delay attribution.
+        Generates clear, human-understandable Explainable AI (XAI) delay attribution
+        accounting for all 12 operational and environmental conditions.
         """
         delta = predicted_delay - current_delay
         reasons = []
 
+        # 1. Weather: Monsoon Rain & Waterlogging
+        if rainfall_intensity > 0.3:
+            reasons.append(f"Monsoon torrential rain & track waterlogging (Caution order: MPS reduced to 30 km/h)")
+
+        # 2. Weather: Fog & Desert Sandstorm
         if fog_index > 0.3:
-            reasons.append(f"Severe fog visibility restriction (MPS reduced to 60 km/h)")
+            reasons.append("Desert sandstorm (Aandhi) / dense fog visibility restriction (MPS reduced to 60 km/h)")
         
+        # 3. Weather: Extreme Heatwave
+        if ambient_temp_c > 42.0:
+            reasons.append(f"High ambient heatwave ({round(ambient_temp_c, 1)}°C / {round(ambient_temp_c * 9/5 + 32, 1)}°F) - CWR track buckling caution & patrol order")
+
+        # 4. Infrastructure: Temporary Speed Restriction (TSR)
+        if tsr_speed_restriction_kmh < 100.0:
+            reasons.append(f"Temporary Speed Restriction (TSR Caution Order {int(tsr_speed_restriction_kmh)} km/h for track/bridge work)")
+
+        # 5. Infrastructure: Section Congestion
         if occupancy_ratio > 0.85:
-            reasons.append(f"Section congestion (track capacity utilized at {int(occupancy_ratio*100)}%)")
+            reasons.append(f"Section congestion across block (track capacity utilized at {int(occupancy_ratio*100)}%)")
         
+        # 6. Signaling: Headway spacing
         if headway_km < 4.0:
-            reasons.append(f"Cautionary signal headway behind preceding train ({round(headway_km, 1)} km gap)")
+            reasons.append(f"Cautionary yellow/red signal headway behind preceding train ({round(headway_km, 1)} km gap)")
         
+        # 7. Signaling: Junction Precedence
         if is_junction and priority_tier >= 3:
-            reasons.append(f"Junction route clearance priority for Superfast/Rajdhani corridor")
+            reasons.append("Junction loop-line wait at Phulera/Marwar for Vande Bharat 20978 route clearance")
+
+        # 8. Scheduling: Peak hour bunching
+        if is_peak_hour and delta > 5:
+            reasons.append("Peak rush hour timetable bunching across trunk corridor")
+
+        # 9. Dwell delay
+        if station_dwell_delay_min > 4.0:
+            reasons.append(f"Extended passenger boarding crowd dwell (+{int(station_dwell_delay_min)}m)")
 
         if delta > 15 and not reasons:
             reasons.append("Downstream bottleneck queuing and speed restrictions")
@@ -76,11 +112,17 @@ class DynamicETAPredictor:
         train_state: dict,
         upcoming_stops: list,
         section_occupancy_map: dict,
-        fog_index: float,
-        headway_km: float
+        fog_index: float = 0.0,
+        headway_km: float = 15.0,
+        rainfall_intensity: float = 0.0,
+        ambient_temp_c: float = 32.0,
+        tsr_speed_restriction_kmh: float = 130.0,
+        is_peak_hour: int = 0,
+        station_dwell_delay_min: float = 0.0
     ) -> list:
         """
-        Computes Dynamic ML ETA and Static NTES Baseline for all upcoming stations.
+        Computes Dynamic ML ETA and Static NTES Baseline for all upcoming stations
+        incorporating all 12 operational parameters.
         """
         results = []
         current_km = train_state.get("current_km", 0.0)
@@ -98,9 +140,8 @@ class DynamicETAPredictor:
             baseline_delay = max(0.0, current_delay)
             baseline_eta = self.format_time(stop["arr"], baseline_delay)
 
-            # 2. Dynamic Machine Learning Model Prediction
+            # 2. Dynamic Machine Learning Model Prediction across 12 conditions
             if self.model is not None:
-                import pandas as pd
                 features_df = pd.DataFrame([{
                     "current_delay_min": current_delay,
                     "distance_remaining_km": distance_remaining,
@@ -108,7 +149,12 @@ class DynamicETAPredictor:
                     "priority_tier": priority_tier,
                     "weather_fog_index": fog_index,
                     "headway_km": headway_km,
-                    "is_junction_ahead": 1 if is_junction else 0
+                    "is_junction_ahead": 1 if is_junction else 0,
+                    "rainfall_intensity": rainfall_intensity,
+                    "ambient_temp_c": ambient_temp_c,
+                    "tsr_speed_restriction_kmh": tsr_speed_restriction_kmh,
+                    "is_peak_hour": is_peak_hour,
+                    "station_dwell_delay_min": station_dwell_delay_min
                 }])
                 predicted_delay = float(self.model.predict(features_df)[0])
                 predicted_delay = max(-5.0, round(predicted_delay, 1))
@@ -121,13 +167,18 @@ class DynamicETAPredictor:
             conf_high = self.format_time(stop["arr"], predicted_delay + 5)
 
             reason = self.generate_delay_explanation(
-                predicted_delay,
-                current_delay,
-                fog_index,
-                occupancy_ratio,
-                priority_tier,
-                headway_km,
-                is_junction
+                predicted_delay=predicted_delay,
+                current_delay=current_delay,
+                fog_index=fog_index,
+                occupancy_ratio=occupancy_ratio,
+                priority_tier=priority_tier,
+                headway_km=headway_km,
+                is_junction=is_junction,
+                rainfall_intensity=rainfall_intensity,
+                ambient_temp_c=ambient_temp_c,
+                tsr_speed_restriction_kmh=tsr_speed_restriction_kmh,
+                is_peak_hour=is_peak_hour,
+                station_dwell_delay_min=station_dwell_delay_min
             )
 
             results.append({

@@ -210,11 +210,11 @@ export const SearchResultsPage: React.FC = () => {
               <div
                 key={train.id}
                 onClick={() => navigate(`/train/${train.id}`)}
-                className="group bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all p-5 cursor-pointer"
+                className="group content-auto-card bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-colors p-5 cursor-pointer"
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  {/* Left: Train Identity & Route */}
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-4">
+                  {/* Left: Train Identity & Route (5 cols) */}
+                  <div className="lg:col-span-5 space-y-2">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <span className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900">
                         {train.number}
@@ -240,8 +240,8 @@ export const SearchResultsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Middle: Times & Duration */}
-                  <div className="flex items-center gap-6 text-xs border-y md:border-y-0 py-3 md:py-0 border-slate-100 dark:border-slate-800">
+                  {/* Middle: Times & Duration (4 cols, centered on desktop) */}
+                  <div className="lg:col-span-4 flex items-center justify-start lg:justify-center gap-6 text-xs border-y lg:border-y-0 py-3 lg:py-0 border-slate-100 dark:border-slate-800">
                     <div>
                       <div className="text-[11px] text-slate-400 dark:text-slate-500 uppercase font-semibold">
                         Departure
@@ -273,8 +273,8 @@ export const SearchResultsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Right: Status badge & Action */}
-                  <div className="flex items-center justify-between md:justify-end gap-3 shrink-0">
+                  {/* Right: Status badge & Action (3 cols, right-aligned) */}
+                  <div className="lg:col-span-3 flex items-center justify-between lg:justify-end gap-3 shrink-0">
                     <TrainStatusBadge
                       state={train.currentStatus.state}
                       delayMinutes={train.currentStatus.delayMinutes}
@@ -334,7 +334,7 @@ export const SearchResultsPage: React.FC = () => {
             No matching trains found
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-            We couldn't find any trains matching your search filters for "{query}". Try checking the spelling or searching by train number (e.g. 12951, 22436).
+            We couldn't find any trains matching your search filters for "{query}". Try checking the spelling or searching by train number (e.g. 20978, 12461).
           </p>
           <button
             onClick={() => {

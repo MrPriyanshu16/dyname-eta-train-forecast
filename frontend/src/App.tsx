@@ -4,15 +4,24 @@ import { SimulationProvider } from './context/SimulationContext';
 import { ThemeProvider } from './context/ThemeContext';
 import { AppShell } from './components/layout/AppShell';
 
-// Pages
-import { HomePage } from './pages/HomePage';
-import { SearchResultsPage } from './pages/SearchResultsPage';
-import { TrainDetailsPage } from './pages/TrainDetailsPage';
-import { SchedulePage } from './pages/SchedulePage';
-import { StationSchedulePage } from './pages/StationSchedulePage';
-import { JourneyPlannerPage } from './pages/JourneyPlannerPage';
-import { SavedTrainsPage } from './pages/SavedTrainsPage';
-import { LiveCorridorPage } from './pages/LiveCorridorPage';
+// Code-split pages with React.lazy
+const HomePage = React.lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
+const SearchResultsPage = React.lazy(() => import('./pages/SearchResultsPage').then(m => ({ default: m.SearchResultsPage })));
+const TrainDetailsPage = React.lazy(() => import('./pages/TrainDetailsPage').then(m => ({ default: m.TrainDetailsPage })));
+const SchedulePage = React.lazy(() => import('./pages/SchedulePage').then(m => ({ default: m.SchedulePage })));
+const StationSchedulePage = React.lazy(() => import('./pages/StationSchedulePage').then(m => ({ default: m.StationSchedulePage })));
+const JourneyPlannerPage = React.lazy(() => import('./pages/JourneyPlannerPage').then(m => ({ default: m.JourneyPlannerPage })));
+const SavedTrainsPage = React.lazy(() => import('./pages/SavedTrainsPage').then(m => ({ default: m.SavedTrainsPage })));
+const LiveCorridorPage = React.lazy(() => import('./pages/LiveCorridorPage').then(m => ({ default: m.LiveCorridorPage })));
+
+const RouteLoadingFallback = () => (
+  <div className="flex items-center justify-center min-h-[50vh] p-8">
+    <div className="flex flex-col items-center gap-3">
+      <div className="w-7 h-7 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
+      <span className="text-xs text-slate-400 dark:text-slate-500 font-mono">Loading transit data...</span>
+    </div>
+  </div>
+);
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -23,17 +32,19 @@ const AppContent: React.FC = () => {
 
   return (
     <AppShell currentTrainId={currentTrainId}>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/live-corridor" element={<LiveCorridorPage />} />
-        <Route path="/search" element={<SearchResultsPage />} />
-        <Route path="/train/:trainId" element={<TrainDetailsPage />} />
-        <Route path="/train/:trainId/schedule" element={<SchedulePage />} />
-        <Route path="/station/:stationId" element={<StationSchedulePage />} />
-        <Route path="/journey-planner" element={<JourneyPlannerPage />} />
-        <Route path="/saved" element={<SavedTrainsPage />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <React.Suspense fallback={<RouteLoadingFallback />}>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/live-corridor" element={<LiveCorridorPage />} />
+          <Route path="/search" element={<SearchResultsPage />} />
+          <Route path="/train/:trainId" element={<TrainDetailsPage />} />
+          <Route path="/train/:trainId/schedule" element={<SchedulePage />} />
+          <Route path="/station/:stationId" element={<StationSchedulePage />} />
+          <Route path="/journey-planner" element={<JourneyPlannerPage />} />
+          <Route path="/saved" element={<SavedTrainsPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </React.Suspense>
     </AppShell>
   );
 };

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TrainSearchInput } from '../components/search/TrainSearchInput';
+import { TrainlineHeroIllustration } from '../components/ui/TrainlineHeroIllustration';
 import { useSimulation } from '../context/SimulationContext';
 import { TrainStatusBadge } from '../components/train/TrainStatusBadge';
 import {
@@ -9,16 +10,14 @@ import {
   Bookmark,
   ArrowRight,
   TrendingUp,
-  MapPin,
   Clock,
-  Sparkles,
   ShieldCheck,
   Zap,
-  Radio
+  Layers
 } from 'lucide-react';
 
-export const HomePage: React.FC = () => {
-  const { trains, savedTrainIds, getTrainById } = useSimulation();
+export const HomePageComponent: React.FC = () => {
+  const { savedTrainIds, getTrainById, recentSearches, trains } = useSimulation();
   const navigate = useNavigate();
 
   // Saved or recently viewed trains for quick card list
@@ -29,106 +28,126 @@ export const HomePage: React.FC = () => {
 
   const popularCorridors = [
     {
-      id: '12951',
-      number: '12951',
-      name: 'Mumbai Rajdhani',
-      route: 'New Delhi → Mumbai Central',
-      departure: '16:55',
-      duration: '15h 40m',
-      badge: 'Superfast Premium',
-      type: 'Rajdhani'
-    },
-    {
-      id: '22436',
-      number: '22436',
-      name: 'Vande Bharat Express',
-      route: 'New Delhi → Varanasi Jn',
-      departure: '06:00',
-      duration: '8h 00m',
+      id: '20978',
+      number: '20978',
+      name: 'Ajmer - Delhi Vande Bharat',
+      route: 'Ajmer → Jaipur → Delhi',
+      departure: '06:20',
+      duration: '5h 15m',
       badge: 'Semi-High Speed',
       type: 'Vande Bharat'
     },
     {
-      id: '12004',
-      number: '12004',
-      name: 'Lucknow Shatabdi',
-      route: 'New Delhi → Lucknow Charbagh',
+      id: '12461',
+      number: '12461',
+      name: 'Mandore Superfast Express',
+      route: 'Jodhpur → Jaipur → Delhi',
+      departure: '20:00',
+      duration: '10h 30m',
+      badge: 'NWR Superfast',
+      type: 'Superfast'
+    },
+    {
+      id: '12015',
+      number: '12015',
+      name: 'Ajmer Shatabdi Express',
+      route: 'New Delhi → Jaipur → Ajmer',
       departure: '06:10',
       duration: '6h 45m',
       badge: 'Daily Intercity',
       type: 'Shatabdi'
     },
     {
-      id: '12626',
-      number: '12626',
-      name: 'Kerala Express',
-      route: 'New Delhi → Thiruvananthapuram',
-      departure: '20:10',
-      duration: '50h 00m',
-      badge: 'Trans-India Trunk',
+      id: '14853',
+      number: '14853',
+      name: 'Marudhar Express',
+      route: 'Jaipur → Ajmer → Jodhpur',
+      departure: '12:20',
+      duration: '7h 20m',
+      badge: 'Rajasthan Corridor',
       type: 'Superfast'
     }
   ];
 
   return (
     <div className="space-y-12 sm:space-y-16 pb-12 transition-colors">
-      {/* Hero Section */}
-      <section className="relative z-20 bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900/80 dark:to-slate-950 pt-12 pb-16 sm:pt-16 sm:pb-20 border-b border-slate-200/70 dark:border-slate-800 transition-colors">
-        {/* Subtle geometric line representing track movement */}
-        <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-20 dark:opacity-30">
-          <div className="absolute top-1/2 left-0 right-0 h-px bg-gradient-to-r from-transparent via-indigo-600 dark:via-indigo-400 to-transparent" />
-          <div className="absolute top-1/2 left-1/3 w-32 h-1 bg-indigo-500 rounded-full blur-xs" />
-        </div>
+      {/* Hero Section with Seamless Trainline-Style Animated Illustration */}
+      <section className="relative z-20 border-b border-slate-200/70 dark:border-slate-800 transition-colors">
+        {/* Sky & Train Track Landscape Animation */}
+        <TrainlineHeroIllustration>
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-20 pt-10 sm:pt-14 pb-48 sm:pb-60">
+            {/* Headline in the High Open Sky */}
+            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15] text-balance drop-shadow-xs">
+              Know where your train is. <br className="hidden sm:inline" />
+              <span className="bg-gradient-to-r from-indigo-700 via-blue-600 to-indigo-900 dark:from-indigo-400 dark:via-sky-300 dark:to-indigo-300 bg-clip-text text-transparent">
+                Know when it arrives.
+              </span>
+            </h1>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center relative z-20">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100/90 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-6">
-            <Radio className="w-3.5 h-3.5 animate-pulse text-indigo-600 dark:text-indigo-400" />
-            <span>Simulated Real-Time Transit Intelligence</span>
+            {/* Concise Supporting Description */}
+            <p className="mt-4 sm:mt-5 text-sm sm:text-base md:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed font-normal">
+              Minimal, instant train tracking, running delays, platform allocations, and arrival estimation—without the clutter of traditional railway portals.
+            </p>
+          </div>
+        </TrainlineHeroIllustration>
+
+        {/* Search Bar & Suggestions - Positioned Directly & Snugly Below the Train Track */}
+        <div className="pt-2 sm:pt-2.5 pb-8 sm:pb-10 px-4 sm:px-6 relative z-20">
+          <div className="max-w-2xl mx-auto">
+            <TrainSearchInput size="large" />
           </div>
 
-          {/* Headline */}
-          <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15] text-balance">
-            Know where your train is. <br className="hidden sm:inline" />
-            <span className="bg-gradient-to-r from-indigo-700 via-blue-600 to-indigo-900 dark:from-indigo-400 dark:via-sky-300 dark:to-indigo-300 bg-clip-text text-transparent">
-              Know when it arrives.
-            </span>
-          </h1>
+          {/* Quick Query Suggestions & Recent Searches */}
+          <div className="mt-3 flex items-center justify-center gap-2 flex-wrap text-xs">
+            {recentSearches.length > 0 && (
+              <>
+                <span className="text-slate-400 dark:text-slate-500 font-medium flex items-center gap-1">
+                  <Clock className="w-3 h-3" /> Recent:
+                </span>
+                {recentSearches.slice(0, 3).map((item, idx) => (
+                  <button
+                    key={`rec-${idx}`}
+                    onClick={() => {
+                      const exactTrain = trains.find(
+                        t => t.number === item || `${t.number} ${t.name}` === item
+                      );
+                      if (exactTrain) {
+                        navigate(`/train/${exactTrain.id}`);
+                      } else {
+                        navigate(`/search?q=${encodeURIComponent(item)}`);
+                      }
+                    }}
+                    className="px-2.5 py-1 rounded-lg bg-indigo-50/80 dark:bg-indigo-950/60 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 border border-indigo-200/70 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-medium transition-colors cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
+                  >
+                    {item}
+                  </button>
+                ))}
+                <span className="text-slate-300 dark:text-slate-700 mx-0.5">•</span>
+              </>
+            )}
 
-          {/* Concise Supporting Description */}
-          <p className="mt-4 text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Minimal, instant train tracking, running delays, platform allocations, and arrival estimation—without the clutter of traditional railway portals.
-          </p>
-
-          {/* Search Bar */}
-          <div className="mt-8 max-w-2xl mx-auto">
-            <TrainSearchInput size="large" autoFocus />
-          </div>
-
-          {/* Quick Query Suggestions */}
-          <div className="mt-4 flex items-center justify-center gap-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
-            <span className="text-slate-400 dark:text-slate-500">Popular:</span>
+            <span className="text-slate-500 dark:text-slate-400 font-medium">Popular:</span>
             <button
-              onClick={() => navigate('/train/12951')}
-              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs"
+              onClick={() => navigate('/train/20978')}
+              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
             >
-              12951 Rajdhani
+              20978 Vande Bharat
             </button>
             <button
-              onClick={() => navigate('/train/22436')}
-              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs"
+              onClick={() => navigate('/train/12461')}
+              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
             >
-              22436 Vande Bharat
+              12461 Mandore Express
             </button>
             <button
-              onClick={() => navigate('/station/NDLS')}
-              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs"
+              onClick={() => navigate('/station/JU')}
+              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
             >
-              NDLS Station Board
+              JU Station Board
             </button>
             <button
               onClick={() => navigate('/journey-planner')}
-              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs"
+              className="px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 font-medium transition-colors cursor-pointer shadow-2xs hover:scale-105 active:scale-95"
             >
               Plan Journey
             </button>
@@ -142,13 +161,13 @@ export const HomePage: React.FC = () => {
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
             to="/journey-planner"
-            className="group p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all flex items-start gap-4"
+            className="group p-5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-600 shadow-xs hover:shadow-md transition-all flex items-start gap-4"
           >
-            <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+            <div className="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100 dark:border-indigo-900 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
               <Compass className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-400 transition-colors">
+              <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
                 <span>Journey Planner</span>
                 <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
               </div>
@@ -159,37 +178,37 @@ export const HomePage: React.FC = () => {
           </Link>
 
           <Link
-            to="/station/NDLS"
-            className="group p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all flex items-start gap-4"
+            to="/live-corridor"
+            className="group p-5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-600 shadow-xs hover:shadow-md transition-all flex items-start gap-4"
           >
-            <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-900 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
-              <Building2 className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-sky-50 dark:bg-sky-950/70 border border-sky-100 dark:border-sky-900 text-sky-600 dark:text-sky-400 flex items-center justify-center shrink-0 group-hover:bg-sky-600 group-hover:text-white transition-colors">
+              <Layers className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900 dark:text-white group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">
-                <span>Station Live Boards</span>
+              <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
+                <span>Live Corridor Map</span>
                 <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Check incoming arrivals, upcoming departures, and platform numbers at any major station.
+                Interactive real-time map of the Jaipur ➔ Ajmer ➔ Jodhpur corridor with live telemetry.
               </p>
             </div>
           </Link>
 
           <Link
-            to="/saved"
-            className="group p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all flex items-start gap-4"
+            to="/station/JU"
+            className="group p-5 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-850 rounded-2xl border border-slate-200/90 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-600 shadow-xs hover:shadow-md transition-all flex items-start gap-4"
           >
-            <div className="w-10 h-10 rounded-lg bg-emerald-50 dark:bg-emerald-950/70 border border-emerald-100 dark:border-emerald-900 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-              <Bookmark className="w-5 h-5" />
+            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/70 border border-purple-100 dark:border-purple-900 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+              <Building2 className="w-5 h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900 dark:text-white group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
-                <span>Saved & Pinned Trains</span>
+              <div className="flex items-center gap-1.5 font-bold text-sm text-slate-900 dark:text-white group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
+                <span>Station Live Boards</span>
                 <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                One-tap access to your daily commutes and tracked journeys with live updates.
+                Platform assignments and upcoming arrivals for Jodhpur, Jaipur, Ajmer and more.
               </p>
             </div>
           </Link>
@@ -354,3 +373,5 @@ export const HomePage: React.FC = () => {
     </div>
   );
 };
+
+export const HomePage = React.memo(HomePageComponent);

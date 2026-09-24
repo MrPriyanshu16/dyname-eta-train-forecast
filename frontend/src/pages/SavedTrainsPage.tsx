@@ -58,7 +58,7 @@ export const SavedTrainsPage: React.FC = () => {
             return (
               <div
                 key={train.id}
-                className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-500/60 hover:shadow-xs transition-all flex flex-col justify-between space-y-4"
+                className="content-auto-card bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-2xs hover:border-indigo-300 dark:hover:border-indigo-500/60 hover:shadow-xs transition-colors flex flex-col justify-between space-y-4"
               >
                 {/* Header */}
                 <div className="flex items-start justify-between gap-3">

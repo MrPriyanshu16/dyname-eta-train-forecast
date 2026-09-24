@@ -1,6 +1,7 @@
 """
 Corridor Telemetry Simulator and Dynamic Digital Twin Engine
 Models authentic train movements, section occupancies, signal aspects, and disruptions.
+Supports 12 real-world operational and environmental conditions.
 """
 
 import math
@@ -8,10 +9,11 @@ import time
 from typing import Dict, List, Optional
 from ml.corridor_data import STATIONS, SECTIONS, TRAINS_SCHEDULE, SIGNALS, NATIONWIDE_ROUTES, NATIONWIDE_STATIONS
 from backend.ml_predictor import predictor
+from backend.weather_service import fetch_live_corridor_weather
 
 def interpolate_coordinates(km: float) -> tuple[float, float, str]:
     """
-    Interpolates latitude and longitude for any kilometer mark along the NDLS-CNB corridor.
+    Interpolates latitude and longitude for any kilometer mark along the Rajasthan corridor.
     Also returns the current section ID.
     """
     km = max(0.0, min(km, STATIONS[-1]["km"]))
@@ -38,18 +40,24 @@ class CorridorSimulator:
         self.is_running = True
         self.sim_speed_multiplier = 1.0  # 1x, 2x, 5x
         
-        # Disruption flags
+        # Operational and environmental disruption flags
         self.disruptions = {
             "fog": False,
-            "fog_intensity": 0.0,  # 0.0 to 1.0
-            "signal_halt_train": None,  # train_number if halted
-            "signal_halt_section": None,  # section_id if red signal
-            "maintenance_section": None,  # section_id under maintenance block
+            "fog_intensity": 0.0,        # 0.0 to 1.0 (Desert sandstorm / fog)
+            "signal_halt_train": None,   # train_number if halted
+            "signal_halt_section": None, # section_id if red signal
+            "maintenance_section": None, # section_id under maintenance block
+            "rain": False,
+            "rain_intensity": 0.0,       # 0.0 to 1.0 (Monsoon torrential waterlogging)
+            "heatwave": False,
+            "ambient_temp_c": 32.0,      # Normal 32°C; heatwave ~47°C
+            "tsr_section": None,         # section_id under Temporary Speed Restriction
+            "tsr_speed_kmh": 130.0       # 30-50 km/h when active
         }
 
-        # Initialize trains with realistic staggered positions along the corridor
-        initial_staggers = [355.0, 245.0, 150.0, 85.0, 20.0]
-        initial_delays = [4.0, 0.0, 12.0, 28.0, 5.0]
+        # Initialize trains with realistic staggered positions along Rajasthan corridor (0 to 412 km)
+        initial_staggers = [335.0, 245.0, 130.0, 52.0, 10.0]
+        initial_delays = [2.0, 0.0, 8.0, 22.0, 5.0]
 
         self.trains: Dict[str, dict] = {}
         for idx, sched in enumerate(TRAINS_SCHEDULE):
@@ -107,9 +115,9 @@ class CorridorSimulator:
         
         return min(ahead_distances) if ahead_distances else 40.0
 
-    def detect_platform_conflicts(self, station_code: str = "CNB") -> List[dict]:
+    def detect_platform_conflicts(self, station_code: str = "JU") -> List[dict]:
         """
-        Detects if two arriving trains have clashing dynamic ETAs on the same platform.
+        Detects if two arriving trains have clashing dynamic ETAs on the same platform at Jodhpur Junction.
         """
         station = next((s for s in self.stations if s["code"] == station_code), None)
         if not station:
@@ -156,9 +164,17 @@ class CorridorSimulator:
         return conflicts
 
     def update_all_states(self, delta_seconds: float):
-        """Advances physics, updates speeds, calculates dynamic ETAs."""
+        """Advances physics, updates speeds, calculates dynamic ETAs across all 12 conditions."""
         occupancy_map = self.get_section_occupancies()
         fog_idx = self.disruptions["fog_intensity"] if self.disruptions["fog"] else 0.0
+        rain_idx = self.disruptions["rain_intensity"] if self.disruptions["rain"] else 0.0
+        ambient_temp = self.disruptions.get("ambient_temp_c", 32.0)
+        tsr_sec = self.disruptions.get("tsr_section")
+        tsr_speed = self.disruptions.get("tsr_speed_kmh", 130.0)
+
+        # Check peak hour
+        current_hour = time.localtime().tm_hour
+        is_peak = 1 if current_hour in [8, 9, 10, 17, 18, 19] else 0
 
         for t_num, train in self.trains.items():
             # Check halt conditions
@@ -178,22 +194,40 @@ class CorridorSimulator:
             else:
                 target_speed = nominal_mps
 
-                # Weather effect
+                # Weather effect 1: Fog / Sandstorm
                 if fog_idx > 0.3:
                     target_speed = min(target_speed, 60.0)
+                    train["current_status"] = "CAUTION (Sandstorm MPS 60 km/h)"
 
-                # Maintenance block effect
+                # Weather effect 2: Monsoon Torrential Rain / Waterlogging
+                if rain_idx > 0.3:
+                    target_speed = min(target_speed, 30.0)
+                    train["current_status"] = "CAUTION (Track Waterlogging 30 km/h)"
+
+                # Weather effect 3: Extreme Heatwave / Rail Expansion Caution
+                if self.disruptions.get("heatwave") or ambient_temp > 42.0:
+                    target_speed = min(target_speed, 50.0)
+                    train["current_status"] = f"CAUTION (Rail Heat Patrol {int(ambient_temp)}°C)"
+
+                # Infrastructure effect 1: TSR Caution Order on train's section
+                if tsr_sec == train["current_section_id"]:
+                    target_speed = min(target_speed, tsr_speed)
+                    train["current_status"] = f"TSR CAUTION (Speed Order {int(tsr_speed)} km/h)"
+
+                # Infrastructure effect 2: Maintenance block effect
                 if self.disruptions["maintenance_section"] == train["current_section_id"]:
                     target_speed = min(target_speed, 45.0)
+                    train["current_status"] = "CAUTION (Track Maintenance 45 km/h)"
 
-                # Headway signal deceleration
+                # Signaling effect: Headway signal deceleration
                 if headway < 3.0:
                     target_speed = min(target_speed, 30.0)
                     train["current_status"] = "CAUTION (Cautionary Aspect Ahead)"
                 elif headway < 6.0:
                     target_speed = min(target_speed, 75.0)
-                    train["current_status"] = "APPROACH (Yellow Signal)"
-                else:
+                    if not (train["current_status"].startswith("CAUTION") or train["current_status"].startswith("TSR")):
+                        train["current_status"] = "APPROACH (Yellow Signal)"
+                elif not (train["current_status"].startswith("CAUTION") or train["current_status"].startswith("TSR")):
                     train["current_status"] = "RUNNING"
 
                 # Priority boost / throttle
@@ -218,7 +252,7 @@ class CorridorSimulator:
                     # Time recovery
                     train["current_delay_min"] = max(0.0, train["current_delay_min"] - (delta_seconds / 60.0) * 0.2)
 
-                # Loop back if reaching terminal station (Kanpur 440.3 km)
+                # Loop back if reaching terminal station (Jodhpur 412 km)
                 if train["current_km"] >= STATIONS[-1]["km"]:
                     train["current_km"] = 0.0
                     train["current_delay_min"] = 0.0
@@ -257,13 +291,18 @@ class CorridorSimulator:
                         "section_id": sec_for_stop
                     })
 
-            # Calculate Dynamic ML ETAs
+            # Calculate Dynamic ML ETAs across all 12 operational parameters
             train["dynamic_etas"] = predictor.predict_downstream_etas(
                 train_state=train,
                 upcoming_stops=upcoming_stops,
                 section_occupancy_map=occupancy_map,
                 fog_index=fog_idx,
-                headway_km=headway
+                headway_km=headway,
+                rainfall_intensity=rain_idx,
+                ambient_temp_c=ambient_temp,
+                tsr_speed_restriction_kmh=tsr_speed if tsr_sec == train["current_section_id"] else 130.0,
+                is_peak_hour=is_peak,
+                station_dwell_delay_min=0.0
             )
 
     def tick(self) -> dict:
@@ -280,7 +319,7 @@ class CorridorSimulator:
     def get_signal_states(self) -> List[dict]:
         """
         Dynamically computes Automatic Block Signal aspects (GREEN, YELLOW, RED)
-        based on live train proximity along the corridor.
+        based on live train proximity and disruptions along the corridor.
         """
         result = []
         for sig in SIGNALS:
@@ -299,7 +338,7 @@ class CorridorSimulator:
                         aspect = "YELLOW"
             
             # Injected disruptions
-            if self.disruptions.get("maintenance_section") == sig.get("section_id"):
+            if self.disruptions.get("maintenance_section") == sig.get("section_id") or self.disruptions.get("tsr_section") == sig.get("section_id"):
                 aspect = "YELLOW"
             if self.disruptions.get("signal_halt_section") == sig.get("section_id"):
                 aspect = "RED"
@@ -331,19 +370,29 @@ class CorridorSimulator:
             "nationwide_routes": NATIONWIDE_ROUTES,
             "nationwide_stations": NATIONWIDE_STATIONS,
             "trains": list(self.trains.values()),
-            "platform_conflicts": self.detect_platform_conflicts("CNB")
+            "platform_conflicts": self.detect_platform_conflicts("JU")
         }
 
     def inject_disruption(self, disruption_type: str, value: Optional[str] = None):
         """Triggered by user or viva examiner."""
-        if disruption_type == "fog":
+        dtype = disruption_type.lower()
+        if dtype in ["fog", "sandstorm"]:
             self.disruptions["fog"] = True
             self.disruptions["fog_intensity"] = 0.85
-        elif disruption_type == "signal_halt":
+        elif dtype == "signal_halt":
             # Halts the first running train or specified train
-            self.disruptions["signal_halt_train"] = value if value else "12004"
-        elif disruption_type == "maintenance_block":
+            self.disruptions["signal_halt_train"] = value if value else "12461"
+        elif dtype == "maintenance_block":
             self.disruptions["maintenance_section"] = value if value else "SEC-3"
+        elif dtype in ["rain", "waterlogging", "monsoon"]:
+            self.disruptions["rain"] = True
+            self.disruptions["rain_intensity"] = 0.90
+        elif dtype in ["heatwave", "extreme_heat"]:
+            self.disruptions["heatwave"] = True
+            self.disruptions["ambient_temp_c"] = 47.5
+        elif dtype in ["tsr", "caution_order"]:
+            self.disruptions["tsr_section"] = value if value else "SEC-4"
+            self.disruptions["tsr_speed_kmh"] = 40.0
         self.update_all_states(delta_seconds=0.0)
 
     def reset_disruptions(self):
@@ -353,7 +402,13 @@ class CorridorSimulator:
             "fog_intensity": 0.0,
             "signal_halt_train": None,
             "signal_halt_section": None,
-            "maintenance_section": None
+            "maintenance_section": None,
+            "rain": False,
+            "rain_intensity": 0.0,
+            "heatwave": False,
+            "ambient_temp_c": 32.0,
+            "tsr_section": None,
+            "tsr_speed_kmh": 130.0
         }
         self.update_all_states(delta_seconds=0.0)
 

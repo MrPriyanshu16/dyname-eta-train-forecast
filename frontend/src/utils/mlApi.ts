@@ -24,6 +24,9 @@ export interface MLPredictionResponse {
   operational_context: {
     current_delay_minutes: number;
     weather_fog_index: number;
+    rainfall_intensity?: number;
+    ambient_temp_c?: number;
+    tsr_speed_kmh?: number;
     section_occupancy_ratio: number;
     headway_km: number;
   };

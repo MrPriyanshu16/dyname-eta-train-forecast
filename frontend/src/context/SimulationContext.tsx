@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
 import { Train, RunningState } from '../types/train';
 import { INITIAL_TRAINS } from '../data/mockTrains';
 import { DEMO_SCENARIOS } from '../data/scenarios';
@@ -26,15 +26,15 @@ interface SimulationContextType {
 
 const SimulationContext = createContext<SimulationContextType | undefined>(undefined);
 
-const SAVED_TRAINS_KEY = 'trackline_saved_trains_v1';
-const RECENT_SEARCHES_KEY = 'trackline_recent_searches_v1';
+const SAVED_TRAINS_KEY = 'trackline_saved_trains_v2';
+const RECENT_SEARCHES_KEY = 'trackline_recent_searches_v2';
 
 import { getCurrentISTString } from '../utils/time';
 
 export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [trains, setTrains] = useState<Train[]>(INITIAL_TRAINS);
   const [simulatedTime, setSimulatedTime] = useState<string>(() => getCurrentISTString());
-  const [activeScenarioId, setActiveScenarioId] = useState<string>('scenario-c'); // Default to Mumbai Rajdhani at Kota
+  const [activeScenarioId, setActiveScenarioId] = useState<string>('scenario-a'); // Default to Ajmer-Delhi Vande Bharat
   const [selectedTargetStations, setSelectedTargetStations] = useState<Record<string, string>>({});
 
   // Continuously sync with live India time every 10 seconds if not manually adjusted
@@ -49,9 +49,9 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [savedTrainIds, setSavedTrainIds] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem(SAVED_TRAINS_KEY);
-      return stored ? JSON.parse(stored) : ['12951', '22436'];
+      return stored ? JSON.parse(stored) : ['20978', '12461'];
     } catch {
-      return ['12951', '22436'];
+      return ['20978', '12461'];
     }
   });
 
@@ -59,9 +59,9 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
-      return stored ? JSON.parse(stored) : ['12951 Mumbai Rajdhani', 'NDLS New Delhi', '22436 Vande Bharat'];
+      return stored ? JSON.parse(stored) : ['20978 Vande Bharat', 'JU Jodhpur Junction', '12461 Mandore Superfast'];
     } catch {
-      return ['12951 Mumbai Rajdhani', 'NDLS New Delhi', '22436 Vande Bharat'];
+      return ['20978 Vande Bharat', 'JU Jodhpur Junction', '12461 Mandore Superfast'];
     }
   });
 
@@ -81,45 +81,48 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     }
   }, [recentSearches]);
 
-  const getTrainById = (id: string) => {
+  const getTrainById = useCallback((id: string) => {
     return trains.find(t => t.id === id || t.number === id);
-  };
+  }, [trains]);
 
-  const advanceSimulatedTime = (minutes: number) => {
-    // Parse simulated time "10:42 AM"
-    const [time, period] = simulatedTime.split(' ');
-    const [hStr, mStr] = time.split(':');
-    let h = parseInt(hStr, 10);
-    let m = parseInt(mStr, 10);
-    if (period === 'PM' && h !== 12) h += 12;
-    if (period === 'AM' && h === 12) h = 0;
+  const advanceSimulatedTime = useCallback((minutes: number) => {
+    setSimulatedTime(prevTime => {
+      // Parse simulated time "10:42 AM"
+      const [time, period] = prevTime.split(' ');
+      const [hStr, mStr] = time.split(':');
+      let h = parseInt(hStr, 10);
+      let m = parseInt(mStr, 10);
+      if (period === 'PM' && h !== 12) h += 12;
+      if (period === 'AM' && h === 12) h = 0;
 
-    let totalMins = h * 60 + m + minutes;
-    if (totalMins < 0) totalMins += 1440;
-    totalMins = totalMins % 1440;
+      let totalMins = h * 60 + m + minutes;
+      if (totalMins < 0) totalMins += 1440;
+      totalMins = totalMins % 1440;
 
-    let newH = Math.floor(totalMins / 60);
-    const newM = totalMins % 60;
-    const newPeriod = newH >= 12 ? 'PM' : 'AM';
-    newH = newH % 12;
-    if (newH === 0) newH = 12;
+      let newH = Math.floor(totalMins / 60);
+      const newM = totalMins % 60;
+      const newPeriod = newH >= 12 ? 'PM' : 'AM';
+      newH = newH % 12;
+      if (newH === 0) newH = 12;
 
-    const newTimeStr = `${newH.toString().padStart(2, '0')}:${newM.toString().padStart(2, '0')} ${newPeriod}`;
-    setSimulatedTime(newTimeStr);
+      const newTimeStr = `${newH.toString().padStart(2, '0')}:${newM.toString().padStart(2, '0')} ${newPeriod}`;
 
-    // Update timestamp on all trains
-    setTrains(prev =>
-      prev.map(t => ({
-        ...t,
-        currentStatus: {
-          ...t.currentStatus,
-          lastUpdated: newTimeStr
-        }
-      }))
-    );
-  };
+      // Update timestamp on all trains
+      setTrains(prev =>
+        prev.map(t => ({
+          ...t,
+          currentStatus: {
+            ...t.currentStatus,
+            lastUpdated: newTimeStr
+          }
+        }))
+      );
 
-  const applyScenario = (scenarioId: string) => {
+      return newTimeStr;
+    });
+  }, []);
+
+  const applyScenario = useCallback((scenarioId: string) => {
     setActiveScenarioId(scenarioId);
     const scenario = DEMO_SCENARIOS.find(s => s.id === scenarioId);
     if (!scenario) return;
@@ -135,9 +138,9 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         return t;
       })
     );
-  };
+  }, []);
 
-  const updateTrainDelay = (trainId: string, newDelayMinutes: number) => {
+  const updateTrainDelay = useCallback((trainId: string, newDelayMinutes: number) => {
     setTrains(prev =>
       prev.map(t => {
         if (t.id !== trainId) return t;
@@ -182,9 +185,9 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         };
       })
     );
-  };
+  }, []);
 
-  const updateTrainState = (trainId: string, newState: RunningState) => {
+  const updateTrainState = useCallback((trainId: string, newState: RunningState) => {
     setTrains(prev =>
       prev.map(t => {
         if (t.id !== trainId) return t;
@@ -197,67 +200,85 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         };
       })
     );
-  };
+  }, []);
 
-  const toggleSaveTrain = (trainId: string) => {
+  const toggleSaveTrain = useCallback((trainId: string) => {
     setSavedTrainIds(prev =>
       prev.includes(trainId) ? prev.filter(id => id !== trainId) : [...prev, trainId]
     );
-  };
+  }, []);
 
-  const isTrainSaved = (trainId: string) => {
+  const isTrainSaved = useCallback((trainId: string) => {
     return savedTrainIds.includes(trainId);
-  };
+  }, [savedTrainIds]);
 
-  const addRecentSearch = (query: string) => {
+  const addRecentSearch = useCallback((query: string) => {
     const trimmed = query.trim();
     if (!trimmed) return;
     setRecentSearches(prev => {
       const filtered = prev.filter(item => item.toLowerCase() !== trimmed.toLowerCase());
       return [trimmed, ...filtered].slice(0, 8);
     });
-  };
+  }, []);
 
-  const clearRecentSearches = () => {
+  const clearRecentSearches = useCallback(() => {
     setRecentSearches([]);
-  };
+  }, []);
 
-  const setSelectedTargetStation = (trainId: string, stationCode: string) => {
+  const setSelectedTargetStation = useCallback((trainId: string, stationCode: string) => {
     setSelectedTargetStations(prev => ({
       ...prev,
       [trainId]: stationCode
     }));
-  };
+  }, []);
 
-  const resetToDefaults = () => {
+  const resetToDefaults = useCallback(() => {
     setTrains(INITIAL_TRAINS);
     setSimulatedTime('10:42 AM');
     setActiveScenarioId('scenario-c');
     setSelectedTargetStations({});
-  };
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    trains,
+    getTrainById,
+    simulatedTime,
+    advanceSimulatedTime,
+    activeScenarioId,
+    applyScenario,
+    updateTrainDelay,
+    updateTrainState,
+    savedTrainIds,
+    toggleSaveTrain,
+    isTrainSaved,
+    recentSearches,
+    addRecentSearch,
+    clearRecentSearches,
+    selectedTargetStations,
+    setSelectedTargetStation,
+    resetToDefaults
+  }), [
+    trains,
+    getTrainById,
+    simulatedTime,
+    advanceSimulatedTime,
+    activeScenarioId,
+    applyScenario,
+    updateTrainDelay,
+    updateTrainState,
+    savedTrainIds,
+    toggleSaveTrain,
+    isTrainSaved,
+    recentSearches,
+    addRecentSearch,
+    clearRecentSearches,
+    selectedTargetStations,
+    setSelectedTargetStation,
+    resetToDefaults
+  ]);
 
   return (
-    <SimulationContext.Provider
-      value={{
-        trains,
-        getTrainById,
-        simulatedTime,
-        advanceSimulatedTime,
-        activeScenarioId,
-        applyScenario,
-        updateTrainDelay,
-        updateTrainState,
-        savedTrainIds,
-        toggleSaveTrain,
-        isTrainSaved,
-        recentSearches,
-        addRecentSearch,
-        clearRecentSearches,
-        selectedTargetStations,
-        setSelectedTargetStation,
-        resetToDefaults
-      }}
-    >
+    <SimulationContext.Provider value={contextValue}>
       {children}
     </SimulationContext.Provider>
   );

@@ -23,8 +23,8 @@ export const JourneyPlannerPage: React.FC = () => {
   const navigate = useNavigate();
   const { trains } = useSimulation();
 
-  const [fromStationCode, setFromStationCode] = useState<string>('NDLS');
-  const [toStationCode, setToStationCode] = useState<string>('MMCT');
+  const [fromStationCode, setFromStationCode] = useState<string>('JP');
+  const [toStationCode, setToStationCode] = useState<string>('JU');
   const [travelDate, setTravelDate] = useState<string>('Today');
   const [selectedForCompare, setSelectedForCompare] = useState<string[]>([]);
 
@@ -110,7 +110,7 @@ export const JourneyPlannerPage: React.FC = () => {
               <select
                 value={fromStationCode}
                 onChange={e => setFromStationCode(e.target.value)}
-                className="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-9 py-2.5 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="w-full h-10 appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-9 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
                 {MOCK_STATIONS.map(st => (
                   <option key={st.code} value={st.code} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
@@ -123,11 +123,11 @@ export const JourneyPlannerPage: React.FC = () => {
           </div>
 
           {/* Swap Button */}
-          <div className="md:col-span-1 flex justify-center pb-1">
+          <div className="md:col-span-1 flex justify-center">
             <button
               type="button"
               onClick={handleSwapStations}
-              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors shadow-2xs cursor-pointer"
+              className="w-10 h-10 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors shadow-2xs cursor-pointer flex items-center justify-center"
               title="Swap origin and destination"
             >
               <ArrowRightLeft className="w-4 h-4" />
@@ -141,7 +141,7 @@ export const JourneyPlannerPage: React.FC = () => {
               <select
                 value={toStationCode}
                 onChange={e => setToStationCode(e.target.value)}
-                className="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-9 py-2.5 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="w-full h-10 appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-9 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
                 {MOCK_STATIONS.map(st => (
                   <option key={st.code} value={st.code} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
@@ -160,7 +160,7 @@ export const JourneyPlannerPage: React.FC = () => {
               <select
                 value={travelDate}
                 onChange={e => setTravelDate(e.target.value)}
-                className="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-9 py-2.5 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="w-full h-10 appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl pl-4 pr-9 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
                 <option value="Today" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Today (Simulated Live)</option>
                 <option value="Tomorrow" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Tomorrow</option>
@@ -176,39 +176,48 @@ export const JourneyPlannerPage: React.FC = () => {
           <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase">Popular Routes:</span>
           <button
             onClick={() => {
-              setFromStationCode('NDLS');
-              setToStationCode('MMCT');
+              setFromStationCode('JP');
+              setToStationCode('JU');
             }}
             className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors font-medium text-[11px] cursor-pointer"
           >
-            New Delhi ↔ Mumbai Central
+            Jaipur ↔ Jodhpur
           </button>
           <button
             onClick={() => {
-              setFromStationCode('NDLS');
-              setToStationCode('BSB');
+              setFromStationCode('JP');
+              setToStationCode('AII');
             }}
             className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors font-medium text-[11px] cursor-pointer"
           >
-            New Delhi ↔ Varanasi
+            Jaipur ↔ Ajmer
           </button>
           <button
             onClick={() => {
-              setFromStationCode('NDLS');
-              setToStationCode('LKO');
+              setFromStationCode('AII');
+              setToStationCode('JU');
             }}
             className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors font-medium text-[11px] cursor-pointer"
           >
-            New Delhi ↔ Lucknow
+            Ajmer ↔ Jodhpur
           </button>
           <button
             onClick={() => {
-              setFromStationCode('MYS');
-              setToStationCode('MAS');
+              setFromStationCode('JU');
+              setToStationCode('PMY');
             }}
             className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors font-medium text-[11px] cursor-pointer"
           >
-            Mysuru ↔ Chennai Central
+            Jodhpur ↔ Pali Marwar
+          </button>
+          <button
+            onClick={() => {
+              setFromStationCode('UDZ');
+              setToStationCode('JP');
+            }}
+            className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors font-medium text-[11px] cursor-pointer"
+          >
+            Udaipur ↔ Jaipur
           </button>
         </div>
       </div>
@@ -296,15 +305,15 @@ export const JourneyPlannerPage: React.FC = () => {
             return (
               <div
                 key={train.id}
-                className={`bg-white dark:bg-slate-900 rounded-xl border transition-all p-5 ${
+                className={`content-auto-card bg-white dark:bg-slate-900 rounded-xl border transition-colors p-5 ${
                   isCompared
                     ? 'border-indigo-500 ring-2 ring-indigo-500/10 dark:ring-indigo-500/20'
                     : 'border-slate-200 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700'
                 }`}
               >
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  {/* Train Identity */}
-                  <div className="space-y-2">
+                <div className="grid grid-cols-1 lg:grid-cols-12 items-center gap-4">
+                  {/* Train Identity (5 cols) */}
+                  <div className="lg:col-span-5 space-y-2">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <span className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900">
                         {train.number}
@@ -320,8 +329,8 @@ export const JourneyPlannerPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Timings */}
-                  <div className="flex items-center gap-6 text-xs border-y md:border-y-0 py-3 md:py-0 border-slate-100 dark:border-slate-800">
+                  {/* Timings (4 cols, centered on desktop) */}
+                  <div className="lg:col-span-4 flex items-center justify-start lg:justify-center gap-6 text-xs border-y lg:border-y-0 py-3 lg:py-0 border-slate-100 dark:border-slate-800">
                     <div>
                       <div className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-semibold">
                         Depart {fromStationCode}
@@ -351,8 +360,8 @@ export const JourneyPlannerPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Actions & Compare checkbox */}
-                  <div className="flex items-center justify-between md:justify-end gap-4 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
+                  {/* Actions & Compare checkbox (3 cols, right-aligned) */}
+                  <div className="lg:col-span-3 flex items-center justify-between lg:justify-end gap-4 shrink-0 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-100 dark:border-slate-800">
                     <TrainStatusBadge
                       state={train.currentStatus.state}
                       delayMinutes={train.currentStatus.delayMinutes}

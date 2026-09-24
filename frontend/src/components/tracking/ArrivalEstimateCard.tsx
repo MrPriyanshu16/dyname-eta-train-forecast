@@ -45,8 +45,8 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
       const res = await predictETAWithML({
         train_number: train.number,
         timestamp: new Date().toISOString(),
-        latitude: 27.2081, // TDL Corridor coordinates
-        longitude: 78.2393,
+        latitude: 26.2842, // Rajasthan Corridor coordinates (Jodhpur Hub)
+        longitude: 73.0188,
         speed: train.currentStatus.currentSpeedKmph || 115.0,
         current_delay_minutes: train.currentStatus.delayMinutes || 0.0,
         weather_fog_index: 0.0
@@ -162,7 +162,7 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
       </div>
 
       {/* Main ETA Display Section */}
-      <div className="py-6 sm:py-7 grid grid-cols-1 md:grid-cols-12 gap-6 items-baseline">
+      <div className="py-6 sm:py-7 grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
         {/* Left dominant block: Station and Estimated Time */}
         <div className="md:col-span-8 space-y-4">
           <div className="flex items-baseline gap-3 flex-wrap">
@@ -250,7 +250,7 @@ export const ArrivalEstimateCard: React.FC<ArrivalEstimateCardProps> = ({
 
           {/* Route Consistency Tag */}
           {mlData && (
-            <div className="pt-2 border-t border-slate-200/60 dark:border-slate-750 flex items-center justify-between text-[11px]">
+            <div className="pt-2 border-t border-slate-200/60 dark:border-slate-800 flex items-center justify-between text-[11px]">
               <span className="text-slate-400">Route Geometry:</span>
               <span className="font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                 <CheckCircle2 className="w-3 h-3" />

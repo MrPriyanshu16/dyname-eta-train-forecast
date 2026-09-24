@@ -80,7 +80,7 @@ export default function AnalyticsView({ metrics }) {
       <div className="p-6 bg-rail-card border border-rail-border rounded-xl shadow-md space-y-4">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-rail-border">
           <div>
-            <h4 className="font-bold text-base text-white">Prediction Error Distribution (Histogram)</h4>
+            <h4 className="font-bold text-base text-slate-900 dark:text-white">Prediction Error Distribution (Histogram)</h4>
             <p className="text-xs text-rail-muted">
               Compares error spread of traditional NTES baseline vs. our Dynamic ML Regressor.
             </p>
@@ -88,11 +88,11 @@ export default function AnalyticsView({ metrics }) {
           <div className="flex items-center space-x-4 text-xs font-medium">
             <span className="flex items-center space-x-1.5">
               <span className="w-3 h-3 rounded bg-emerald-500"></span>
-              <span className="text-slate-200">Our ML Model</span>
+              <span className="text-slate-700 dark:text-slate-200">Our ML Model</span>
             </span>
             <span className="flex items-center space-x-1.5">
               <span className="w-3 h-3 rounded bg-rose-500/60"></span>
-              <span className="text-slate-400">Static NTES</span>
+              <span className="text-slate-500 dark:text-slate-400">Static NTES</span>
             </span>
           </div>
         </div>
@@ -111,25 +111,25 @@ export default function AnalyticsView({ metrics }) {
             return (
               <div key={label} className={`p-2.5 rounded-lg border ${isAccurateBin ? 'bg-emerald-950/20 border-emerald-800/40' : 'bg-rail-bg/50 border-rail-border'}`}>
                 <div className="flex items-center justify-between text-xs mb-1.5">
-                  <span className={`font-mono font-semibold ${isAccurateBin ? 'text-emerald-300' : 'text-slate-300'}`}>
+                  <span className={`font-mono font-semibold ${isAccurateBin ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-300'}`}>
                     {label} {isAccurateBin && '🎯 (Target Zone)'}
                   </span>
                   <div className="space-x-3 font-mono text-[11px]">
-                    <span className="text-emerald-400 font-bold">{mlCount} tests</span>
-                    <span className="text-slate-400">NTES: {baseCount}</span>
+                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">{mlCount} tests</span>
+                    <span className="text-slate-500 dark:text-slate-400">NTES: {baseCount}</span>
                   </div>
                 </div>
 
                 <div className="space-y-1">
                   {/* ML Model Bar */}
-                  <div className="w-full bg-slate-800/80 rounded-full h-2.5 overflow-hidden">
+                  <div className="w-full bg-slate-200 dark:bg-slate-800/80 rounded-full h-2.5 overflow-hidden">
                     <div
                       className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                       style={{ width: `${mlWidthPct}%` }}
                     />
                   </div>
                   {/* NTES Bar */}
-                  <div className="w-full bg-slate-800/40 rounded-full h-1.5 overflow-hidden">
+                  <div className="w-full bg-slate-200 dark:bg-slate-800/40 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="h-full bg-rose-500/60 rounded-full transition-all duration-500"
                       style={{ width: `${baseWidthPct}%` }}
@@ -147,7 +147,7 @@ export default function AnalyticsView({ metrics }) {
         
         <div className="lg:col-span-7 p-6 bg-rail-card border border-rail-border rounded-xl shadow-md space-y-4">
           <div className="pb-3 border-b border-rail-border">
-            <h4 className="font-bold text-base text-white">Feature Importance (Delay Drivers)</h4>
+            <h4 className="font-bold text-base text-slate-900 dark:text-white">Feature Importance (Delay Drivers)</h4>
             <p className="text-xs text-rail-muted">
               Calculated via tree-based Gini impurity & Mean Decrease in Impurity (MDI).
             </p>
@@ -158,25 +158,30 @@ export default function AnalyticsView({ metrics }) {
               .sort((a, b) => b[1] - a[1])
               .map(([key, val]) => {
                 const labelMap = {
-                  section_occupancy_ratio: '1. Track Section Congestion (Capacity Utilization)',
-                  distance_remaining_km: '2. Distance Remaining to Target Station',
-                  weather_fog_index: '3. Weather Visibility / Winter Fog Index',
-                  current_delay_min: '4. Accumulated Delay Carried Forward',
-                  priority_tier: '5. Train Signaling Priority Class',
-                  is_junction_ahead: '6. Major Railway Junction Bottleneck Ahead',
-                  headway_km: '7. Distance Headway Behind Preceding Train'
+                  distance_remaining_km: 'Distance Remaining to Station (km)',
+                  rainfall_intensity: 'Monsoon Rain & Track Waterlogging Intensity',
+                  section_occupancy_ratio: 'Track Section Congestion (Capacity Ratio)',
+                  weather_fog_index: 'Winter Fog / Sandstorm Visibility Restriction',
+                  tsr_speed_restriction_kmh: 'Temporary Speed Restriction (TSR Caution Order)',
+                  current_delay_min: 'Accumulated Delay Carried Forward (min)',
+                  ambient_temp_c: 'Ambient Temperature / Rail Buckling Alert (°C)',
+                  priority_tier: 'Train Signaling Precedence & Priority Class',
+                  is_junction_ahead: 'Major Railway Junction Bottleneck Ahead',
+                  headway_km: 'Signal Headway Spacing Behind Preceding Train',
+                  station_dwell_delay_min: 'Intermediate Station Platform Boarding Crowds',
+                  is_peak_hour: 'Peak Rush Hour Timetable Bunching'
                 };
 
                 return (
                   <div key={key} className="space-y-1">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-medium text-slate-200">{labelMap[key] || key}</span>
-                      <span className="font-mono font-bold text-sky-400">{val}%</span>
+                      <span className="font-medium text-slate-700 dark:text-slate-200">{labelMap[key] || key}</span>
+                      <span className="font-mono font-bold text-sky-600 dark:text-sky-400">{val}%</span>
                     </div>
-                    <div className="w-full bg-slate-800 rounded-full h-2 overflow-hidden">
+                    <div className="w-full bg-slate-200 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
                       <div
                         className="h-full bg-gradient-to-r from-sky-500 to-emerald-400 rounded-full"
-                        style={{ width: `${val * 3}%` }}
+                        style={{ width: `${Math.min(100, val * 3.5)}%` }}
                       />
                     </div>
                   </div>
@@ -190,26 +195,26 @@ export default function AnalyticsView({ metrics }) {
           <div>
             <div className="flex items-center space-x-2 pb-3 border-b border-rail-border">
               <FileText className="w-4 h-4 text-rail-accent" />
-              <h4 className="font-bold text-base text-white">Viva Talking Points for Project Report</h4>
+              <h4 className="font-bold text-base text-slate-900 dark:text-white">Viva Talking Points for Project Report</h4>
             </div>
 
-            <ul className="mt-3 space-y-2.5 text-xs text-slate-300">
+            <ul className="mt-3 space-y-2.5 text-xs text-slate-600 dark:text-slate-300">
               <li className="flex items-start space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Benchmark Baseline:</strong> Evaluated against Indian Railways' current NTES practice (static timetable + current delay).
+                  <strong>Benchmark Baseline:</strong> Evaluated against Indian Railways' current NTES practice (static timetable + current delay) yielding &gt;90% error reduction.
                 </span>
               </li>
               <li className="flex items-start space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Key Finding:</strong> Section congestion (25.8%) and fog (20.6%) account for nearly half of all cascading arrival deviations.
+                  <strong>12 Multi-Domain Conditions:</strong> Encompasses weather (fog, monsoon rain, extreme heat), track infrastructure (congestion, TSR cautions, maintenance), signaling (headway, junction precedence), and scheduling (peak hours, dwell).
                 </span>
               </li>
               <li className="flex items-start space-x-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
                 <span>
-                  <strong>Operational Benefit:</strong> Allows station controllers to preemptively detect platform schedule clashes at major junctions like Kanpur Central.
+                  <strong>Operational Benefit:</strong> Allows station controllers to preemptively detect platform schedule clashes at major junctions like Jodhpur & Kanpur Central.
                 </span>
               </li>
             </ul>
@@ -218,7 +223,7 @@ export default function AnalyticsView({ metrics }) {
           <div className="pt-4 border-t border-rail-border">
             <div className="p-3 bg-rail-bg rounded-lg border border-rail-border text-center">
               <span className="text-xs text-rail-muted block">Ready for inclusion in</span>
-              <span className="text-xs font-bold text-white font-mono">B.Tech Final Year Thesis / SIH PPT</span>
+              <span className="text-xs font-bold text-slate-900 dark:text-white font-mono">B.Tech Final Year Thesis / SIH PPT</span>
             </div>
           </div>
         </div>
