@@ -136,8 +136,8 @@ cd ..
 
 ### 1-Click Launch (Windows)
 1. **Start Backend Server:** Double-click `run_backend.bat` (Starts on `http://localhost:8000`).
-2. **Start Frontend Dashboard:** Double-click `run_frontend.bat` (Starts on `http://localhost:5173`).
-3. Open `http://localhost:5173` in your browser.
+2. **Start Frontend Dashboard:** Double-click `run_frontend.bat` (Starts on `http://localhost:3000`).
+3. Open `http://localhost:3000` in your browser.
 
 ### Manual Terminal Commands
 **Terminal 1 (Backend):**
