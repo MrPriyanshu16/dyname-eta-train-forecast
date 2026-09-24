@@ -1,0 +1,61 @@
+{
+  "status": "EVALUATED_ON_UNSEEN_TEST_SET",
+  "active_model": "XGBoost Regressor (Active Operational)",
+  "model_version": "2.1.0-rajasthan",
+  "target_definition": "target_section_delay_change_min (delta = next_arr_delay - dep_delay)",
+  "evaluation_period": "26 Sep \u2013 30 Sep 2024",
+  "test_observations": 15124,
+  "mae_minutes": 5.11,
+  "rmse_minutes": 16.6,
+  "median_absolute_error_minutes": 2.12,
+  "within_5_minutes_percent": 75.4,
+  "within_10_minutes_percent": 89.6,
+  "within_15_minutes_percent": 94.1,
+  "within_30_minutes_percent": 97.9,
+  "uncertainty_interval_80_coverage": 81.5,
+  "baseline_comparison": [
+    {
+      "model": "Schedule Baseline (ETA=STA)",
+      "mae": 19.87,
+      "rmse": 51.33,
+      "medae": 7.0,
+      "within_5m": 46.3,
+      "within_10m": 57.1
+    },
+    {
+      "model": "Current Delay (ETA=STA+Delay)",
+      "mae": 6.82,
+      "rmse": 19.95,
+      "medae": 2.0,
+      "within_5m": 68.4,
+      "within_10m": 82.1
+    },
+    {
+      "model": "XGBoost Regressor (Active)",
+      "mae": 5.11,
+      "rmse": 16.6,
+      "medae": 2.12,
+      "within_5m": 75.4,
+      "within_10m": 89.6
+    },
+    {
+      "model": "LightGBM Regressor",
+      "mae": 5.13,
+      "rmse": 16.49,
+      "medae": 2.17,
+      "within_5m": 75.4,
+      "within_10m": 89.5
+    }
+  ],
+  "training_data": {
+    "training_period": "01 Sep \u2013 20 Sep 2024",
+    "validation_period": "21 Sep \u2013 25 Sep 2024",
+    "test_period": "26 Sep \u2013 30 Sep 2024",
+    "train_observations": 59202,
+    "val_observations": 15045,
+    "test_observations": 15124,
+    "feature_count": 30,
+    "unique_trains_test": 561,
+    "unique_stations_test": 453
+  }
+}

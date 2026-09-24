@@ -273,3 +273,105 @@ export async function fetchSystemDataStatus(): Promise<SystemDataStatusResponse 
     return null;
   }
 }
+
+import type { ModelPerformanceMetrics } from '../types/train';
+
+export async function fetchModelPerformanceMetrics(): Promise<ModelPerformanceMetrics | null> {
+  try {
+    const res = await fetch(`${ML_API_BASE_URL}/api/eta/performance`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(2500)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export interface StationSearchResult {
+  scope: string;
+  count: number;
+  stations: Array<{
+    code: string;
+    name: string;
+    state: string;
+    zone: string;
+    city: string;
+    latitude: number | null;
+    longitude: number | null;
+    platforms: number;
+  }>;
+}
+
+export interface PlannedJourneyTrain {
+  train_number: string;
+  train_name: string;
+  category: string;
+  from_station_code: string;
+  from_station_name: string;
+  to_station_code: string;
+  to_station_name: string;
+  scheduled_departure: string;
+  scheduled_arrival: string;
+  estimated_arrival: string;
+  current_delay_minutes: number;
+  predicted_delay_minutes: number;
+  duration: string;
+  stops_count: number;
+  distance_km: number;
+  state: string;
+  model_status: string;
+}
+
+export interface PlanJourneyResponse {
+  scope: string;
+  from_station: string;
+  to_station: string;
+  count: number;
+  trains: PlannedJourneyTrain[];
+  message: string;
+}
+
+export async function searchStationsFromMaster(
+  search: string = '',
+  scope: string = 'rajasthan',
+  limit: number = 60
+): Promise<StationSearchResult | null> {
+  try {
+    const params = new URLSearchParams({ scope, limit: String(limit) });
+    if (search.trim()) params.append('search', search.trim());
+    const res = await fetch(`${ML_API_BASE_URL}/api/stations?${params.toString()}`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(3000)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+export async function planJourney(
+  fromStation: string,
+  toStation: string,
+  scope: string = 'rajasthan'
+): Promise<PlanJourneyResponse | null> {
+  try {
+    const params = new URLSearchParams({
+      from_station: fromStation.trim(),
+      to_station: toStation.trim(),
+      scope
+    });
+    const res = await fetch(`${ML_API_BASE_URL}/api/plan-journey?${params.toString()}`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(3500)
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  } catch {
+    return null;
+  }
+}
+
+

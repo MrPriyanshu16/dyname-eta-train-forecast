@@ -4,6 +4,7 @@ import { useSimulation } from '../context/SimulationContext';
 import { ArrivalEstimateCard } from '../components/tracking/ArrivalEstimateCard';
 import { CurrentLocationBanner } from '../components/tracking/CurrentLocationBanner';
 import { RouteProgressTimeline } from '../components/tracking/RouteProgressTimeline';
+import { ModelPerformanceCard } from '../components/tracking/ModelPerformanceCard';
 import { TrainStatusBadge } from '../components/train/TrainStatusBadge';
 import { fetchTrainDetailsFromMaster } from '../utils/mlApi';
 import { Train } from '../types/train';
@@ -249,6 +250,9 @@ export const TrainDetailsPage: React.FC = () => {
         selectedStationCode={targetStation.stationCode}
         onSelectStation={handleSelectStation}
       />
+
+      {/* Dynamic ETA Model Performance Card */}
+      <ModelPerformanceCard />
     </div>
   );
 };

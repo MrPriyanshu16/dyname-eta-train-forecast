@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 
 export const StationSchedulePage: React.FC = () => {
-  const { stationId = 'NDLS' } = useParams<{ stationId: string }>();
+  const { stationId = 'JP' } = useParams<{ stationId: string }>();
   const navigate = useNavigate();
   const { trains, simulatedTime } = useSimulation();
 

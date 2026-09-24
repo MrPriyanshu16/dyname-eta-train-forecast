@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { TrainSearchInput } from '../components/search/TrainSearchInput';
 import { useSimulation } from '../context/SimulationContext';
 import { TrainStatusBadge } from '../components/train/TrainStatusBadge';
+import { ModelPerformanceCard } from '../components/tracking/ModelPerformanceCard';
 import {
   Compass,
   Building2,
@@ -15,7 +16,8 @@ import {
   ShieldCheck,
   Zap,
   Radio,
-  RotateCcw
+  RotateCcw,
+  Cpu
 } from 'lucide-react';
 
 export const HomePage: React.FC = () => {
@@ -30,16 +32,6 @@ export const HomePage: React.FC = () => {
 
   const popularCorridors = [
     {
-      id: '12951',
-      number: '12951',
-      name: 'Mumbai Rajdhani',
-      route: 'New Delhi → Mumbai Central (via Kota)',
-      departure: '16:55',
-      duration: '15h 40m',
-      badge: 'Superfast Premium',
-      type: 'Rajdhani'
-    },
-    {
       id: '22491',
       number: '22491',
       name: 'Mandore Superfast Express',
@@ -50,24 +42,34 @@ export const HomePage: React.FC = () => {
       type: 'Superfast'
     },
     {
+      id: '22492',
+      number: '22492',
+      name: 'Mandore Superfast Express',
+      route: 'Old Delhi → Jodhpur Jn (via Jaipur)',
+      departure: '21:10',
+      duration: '10h 20m',
+      badge: 'Return Service',
+      type: 'Superfast'
+    },
+    {
       id: '14888',
       number: '14888',
       name: 'Barmer - Rishikesh Express',
-      route: 'Barmer → Rishikesh (43 Halts)',
+      route: 'Barmer → Rishikesh (via Jodhpur & Bikaner)',
       departure: '06:00',
       duration: '27h 54m',
       badge: 'Desert Express',
       type: 'Express'
     },
     {
-      id: '22436',
-      number: '22436',
-      name: 'Vande Bharat Express',
-      route: 'New Delhi → Varanasi Jn',
-      departure: '06:00',
-      duration: '8h 00m',
-      badge: 'Semi-High Speed',
-      type: 'Vande Bharat'
+      id: '12951',
+      number: '12951',
+      name: 'Mumbai Rajdhani Express',
+      route: 'New Delhi → Mumbai Central (via Kota Jn)',
+      departure: '16:55',
+      duration: '15h 40m',
+      badge: 'Superfast Premium',
+      type: 'Rajdhani'
     }
   ];
 
@@ -90,15 +92,15 @@ export const HomePage: React.FC = () => {
 
           {/* Headline */}
           <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white tracking-tight leading-[1.15] text-balance">
-            Know where your train is. <br className="hidden sm:inline" />
+            Track the Run. <br className="hidden sm:inline" />
             <span className="bg-gradient-to-r from-indigo-700 via-blue-600 to-indigo-900 dark:from-indigo-400 dark:via-sky-300 dark:to-indigo-300 bg-clip-text text-transparent">
-              Know when it arrives.
+              Know When It Arrives.
             </span>
           </h1>
 
           {/* Concise Supporting Description */}
-          <p className="mt-4 text-sm sm:text-base text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
-            Minimal, instant train tracking, running delays, platform allocations, and arrival estimation across Rajasthan network services.
+          <p className="mt-4 text-sm sm:text-base text-slate-700 dark:text-slate-300 max-w-xl mx-auto leading-relaxed font-medium">
+            Dynamic train arrival forecasting and real-time delay propagation engineered specifically for the Rajasthan railway network.
           </p>
 
           {/* Search Bar */}
@@ -108,53 +110,53 @@ export const HomePage: React.FC = () => {
 
           {/* Recent Searches Quick Access Row */}
           {recentSearches.length > 0 && (
-            <div className="mt-3 flex items-center justify-center gap-1.5 flex-wrap text-xs">
-              <span className="text-slate-400 dark:text-slate-500 flex items-center gap-1 font-medium">
-                <Clock className="w-3 h-3 text-indigo-500" /> Recent:
+            <div className="mt-3.5 flex items-center justify-center gap-1.5 flex-wrap text-xs">
+              <span className="text-slate-600 dark:text-slate-300 flex items-center gap-1 font-bold">
+                <Clock className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" /> Recent:
               </span>
               {recentSearches.slice(0, 4).map((item, idx) => (
                 <button
                   key={idx}
                   onClick={() => navigate(`/search?q=${encodeURIComponent(item)}`)}
-                  className="px-2.5 py-0.5 rounded-full bg-white dark:bg-slate-850 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 text-[11px] font-medium transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
+                  className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/70 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 text-xs font-semibold transition-colors flex items-center gap-1 cursor-pointer shadow-2xs"
                 >
-                  <RotateCcw className="w-2.5 h-2.5 text-slate-400" />
+                  <RotateCcw className="w-2.5 h-2.5 text-slate-400 dark:text-slate-400" />
                   <span>{item}</span>
                 </button>
               ))}
             </div>
           )}
 
-          {/* Quick Query Suggestions */}
-          <div className="mt-3 flex items-center justify-center gap-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
-            <span className="text-slate-400 dark:text-slate-500 font-medium">Popular:</span>
-            <button
-              onClick={() => navigate('/train/14888')}
-              className="px-2.5 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
-            >
-              14888 Barmer - Rishikesh
-            </button>
+          {/* Quick Query Suggestions with High Contrast */}
+          <div className="mt-3 flex items-center justify-center gap-2 flex-wrap text-xs">
+            <span className="text-slate-600 dark:text-slate-300 font-bold">Popular:</span>
             <button
               onClick={() => navigate('/train/22491')}
-              className="px-2.5 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-semibold transition-colors cursor-pointer"
             >
               22491 Mandore Express
             </button>
             <button
+              onClick={() => navigate('/train/14888')}
+              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-semibold transition-colors cursor-pointer"
+            >
+              14888 Barmer - Rishikesh
+            </button>
+            <button
               onClick={() => navigate('/station/JP')}
-              className="px-2.5 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-semibold transition-colors cursor-pointer"
             >
               JP Jaipur Board
             </button>
             <button
               onClick={() => navigate('/station/JU')}
-              className="px-2.5 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 font-semibold transition-colors cursor-pointer"
             >
               JU Jodhpur Board
             </button>
             <button
               onClick={() => navigate('/journey-planner')}
-              className="px-2.5 py-0.5 rounded bg-white dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 font-medium transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-indigo-50 dark:bg-indigo-950/70 hover:bg-indigo-100 dark:hover:bg-indigo-900 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-bold transition-colors cursor-pointer"
             >
               Plan Journey
             </button>
@@ -164,6 +166,11 @@ export const HomePage: React.FC = () => {
 
       {/* Main Container */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        {/* ML Model Performance Section */}
+        <section>
+          <ModelPerformanceCard />
+        </section>
+
         {/* Quick Utility Actions */}
         <section className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <Link
@@ -179,13 +186,13 @@ export const HomePage: React.FC = () => {
                 <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Compare direct trains between stations by departure, stops, and duration.
+                Compare direct trains between Rajasthan stations by departure, stops, and duration.
               </p>
             </div>
           </Link>
 
           <Link
-            to="/station/NDLS"
+            to="/station/JP"
             className="group p-5 bg-white dark:bg-slate-900 rounded-xl border border-slate-200/90 dark:border-slate-800 hover:border-indigo-300 dark:hover:border-indigo-700 hover:shadow-xs transition-all flex items-start gap-4"
           >
             <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-950/70 border border-blue-100 dark:border-blue-900 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 group-hover:bg-blue-600 group-hover:text-white transition-colors">
@@ -197,7 +204,7 @@ export const HomePage: React.FC = () => {
                 <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
-                Check incoming arrivals, upcoming departures, and platform numbers at any major station.
+                Check incoming arrivals, upcoming departures, and platform numbers at Jaipur, Jodhpur, Kota & more.
               </p>
             </div>
           </Link>

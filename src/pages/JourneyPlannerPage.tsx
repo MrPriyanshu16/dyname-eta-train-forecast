@@ -1,31 +1,97 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSimulation } from '../context/SimulationContext';
 import { MOCK_STATIONS } from '../data/mockStations';
 import { TrainStatusBadge } from '../components/train/TrainStatusBadge';
-import { calculateJourneyDuration } from '../utils/time';
+import { planJourney, searchStationsFromMaster, PlannedJourneyTrain } from '../utils/mlApi';
 import {
   Compass,
   ArrowRightLeft,
   ArrowRight,
-  Calendar,
   Clock,
-  Check,
   RotateCcw,
-  Sparkles,
   Sliders,
   ChevronRight,
-  Train as TrainIcon
+  Train as TrainIcon,
+  Search,
+  MapPin,
+  Info,
+  Loader2
 } from 'lucide-react';
 
 export const JourneyPlannerPage: React.FC = () => {
   const navigate = useNavigate();
-  const { trains } = useSimulation();
 
-  const [fromStationCode, setFromStationCode] = useState<string>('NDLS');
-  const [toStationCode, setToStationCode] = useState<string>('MMCT');
-  const [travelDate, setTravelDate] = useState<string>('Today');
+  const [fromStationCode, setFromStationCode] = useState<string>('JU');
+  const [toStationCode, setToStationCode] = useState<string>('JP');
+  const [availableStations, setAvailableStations] = useState<Array<{ code: string; name: string; city: string }>>(
+    MOCK_STATIONS.map(s => ({ code: s.code, name: s.name, city: s.city }))
+  );
+  const [matchingTrains, setMatchingTrains] = useState<PlannedJourneyTrain[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
   const [selectedForCompare, setSelectedForCompare] = useState<string[]>([]);
+  const [statusMessage, setStatusMessage] = useState<string>('');
+
+  // Fetch verified Rajasthan stations from backend on mount
+  useEffect(() => {
+    let isMounted = true;
+    searchStationsFromMaster('', 'rajasthan', 100)
+      .then(res => {
+        if (isMounted && res && res.stations && res.stations.length > 0) {
+          setAvailableStations(
+            res.stations.map(s => ({
+              code: s.code,
+              name: s.name,
+              city: s.city || s.name
+            }))
+          );
+        }
+      })
+      .catch(() => {
+        // Fallback already populated from verified Rajasthan MOCK_STATIONS
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  // Fetch journey plan whenever fromStation or toStation changes
+  useEffect(() => {
+    if (!fromStationCode || !toStationCode || fromStationCode === toStationCode) {
+      setMatchingTrains([]);
+      setLoading(false);
+      setStatusMessage('Please select two distinct Rajasthan stations to plan your journey.');
+      return;
+    }
+
+    let isMounted = true;
+    setLoading(true);
+    setStatusMessage('');
+
+    planJourney(fromStationCode, toStationCode, 'rajasthan')
+      .then(res => {
+        if (isMounted) {
+          if (res && res.trains) {
+            setMatchingTrains(res.trains);
+            setStatusMessage(res.message || '');
+          } else {
+            setMatchingTrains([]);
+            setStatusMessage('No matching Rajasthan-scope train service found.');
+          }
+          setLoading(false);
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          setMatchingTrains([]);
+          setStatusMessage('No matching Rajasthan-scope train service found.');
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [fromStationCode, toStationCode]);
 
   const handleSwapStations = () => {
     const temp = fromStationCode;
@@ -33,54 +99,18 @@ export const JourneyPlannerPage: React.FC = () => {
     setToStationCode(temp);
   };
 
-  // Find all trains that connect From station to To station in sequence
-  const matchingTrains = useMemo(() => {
-    return trains
-      .map(train => {
-        const fromIndex = train.stops.findIndex(
-          s => s.stationCode.toUpperCase() === fromStationCode.toUpperCase()
-        );
-        const toIndex = train.stops.findIndex(
-          s => s.stationCode.toUpperCase() === toStationCode.toUpperCase()
-        );
-
-        if (fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex) {
-          const fromStop = train.stops[fromIndex];
-          const toStop = train.stops[toIndex];
-          const stopsCount = toIndex - fromIndex - 1;
-          const sectionDistance = toStop.distanceFromOriginKm - fromStop.distanceFromOriginKm;
-          const depTime = fromStop.scheduledDeparture !== '--' ? fromStop.scheduledDeparture : fromStop.scheduledArrival;
-          const arrTime = toStop.scheduledArrival !== '--' ? toStop.scheduledArrival : toStop.scheduledDeparture;
-          const duration = calculateJourneyDuration(depTime, arrTime, toStop.day - fromStop.day);
-
-          return {
-            train,
-            fromStop,
-            toStop,
-            stopsCount,
-            sectionDistance,
-            depTime,
-            arrTime,
-            duration
-          };
-        }
-        return null;
-      })
-      .filter((item): item is NonNullable<typeof item> => item !== null);
-  }, [trains, fromStationCode, toStationCode]);
-
-  const toggleCompare = (trainId: string) => {
+  const toggleCompare = (trainNumber: string) => {
     setSelectedForCompare(prev =>
-      prev.includes(trainId)
-        ? prev.filter(id => id !== trainId)
+      prev.includes(trainNumber)
+        ? prev.filter(num => num !== trainNumber)
         : prev.length < 3
-        ? [...prev, trainId]
+        ? [...prev, trainNumber]
         : prev
     );
   };
 
   const comparedTrains = matchingTrains.filter(m =>
-    selectedForCompare.includes(m.train.id)
+    selectedForCompare.includes(m.train_number)
   );
 
   return (
@@ -89,31 +119,33 @@ export const JourneyPlannerPage: React.FC = () => {
       <div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-indigo-50 dark:bg-indigo-950/70 border border-indigo-100 dark:border-indigo-900 text-indigo-700 dark:text-indigo-400 text-xs font-semibold mb-2">
           <Compass className="w-3.5 h-3.5 text-indigo-600 dark:text-indigo-400" />
-          <span>Point-to-Point Route Comparison</span>
+          <span>Rajasthan Railway Network Scope</span>
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          Journey Planner
+          Plan Journey
         </h1>
-        <p className="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-xl">
-          Find and compare direct train services between two stations. Compare schedules, stops, running delays, and transit times.
+        <p className="text-xs sm:text-sm text-slate-600 dark:text-slate-300 mt-1 max-w-xl">
+          Find and compare direct train services connecting stations across Rajasthan. Real-time timetable schedules and dynamic arrival forecasts.
         </p>
       </div>
 
       {/* Route Search Form Card */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-7 shadow-2xs transition-colors">
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 sm:p-7 shadow-2xs transition-colors">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           {/* From Station */}
-          <div className="md:col-span-4 space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">From Station</label>
+          <div className="md:col-span-5 space-y-1.5">
+            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+              From Station (Rajasthan Network)
+            </label>
             <div className="relative">
               <select
                 value={fromStationCode}
                 onChange={e => setFromStationCode(e.target.value)}
-                className="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
-                {MOCK_STATIONS.map(st => (
+                {availableStations.map(st => (
                   <option key={st.code} value={st.code} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
-                    {st.name} ({st.code}) — {st.city}
+                    {st.name} ({st.code})
                   </option>
                 ))}
               </select>
@@ -121,93 +153,67 @@ export const JourneyPlannerPage: React.FC = () => {
           </div>
 
           {/* Swap Button */}
-          <div className="md:col-span-1 flex justify-center pb-1">
+          <div className="md:col-span-2 flex justify-center pb-1">
             <button
               type="button"
               onClick={handleSwapStations}
-              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition-colors shadow-2xs cursor-pointer"
+              className="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 bg-white dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 transition-colors shadow-2xs cursor-pointer flex items-center gap-1.5 text-xs font-medium"
               title="Swap origin and destination"
             >
-              <ArrowRightLeft className="w-4 h-4" />
+              <ArrowRightLeft className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+              <span className="hidden sm:inline">Swap</span>
             </button>
           </div>
 
           {/* To Station */}
-          <div className="md:col-span-4 space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">To Station</label>
+          <div className="md:col-span-5 space-y-1.5">
+            <label className="block text-xs font-bold text-slate-800 dark:text-slate-200">
+              To Station (Rajasthan Network)
+            </label>
             <div className="relative">
               <select
                 value={toStationCode}
                 onChange={e => setToStationCode(e.target.value)}
-                className="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
+                className="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
               >
-                {MOCK_STATIONS.map(st => (
+                {availableStations.map(st => (
                   <option key={st.code} value={st.code} className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
-                    {st.name} ({st.code}) — {st.city}
+                    {st.name} ({st.code})
                   </option>
                 ))}
               </select>
             </div>
           </div>
-
-          {/* Date Selector */}
-          <div className="md:col-span-3 space-y-1.5">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">Travel Window</label>
-            <select
-              value={travelDate}
-              onChange={e => setTravelDate(e.target.value)}
-              className="w-full appearance-none bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-xs font-semibold text-slate-900 dark:text-slate-100 outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-            >
-              <option value="Today" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Today (Simulated Live)</option>
-              <option value="Tomorrow" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">Tomorrow</option>
-              <option value="Weekend" className="bg-white dark:bg-slate-800 text-slate-900 dark:text-white">This Weekend</option>
-            </select>
-          </div>
         </div>
 
-        {/* Quick Corridor Shortcut Chips */}
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 flex-wrap text-xs text-slate-500 dark:text-slate-400">
-          <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase">Popular Routes:</span>
-          <button
-            onClick={() => {
-              setFromStationCode('NDLS');
-              setToStationCode('MMCT');
-            }}
-            className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors font-medium text-[11px] cursor-pointer"
-          >
-            New Delhi ↔ Mumbai Central
-          </button>
-          <button
-            onClick={() => {
-              setFromStationCode('NDLS');
-              setToStationCode('BSB');
-            }}
-            className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors font-medium text-[11px] cursor-pointer"
-          >
-            New Delhi ↔ Varanasi
-          </button>
-          <button
-            onClick={() => {
-              setFromStationCode('NDLS');
-              setToStationCode('LKO');
-            }}
-            className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors font-medium text-[11px] cursor-pointer"
-          >
-            New Delhi ↔ Lucknow
-          </button>
-          <button
-            onClick={() => {
-              setFromStationCode('MYS');
-              setToStationCode('MAS');
-            }}
-            className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition-colors font-medium text-[11px] cursor-pointer"
-          >
-            Mysuru ↔ Chennai Central
-          </button>
+        {/* Popular Rajasthan Corridors */}
+        <div className="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center gap-2 flex-wrap text-xs">
+          <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            Popular Rajasthan Corridors:
+          </span>
+          {[
+            { label: 'Jodhpur ↔ Jaipur', from: 'JU', to: 'JP' },
+            { label: 'Jaipur ↔ Kota', from: 'JP', to: 'KOTA' },
+            { label: 'Ajmer ↔ Jaipur', from: 'AII', to: 'JP' },
+            { label: 'Bikaner ↔ Jaipur', from: 'BKN', to: 'JP' },
+            { label: 'Barmer ↔ Jodhpur', from: 'BME', to: 'JU' },
+            { label: 'Jaipur ↔ Alwar', from: 'JP', to: 'AWR' }
+          ].map(c => (
+            <button
+              key={c.label}
+              onClick={() => {
+                setFromStationCode(c.from);
+                setToStationCode(c.to);
+              }}
+              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-950/60 hover:text-indigo-700 dark:hover:text-indigo-300 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 transition-colors font-medium text-[11px] cursor-pointer"
+            >
+              {c.label}
+            </button>
+          ))}
         </div>
       </div>
 
-      {/* Compared Trains Matrix (when user checks compare boxes) */}
+      {/* Compared Trains Matrix */}
       {comparedTrains.length > 0 && (
         <div className="bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 rounded-2xl p-6 shadow-xs space-y-4">
           <div className="flex items-center justify-between">
@@ -224,42 +230,44 @@ export const JourneyPlannerPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {comparedTrains.map(({ train, depTime, arrTime, duration, stopsCount }) => (
+            {comparedTrains.map(m => (
               <div
-                key={train.id}
+                key={m.train_number}
                 className="bg-white dark:bg-slate-900 rounded-xl p-4 border border-indigo-100 dark:border-indigo-900 shadow-2xs space-y-3"
               >
                 <div className="flex items-center justify-between">
                   <span className="font-mono font-bold text-xs bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-400 px-2 py-0.5 rounded">
-                    {train.number}
+                    {m.train_number}
                   </span>
-                  <TrainStatusBadge
-                    state={train.currentStatus.state}
-                    delayMinutes={train.currentStatus.delayMinutes}
-                    size="sm"
-                  />
+                  <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                    {m.category}
+                  </span>
                 </div>
-                <div className="font-bold text-sm text-slate-900 dark:text-white">{train.name}</div>
+                <div className="font-bold text-sm text-slate-900 dark:text-white truncate">{m.train_name}</div>
                 <div className="text-xs space-y-1.5 pt-2 border-t border-slate-100 dark:border-slate-800">
                   <div className="flex justify-between">
-                    <span className="text-slate-500 dark:text-slate-400">Departure:</span>
-                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{depTime}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Scheduled Departure:</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{m.scheduled_departure}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500 dark:text-slate-400">Arrival:</span>
-                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{arrTime}</span>
+                    <span className="text-slate-500 dark:text-slate-400">Scheduled Arrival:</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{m.scheduled_arrival}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-500 dark:text-slate-400">Estimated Arrival (ETA):</span>
+                    <span className="font-mono font-bold text-indigo-700 dark:text-indigo-400">{m.estimated_arrival}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500 dark:text-slate-400">Duration:</span>
-                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{duration}</span>
+                    <span className="font-mono font-bold text-slate-800 dark:text-slate-200">{m.duration}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500 dark:text-slate-400">Intermediate Stops:</span>
-                    <span className="font-semibold text-slate-800 dark:text-slate-200">{stopsCount} stops</span>
+                    <span className="font-semibold text-slate-800 dark:text-slate-200">{m.stops_count} stops ({m.distance_km} km)</span>
                   </div>
                 </div>
                 <button
-                  onClick={() => navigate(`/train/${train.id}`)}
+                  onClick={() => navigate(`/train/${m.train_number}`)}
                   className="w-full py-1.5 text-xs font-semibold rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white transition-colors cursor-pointer"
                 >
                   Track Live Status →
@@ -274,22 +282,29 @@ export const JourneyPlannerPage: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-base font-bold text-slate-900 dark:text-white tracking-tight">
-            Available Direct Services ({matchingTrains.length})
+            Matching Rajasthan Services ({matchingTrains.length})
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Select up to 3 services to compare journey parameters side by side.
+            Direct services connecting {fromStationCode} and {toStationCode} on verified network routes.
           </p>
         </div>
       </div>
 
       {/* Results List */}
-      {matchingTrains.length > 0 ? (
+      {loading ? (
+        <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center space-y-3">
+          <Loader2 className="w-8 h-8 text-indigo-600 animate-spin mx-auto" />
+          <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+            Querying Rajasthan routes between {fromStationCode} and {toStationCode}...
+          </p>
+        </div>
+      ) : matchingTrains.length > 0 ? (
         <div className="space-y-3">
-          {matchingTrains.map(({ train, depTime, arrTime, duration, stopsCount, sectionDistance }) => {
-            const isCompared = selectedForCompare.includes(train.id);
+          {matchingTrains.map(m => {
+            const isCompared = selectedForCompare.includes(m.train_number);
             return (
               <div
-                key={train.id}
+                key={m.train_number}
                 className={`bg-white dark:bg-slate-900 rounded-xl border transition-all p-5 ${
                   isCompared
                     ? 'border-indigo-500 ring-2 ring-indigo-500/10 dark:ring-indigo-500/20'
@@ -301,46 +316,55 @@ export const JourneyPlannerPage: React.FC = () => {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <span className="font-mono font-bold text-xs px-2 py-0.5 rounded bg-indigo-50 dark:bg-indigo-950/70 text-indigo-700 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900">
-                        {train.number}
+                        {m.train_number}
                       </span>
-                      <h3 className="font-bold text-base text-slate-900 dark:text-white">{train.name}</h3>
-                      <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
-                        {train.type}
+                      <h3 className="font-bold text-base text-slate-900 dark:text-white">{m.train_name}</h3>
+                      <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                        {m.category}
                       </span>
                     </div>
 
-                    <div className="text-xs text-slate-500 dark:text-slate-400">
-                      Runs: {train.daysOfOperation.join(', ')} · Classes: {train.classes.join(', ')}
+                    <div className="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
+                      <span>{m.from_station_name} ({m.from_station_code})</span>
+                      <ArrowRight className="w-3 h-3 text-slate-400" />
+                      <span>{m.to_station_name} ({m.to_station_code})</span>
                     </div>
                   </div>
 
                   {/* Timings */}
                   <div className="flex items-center gap-6 text-xs border-y md:border-y-0 py-3 md:py-0 border-slate-100 dark:border-slate-800">
                     <div>
-                      <div className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-semibold">
-                        Depart {fromStationCode}
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">
+                        Depart {m.from_station_code} (STA)
                       </div>
                       <div className="font-mono font-bold text-base text-slate-900 dark:text-white">
-                        {depTime}
+                        {m.scheduled_departure}
                       </div>
                     </div>
 
                     <div className="text-center">
-                      <div className="text-[11px] text-slate-500 dark:text-slate-400 font-mono font-semibold">
-                        {duration}
+                      <div className="text-[11px] text-slate-600 dark:text-slate-300 font-mono font-semibold">
+                        {m.duration}
                       </div>
                       <div className="w-16 h-0.5 bg-slate-200 dark:bg-slate-700 rounded-full my-1" />
-                      <div className="text-[10px] text-slate-400 dark:text-slate-500">
-                        {stopsCount} stops ({sectionDistance} km)
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400">
+                        {m.stops_count} intermediate halts ({m.distance_km} km)
                       </div>
                     </div>
 
                     <div>
-                      <div className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-semibold">
-                        Arrive {toStationCode}
+                      <div className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold">
+                        Arrive {m.to_station_code}
                       </div>
-                      <div className="font-mono font-bold text-base text-slate-900 dark:text-white">
-                        {arrTime}
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-mono font-bold text-base text-slate-900 dark:text-white">
+                          {m.scheduled_arrival}
+                        </span>
+                        {m.estimated_arrival !== m.scheduled_arrival && (
+                          <span className="font-mono text-xs font-bold text-amber-600 dark:text-amber-400" title="Estimated Arrival (ETA)">
+                            ETA {m.estimated_arrival}
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>
@@ -348,23 +372,23 @@ export const JourneyPlannerPage: React.FC = () => {
                   {/* Actions & Compare checkbox */}
                   <div className="flex items-center justify-between md:justify-end gap-4 shrink-0 pt-3 md:pt-0 border-t md:border-t-0 border-slate-100 dark:border-slate-800">
                     <TrainStatusBadge
-                      state={train.currentStatus.state}
-                      delayMinutes={train.currentStatus.delayMinutes}
+                      state={m.current_delay_minutes > 5 ? 'DELAYED' : 'ON_TIME'}
+                      delayMinutes={m.current_delay_minutes}
                     />
 
                     {/* Compare toggle */}
-                    <label className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300 font-medium cursor-pointer select-none">
+                    <label className="flex items-center gap-1.5 text-xs text-slate-700 dark:text-slate-300 font-medium cursor-pointer select-none">
                       <input
                         type="checkbox"
                         checked={isCompared}
-                        onChange={() => toggleCompare(train.id)}
-                        className="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5"
+                        onChange={() => toggleCompare(m.train_number)}
+                        className="rounded text-indigo-600 focus:ring-indigo-500 w-3.5 h-3.5 cursor-pointer"
                       />
                       <span>Compare</span>
                     </label>
 
                     <button
-                      onClick={() => navigate(`/train/${train.id}`)}
+                      onClick={() => navigate(`/train/${m.train_number}`)}
                       className="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-semibold text-xs transition-colors shadow-2xs cursor-pointer flex items-center gap-1"
                     >
                       <span>Track</span>
@@ -378,12 +402,12 @@ export const JourneyPlannerPage: React.FC = () => {
         </div>
       ) : (
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-12 text-center space-y-3">
-          <TrainIcon className="w-8 h-8 text-slate-300 dark:text-slate-600 mx-auto" />
+          <TrainIcon className="w-8 h-8 text-slate-400 dark:text-slate-500 mx-auto" />
           <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
-            No Direct Trains Found Between {fromStationCode} and {toStationCode}
+            No matching Rajasthan-scope train service found.
           </h3>
           <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto">
-            Try checking high-traffic corridors such as New Delhi to Mumbai Central, New Delhi to Varanasi, or Mysuru to Chennai Central.
+            No direct trains connect {fromStationCode} to {toStationCode} in this sequence on the Rajasthan network. Try checking high-traffic Rajasthan corridors such as Jodhpur ↔ Jaipur (JU ↔ JP) or Jaipur ↔ Kota (JP ↔ KOTA).
           </p>
         </div>
       )}

@@ -3,37 +3,37 @@ import { SimulationScenario } from '../types/train';
 export const DEMO_SCENARIOS: SimulationScenario[] = [
   {
     id: 'scenario-a',
-    name: 'Scenario A: On-Time High-Speed Service',
-    description: 'Vande Bharat Express (22436) running precisely on-time, approaching Kanpur Central at 124 km/h.',
-    trainId: '22436',
-    badge: 'On Time (0 min)'
+    name: 'Scenario A: Mandore Superfast Express (22491)',
+    description: 'Mandore Superfast Express departing Jodhpur Junction (JU) towards Jaipur and Delhi.',
+    trainId: '22491',
+    badge: 'Rajasthan Superfast'
   },
   {
     id: 'scenario-b',
-    name: 'Scenario B: Delayed Trunk Express',
-    description: 'Kerala Express (12626) running 38 minutes late due to caution orders, dynamically re-projecting upcoming arrival times.',
-    trainId: '12626',
-    badge: 'Delayed (38 min)'
+    name: 'Scenario B: Barmer - Rishikesh Express (14888)',
+    description: 'Barmer to Rishikesh desert express traversing Jodhpur, Merta Road, and Bikaner.',
+    trainId: '14888',
+    badge: 'Desert Express'
   },
   {
     id: 'scenario-c',
-    name: 'Scenario C: Standing at Station Platform',
-    description: 'Mumbai Rajdhani (12951) halted at Platform 1 of Kota Junction with active halt countdown.',
+    name: 'Scenario C: Mumbai Rajdhani at Kota Junction (12951)',
+    description: 'Mumbai Rajdhani (12951) halted at Platform 1 of Kota Junction with live ETA forecasting.',
     trainId: '12951',
-    badge: 'Halted at Platform'
+    badge: 'Halted at Kota'
   },
   {
     id: 'scenario-d',
-    name: 'Scenario D: Cruising Between Stations',
-    description: 'Lucknow Shatabdi (12004) between Aligarh and Tundla corridor, speed ~112 km/h.',
-    trainId: '12004',
-    badge: 'Between Stations'
+    name: 'Scenario D: Ajmer Vande Bharat (20977)',
+    description: 'Ajmer - Delhi Cantt Vande Bharat Express cruising through Jaipur and Alwar corridors.',
+    trainId: '20977',
+    badge: 'Semi-High Speed'
   },
   {
     id: 'scenario-e',
-    name: 'Scenario E: Completed Journey',
-    description: 'Howrah Rajdhani (12302) arrived at destination New Delhi on Platform 16.',
-    trainId: '12302',
-    badge: 'Journey Completed'
+    name: 'Scenario E: Mandore Express Downlink (22492)',
+    description: 'Mandore Superfast Express returning from Delhi (DLI) to Jodhpur Junction.',
+    trainId: '22492',
+    badge: 'Return Service'
   }
 ];

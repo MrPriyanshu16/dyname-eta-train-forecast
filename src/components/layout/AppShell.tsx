@@ -16,7 +16,7 @@ export const AppShell: React.FC<AppShellProps> = ({ children, currentTrainId }) 
 
   const mobileNavItems = [
     { label: 'Track', path: '/', icon: Search },
-    { label: 'Stations', path: '/station/NDLS', icon: Building2 },
+    { label: 'Stations', path: '/station/JP', icon: Building2 },
     { label: 'Planner', path: '/journey-planner', icon: Compass },
     {
       label: 'Saved',

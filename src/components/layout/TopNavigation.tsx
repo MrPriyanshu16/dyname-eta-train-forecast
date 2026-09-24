@@ -45,7 +45,7 @@ export const TopNavigation: React.FC = () => {
 
   const navLinks = [
     { label: 'Track Train', path: '/', icon: Compass },
-    { label: 'Station Boards', path: '/station/NDLS', icon: Building2 },
+    { label: 'Station Boards', path: '/station/JP', icon: Building2 },
     { label: 'Plan Journey', path: '/journey-planner', icon: Compass },
     {
       label: 'Saved Trains',

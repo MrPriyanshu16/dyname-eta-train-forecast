@@ -34,7 +34,7 @@ import { getCurrentISTString } from '../utils/time';
 export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [trains, setTrains] = useState<Train[]>(INITIAL_TRAINS);
   const [simulatedTime, setSimulatedTime] = useState<string>(() => getCurrentISTString());
-  const [activeScenarioId, setActiveScenarioId] = useState<string>('scenario-c'); // Default to Mumbai Rajdhani at Kota
+  const [activeScenarioId, setActiveScenarioId] = useState<string>('scenario-a');
   const [selectedTargetStations, setSelectedTargetStations] = useState<Record<string, string>>({});
 
   // Continuously sync with live India time every 10 seconds if not manually adjusted
@@ -49,9 +49,9 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [savedTrainIds, setSavedTrainIds] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem(SAVED_TRAINS_KEY);
-      return stored ? JSON.parse(stored) : ['12951', '22436'];
+      return stored ? JSON.parse(stored) : ['22491', '14888'];
     } catch {
-      return ['12951', '22436'];
+      return ['22491', '14888'];
     }
   });
 
@@ -59,9 +59,9 @@ export const SimulationProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [recentSearches, setRecentSearches] = useState<string[]>(() => {
     try {
       const stored = localStorage.getItem(RECENT_SEARCHES_KEY);
-      return stored ? JSON.parse(stored) : ['12951 Mumbai Rajdhani', 'NDLS New Delhi', '22436 Vande Bharat'];
+      return stored ? JSON.parse(stored) : ['22491 Vande Bharat Express', 'JP Jaipur Junction', '14888 Barmer Rishikesh Express'];
     } catch {
-      return ['12951 Mumbai Rajdhani', 'NDLS New Delhi', '22436 Vande Bharat'];
+      return ['22491 Vande Bharat Express', 'JP Jaipur Junction', '14888 Barmer Rishikesh Express'];
     }
   });
 

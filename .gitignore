@@ -35,3 +35,11 @@ scratch/
 scratch_*.txt
 ~$*
 
+# Large raw datasets (> 50MB and non-Rajasthan bulk files)
+Datasets/*.geojsonl
+Datasets/*.geojson
+Datasets/train_delays_Sep2024.json
+Datasets/train_routes_delays_Sep2024.csv
+Datasets/train_routes_Sep2024.csv
+Datasets/rajasthan_section_training_observations.csv
+
